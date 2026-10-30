@@ -275,6 +275,26 @@ pub struct Candidate {
     pub surface_ok: bool,
     /// Its name matches the adapter the user asked for ([`adapter_matches`]).
     pub wanted: bool,
+    /// Its name says it is a VM's emulated GPU ([`is_virtual_gpu`]).
+    pub virtual_gpu: bool,
+}
+
+/// Whether `name` is a VM's emulated GPU. VMware's SVGA3D drew a black window on Windows (#5191,
+/// #1788) and the rest are the same kind of adapter.
+fn is_virtual_gpu(name: &str) -> bool {
+    let name = name.to_ascii_lowercase();
+    ["svga", "vmware", "virtualbox", "vbox", "parallels", "qemu", "virgl"].iter().any(|s| name.contains(s))
+}
+
+/// Whether `a` is a real GPU, not a VM's adapter or a software renderer. wgpu's GL backend only
+/// recognises integrated GPUs by name: every other real GPU (NVIDIA, AMD) it reports as `Other`,
+/// with the same type and an unknown vendor (0) that it gives a VM's SVGA3D, so the name decides.
+fn hardware(a: &Candidate) -> bool {
+    match a.device_type {
+        wgpu::DeviceType::DiscreteGpu | wgpu::DeviceType::IntegratedGpu => true,
+        wgpu::DeviceType::Other => !a.virtual_gpu,
+        wgpu::DeviceType::VirtualGpu | wgpu::DeviceType::Cpu => false,
+    }
 }
 
 /// Rank of an adapter (lower is better): high-performance device types first (egui's power
@@ -285,9 +305,8 @@ pub struct Candidate {
 /// with no hardware DX12 or Vulkan adapter (#7331). GL on a virtual or unknown adapter (VMware's
 /// SVGA3D) still comes after everything: it drew a black window (#5191, #1788).
 fn rank(a: &Candidate, backend: GpuBackend, os: Os) -> (u8, u8, u8) {
-    let hardware = matches!(a.device_type, wgpu::DeviceType::DiscreteGpu | wgpu::DeviceType::IntegratedGpu);
     let fallback =
-        u8::from((backend == GpuBackend::Cpu && a.backend == wgpu::Backend::Vulkan) || (os == Os::Windows && a.backend == wgpu::Backend::Gl && !hardware));
+        u8::from((backend == GpuBackend::Cpu && a.backend == wgpu::Backend::Vulkan) || (os == Os::Windows && a.backend == wgpu::Backend::Gl && !hardware(a)));
     let ty = match a.device_type {
         wgpu::DeviceType::DiscreteGpu => 0,
         wgpu::DeviceType::IntegratedGpu => 1,
@@ -412,6 +431,7 @@ pub fn configure(setup: &mut egui_wgpu::WgpuSetup, plan: &Plan, os: Os, wanted: 
                             backend: i.backend,
                             surface_ok: surface.is_none_or(|s| a.is_surface_supported(s)),
                             wanted: wanted.as_deref().is_some_and(|w| adapter_matches(&i.name, w)),
+                            virtual_gpu: is_virtual_gpu(&i.name),
                         }
                     })
                     .collect();
