@@ -17,6 +17,10 @@
 //! start doesn't load the Intel Vulkan driver either. `WGPU_BACKEND` still overrides everything,
 //! and `--safe-gpu` forces the CPU path for one launch.
 //!
+//! On Windows a hardware adapter always beats the software WARP adapter: DX12 or Vulkan when the
+//! driver has them, else GL, which is the only hardware backend left on an old GPU (#7331). GL on a
+//! virtual GPU (VMware's SVGA3D) still ranks last: it drew a black window (#5191, #1788).
+//!
 //! "CPU" composites on the CPU and draws the window with a software adapter where the platform
 //! has one (WARP on Windows, llvmpipe over GL elsewhere). On Linux a GL adapter that can't present
 //! (NVIDIA's EGL, which also hides llvmpipe) falls back to a Vulkan adapter for the window only
@@ -117,7 +121,8 @@ pub struct Plan {
     pub remember: bool,
 }
 
-/// A backend the platform has (others fall back to `auto`).
+/// A backend the platform has (others fall back to `auto`). Windows has GL: it is the only
+/// hardware backend left on a machine whose GPU driver offers no DX12 or Vulkan (#7331).
 pub fn sanitize(pref: GpuBackend, os: Os) -> GpuBackend {
     use GpuBackend::*;
     match (os, pref) {
@@ -276,10 +281,13 @@ pub struct Candidate {
 /// preference) or software adapters first for `cpu`; then backends, with DX12 before Vulkan for
 /// Intel and Qualcomm on Windows ([`dx12_first_on_windows`]). For `cpu`, any GL adapter comes
 /// before Vulkan, which is only the fallback for presenting the window (see [`backends`]). On
-/// Windows GL comes after every other adapter, WARP included: GL there (VMware's SVGA3D, GL-only
-/// old GPUs) drew a black window (#5191, #1788).
+/// Windows a GL adapter of a real GPU ranks like any other, so it beats software WARP on a machine
+/// with no hardware DX12 or Vulkan adapter (#7331). GL on a virtual or unknown adapter (VMware's
+/// SVGA3D) still comes after everything: it drew a black window (#5191, #1788).
 fn rank(a: &Candidate, backend: GpuBackend, os: Os) -> (u8, u8, u8) {
-    let fallback = u8::from((backend == GpuBackend::Cpu && a.backend == wgpu::Backend::Vulkan) || (os == Os::Windows && a.backend == wgpu::Backend::Gl));
+    let hardware = matches!(a.device_type, wgpu::DeviceType::DiscreteGpu | wgpu::DeviceType::IntegratedGpu);
+    let fallback =
+        u8::from((backend == GpuBackend::Cpu && a.backend == wgpu::Backend::Vulkan) || (os == Os::Windows && a.backend == wgpu::Backend::Gl && !hardware));
     let ty = match a.device_type {
         wgpu::DeviceType::DiscreteGpu => 0,
         wgpu::DeviceType::IntegratedGpu => 1,

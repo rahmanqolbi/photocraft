@@ -62,6 +62,9 @@ fn no_marker_uses_the_preference() {
     }
     assert_eq!(plan(Dx12, None, None, false, Os::Windows).backend, Dx12);
     assert_eq!(plan(Gl, None, None, false, Os::Other).backend, Gl);
+    // Windows has GL too: on an old GPU it is the only hardware backend (#7331).
+    assert_eq!(plan(Gl, None, None, false, Os::Windows).backend, Gl);
+    assert_eq!(backends(&plan(Gl, None, None, false, Os::Windows), Os::Windows), Some(wgpu::Backends::GL));
     // A backend the platform lacks is `auto`.
     assert_eq!(plan(Metal, None, None, false, Os::Windows).backend, Auto);
     assert_eq!(plan(Dx12, None, None, false, Os::Mac).backend, Auto);
@@ -330,16 +333,25 @@ fn cpu_on_linux_falls_back_to_vulkan_only_when_gl_cannot_present() {
     assert_eq!(pick(&[nvidia_gl, nvidia_vk], Auto, Os::Other), Some(1));
 }
 
-/// #5191, #1788: a Windows VM offers VMware's SVGA3D over GL (`Other`) and WARP (`Cpu`, DX12).
-/// GL drew a black window; WARP works. GL stays the last resort.
+/// #7331: a GPU driver that offers no DX12 and no Vulkan leaves only WARP over DX12, so the whole
+/// window is drawn by software while a working GL adapter sits unused (an Intel HD 4600 with a 2015
+/// driver spends 20 ms per frame on the UI under WARP and 2 ms under GL). A GL adapter of a real GPU
+/// now beats WARP. #5191, #1788: the virtual GPU's GL (VMware SVGA3D) drew a black window, so it
+/// stays last.
 #[test]
-fn windows_auto_prefers_warp_over_gl() {
+fn windows_auto_prefers_hardware_gl_over_software_warp() {
     use wgpu::{Backend as B, DeviceType as T};
     let svga_gl = cand(0x15ad, T::Other, B::Gl);
     let warp = cand(0x1414, T::Cpu, B::Dx12);
     assert_eq!(pick(&[svga_gl, warp], Auto, Os::Windows), Some(1));
-    assert_eq!(pick(&[cand(INTEL, T::IntegratedGpu, B::Gl), warp], Auto, Os::Windows), Some(1));
+    assert_eq!(pick(&[cand(0x15ad, T::VirtualGpu, B::Gl), warp], Auto, Os::Windows), Some(1));
     assert_eq!(pick(&[svga_gl], Auto, Os::Windows), Some(0));
+    // A hardware GL adapter beats software graphics...
+    let intel_gl = cand(INTEL, T::IntegratedGpu, B::Gl);
+    assert_eq!(pick(&[intel_gl, warp], Auto, Os::Windows), Some(0));
+    assert_eq!(pick(&[cand(0x10de, T::DiscreteGpu, B::Gl), warp], Auto, Os::Windows), Some(0));
+    // ...but hardware DX12 still beats it, so no working DX12 machine changes.
+    assert_eq!(pick(&[intel_gl, cand(INTEL, T::IntegratedGpu, B::Dx12), warp], Auto, Os::Windows), Some(1));
     // Elsewhere GL keeps its rank.
     assert_eq!(pick(&[svga_gl, warp], Auto, Os::Other), Some(0));
 }
