@@ -141,12 +141,17 @@ fn safe_gpu_forces_the_cpu_for_one_launch() {
 }
 
 fn cand(vendor: u32, device_type: wgpu::DeviceType, backend: wgpu::Backend) -> Candidate {
-    Candidate { vendor, device_type, backend, surface_ok: true, wanted: false, virtual_gpu: false }
+    Candidate { vendor, device_type, backend, surface_ok: true, wanted: false, kind: Kind::Gpu }
 }
 
-/// `cand`, named as a VM's emulated GPU is ([`is_virtual_gpu`]).
+/// `cand` as a VM's emulated GPU is named ([`kind`]).
 fn vm(vendor: u32, device_type: wgpu::DeviceType, backend: wgpu::Backend) -> Candidate {
-    Candidate { virtual_gpu: true, ..cand(vendor, device_type, backend) }
+    Candidate { kind: Kind::Virtual, ..cand(vendor, device_type, backend) }
+}
+
+/// `cand` as a software rasterizer is named ([`kind`]).
+fn soft(vendor: u32, device_type: wgpu::DeviceType, backend: wgpu::Backend) -> Candidate {
+    Candidate { kind: Kind::Software, ..cand(vendor, device_type, backend) }
 }
 
 #[test]
@@ -363,19 +368,34 @@ fn windows_auto_prefers_hardware_gl_over_software_warp() {
     assert_eq!(pick(&[cand(NVIDIA, T::DiscreteGpu, B::Gl), warp], Auto, Os::Windows), Some(0));
     // ...but hardware DX12 still beats it, so no working DX12 machine changes.
     assert_eq!(pick(&[nvidia_gl, cand(INTEL, T::IntegratedGpu, B::Dx12), warp], Auto, Os::Windows), Some(1));
+    // A VM's emulated Intel GPU is `IntegratedGpu` (the renderer name contains "intel"), and a
+    // software rasterizer wgpu doesn't know is `Other`; neither may outrank WARP.
+    assert_eq!(pick(&[vm(0, T::IntegratedGpu, B::Gl), warp], Auto, Os::Windows), Some(1), "virgl");
+    assert_eq!(pick(&[soft(0, T::Other, B::Gl), warp], Auto, Os::Windows), Some(1), "softpipe");
+    assert_eq!(pick(&[soft(0xffff, T::Cpu, B::Gl), warp], Auto, Os::Windows), Some(1), "llvmpipe");
     // Elsewhere GL keeps its rank.
     assert_eq!(pick(&[svga_gl, warp], Auto, Os::Other), Some(0));
 }
 
 /// wgpu's GL backend reports a VM's emulated GPU with an unknown vendor (0), the same as an AMD
-/// card, so only the name tells them apart.
+/// card, so only the name tells them apart. It knows llvmpipe, swiftshader and mesa offscreen as
+/// software, but not the other rasterizers, and calls a VM's Intel GPU integrated.
 #[test]
-fn a_vm_gpu_is_recognised_by_its_name() {
-    for name in ["SVGA3D; build: RELEASE;LLVM;", "VMware SVGA 3D", "VirtualBox Graphics Adapter", "Parallels Display Adapter"] {
-        assert!(is_virtual_gpu(name), "{name}");
+fn an_adapters_name_says_what_it_is() {
+    for name in [
+        "SVGA3D; build: RELEASE;LLVM;",
+        "VMware SVGA 3D",
+        "VirtualBox Graphics Adapter",
+        "Parallels Display Adapter",
+        "virgl (Mesa Intel(R) UHD Graphics 620 (CML GT2))",
+    ] {
+        assert_eq!(kind(name), Kind::Virtual, "{name}");
     }
-    for name in ["NVIDIA GeForce GTX 970/PCIe/SSE2", "AMD Radeon RX 580 Series", "Intel(R) HD Graphics 4600", ""] {
-        assert!(!is_virtual_gpu(name), "{name}");
+    for name in ["llvmpipe (LLVM 15.0.7, 256 bits)", "softpipe", "swrast", "Google SwiftShader", "GDI Generic"] {
+        assert_eq!(kind(name), Kind::Software, "{name}");
+    }
+    for name in ["NVIDIA GeForce GTX 970/PCIe/SSE2", "AMD Radeon RX 580 Series", "ATI Radeon HD 5700 Series", "Intel(R) HD Graphics 4600", ""] {
+        assert_eq!(kind(name), Kind::Gpu, "{name}");
     }
 }
 
