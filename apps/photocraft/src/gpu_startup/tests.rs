@@ -368,6 +368,10 @@ fn windows_auto_prefers_hardware_gl_over_software_warp() {
     assert_eq!(pick(&[cand(NVIDIA, T::DiscreteGpu, B::Gl), warp], Auto, Os::Windows), Some(0));
     // ...but hardware DX12 still beats it, so no working DX12 machine changes.
     assert_eq!(pick(&[nvidia_gl, cand(INTEL, T::IntegratedGpu, B::Dx12), warp], Auto, Os::Windows), Some(1));
+    // Hardware GL is the compatibility path: a real GPU on Vulkan or DX12 stays ahead even when GL
+    // reports the better device type (an integrated GL adapter vs a discrete one on Vulkan).
+    assert_eq!(pick(&[cand(INTEL, T::IntegratedGpu, B::Gl), cand(NVIDIA, T::Other, B::Vulkan)], Auto, Os::Windows), Some(1), "a discrete Vulkan adapter");
+    assert_eq!(pick(&[cand(INTEL, T::IntegratedGpu, B::Gl), cand(NVIDIA, T::DiscreteGpu, B::Vulkan)], Auto, Os::Windows), Some(1));
     // A VM's emulated Intel GPU is `IntegratedGpu` (the renderer name contains "intel"), and a
     // software rasterizer wgpu doesn't know is `Other`; neither may outrank WARP.
     assert_eq!(pick(&[vm(0, T::IntegratedGpu, B::Gl), warp], Auto, Os::Windows), Some(1), "virgl");

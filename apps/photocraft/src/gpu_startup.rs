@@ -318,14 +318,23 @@ fn hardware(a: &Candidate) -> bool {
 /// Rank of an adapter (lower is better): high-performance device types first (egui's power
 /// preference) or software adapters first for `cpu`; then backends, with DX12 before Vulkan for
 /// Intel and Qualcomm on Windows ([`dx12_first_on_windows`]). For `cpu`, any GL adapter comes
-/// before Vulkan, which is only the fallback for presenting the window (see [`backends`]). On
-/// Windows a GL adapter of a real GPU ranks like any other, so it beats software WARP on a machine
-/// with no hardware DX12 or Vulkan adapter (#7331). GL on a virtual adapter (VMware's SVGA3D) or a
-/// software renderer still comes after everything: the former drew a black window (#5191, #1788),
-/// the latter is slower than WARP.
+/// before Vulkan, which is only the fallback for presenting the window (see [`backends`]).
+///
+/// A real GPU on a real graphics API comes first. On Windows, GL is the compatibility path, so a
+/// real GPU's GL adapter ranks after the other backends but before software WARP: that is what
+/// #7331 asks for, and it keeps a hardware Vulkan or DX12 adapter ahead of an integrated GL one.
+/// A VM's GL (VMware's SVGA3D drew a black window, #5191, #1788) and a software rasterizer stay
+/// last, behind WARP.
 fn rank(a: &Candidate, backend: GpuBackend, os: Os) -> (u8, u8, u8) {
-    let fallback =
-        u8::from((backend == GpuBackend::Cpu && a.backend == wgpu::Backend::Vulkan) || (os == Os::Windows && a.backend == wgpu::Backend::Gl && !hardware(a)));
+    let tier = if backend == GpuBackend::Cpu {
+        u8::from(a.backend == wgpu::Backend::Vulkan)
+    } else if !hardware(a) {
+        if os == Os::Windows && a.backend == wgpu::Backend::Gl { 3 } else { 2 }
+    } else if os == Os::Windows && a.backend == wgpu::Backend::Gl {
+        1
+    } else {
+        0
+    };
     let ty = match a.device_type {
         wgpu::DeviceType::DiscreteGpu => 0,
         wgpu::DeviceType::IntegratedGpu => 1,
@@ -345,7 +354,7 @@ fn rank(a: &Candidate, backend: GpuBackend, os: Os) -> (u8, u8, u8) {
         wgpu::Backend::Gl => 3,
         wgpu::Backend::BrowserWebGpu | wgpu::Backend::Noop => 4,
     };
-    (fallback, ty, be)
+    (tier, ty, be)
 }
 
 /// The adapter to use among `adapters` (`None` when there is none). Adapters the user asked for
