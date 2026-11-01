@@ -399,3 +399,14 @@ fn gl_builds_its_pipelines_on_one_thread() {
     assert!(super::setup::parallel_pipelines(wgpu::Backend::Dx12));
     assert!(super::setup::parallel_pipelines(wgpu::Backend::Metal));
 }
+
+#[test]
+fn the_vertex_shaders_return_the_position_directly() {
+    // naga turns a vertex output struct that holds only `@builtin(position)` into GLSL Intel's
+    // Windows OpenGL driver rejects, which fails every pipeline and silently costs the whole GPU
+    // canvas (#10636), so both entry points return the position itself.
+    for (name, src) in [("compose", super::kit::SHADER), ("camera raw", super::camera_raw::CAMERA_RAW_SHADER)] {
+        assert!(src.contains("-> @builtin(position) vec4<f32>"), "{name}: the vertex shader must return the position");
+        assert!(!src.contains("struct VOut"), "{name}: a position-only output struct breaks Intel's GL driver");
+    }
+}
