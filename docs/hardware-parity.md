@@ -23,7 +23,7 @@ HDR display to verify.
 | Documents larger than the GPU texture limit | yes (tiled) | CPU fallback; tiling in progress (#49) | partial |
 | CPU-only fallback when no GPU | yes, reduced | `cpu` canvas preference; fails to start without an adapter on some Linux systems (#2519, #2412) | partial |
 | Choosing the GPU on a multi-GPU machine | Preferences › Performance › Use Graphics Processor | Linux only: Preferences › Performance › Advanced › GPU adapter and `PHOTOCRAFT_GPU_ADAPTER` (#1885); ignored on Windows and macOS | partial |
-| Old / integrated GPUs | yes | black line on Intel HD (#2426), OpenCore Macs fail (#1859), Rgba32Float panic (#2020); on Windows a GPU whose driver has no DX12 or Vulkan composites through its OpenGL adapter once that adapter is selected (automatic selection needs #10284; Intel HD 4600: a 1920×1080 document in 26 ms, ~9 s once on the first draw while the driver links its shaders) | partial |
+| Old / integrated GPUs | yes | black line on Intel HD (#2426), OpenCore Macs fail (#1859), Rgba32Float panic (#2020); on Windows a GPU whose driver has no DX12 or Vulkan composites through its OpenGL adapter once that adapter is selected (automatic selection needs #10284; Intel HD 4600: a 1920×1080 document in 26 ms, plus ~8 s once while Intel's driver compiles the composite shaders, with or without GPU timing) | partial |
 
 ## Pen tablets
 
