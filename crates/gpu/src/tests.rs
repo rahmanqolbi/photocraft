@@ -388,3 +388,14 @@ fn colour_managed_tiles_match_the_per_pixel_conversion() {
 fn grid_rounds_out() {
     assert_eq!(tile_grid(Rect::new(0, 0, 300, 256)), Rect::new(0, 0, 512, 256));
 }
+
+#[test]
+fn gl_builds_its_pipelines_on_one_thread() {
+    // wgpu-hal's GL device takes one context lock around every call and panics after a second
+    // ("Could not lock adapter context. This is most-likely a deadlock"), so two threads creating
+    // pipelines abort the process; every other backend keeps the parallel build (#6419).
+    assert!(!super::setup::parallel_pipelines(wgpu::Backend::Gl));
+    assert!(super::setup::parallel_pipelines(wgpu::Backend::Vulkan));
+    assert!(super::setup::parallel_pipelines(wgpu::Backend::Dx12));
+    assert!(super::setup::parallel_pipelines(wgpu::Backend::Metal));
+}
