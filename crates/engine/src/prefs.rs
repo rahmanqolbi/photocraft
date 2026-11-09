@@ -340,6 +340,28 @@ impl Default for Interface {
     }
 }
 
+/// How a floating document window is shown (Preferences › Workspace).
+///
+/// `Os` (the default here) gives every floating document its own operating system window,
+/// the way Photoshop detaches tabs. `Workspace` draws Photoshop-style windows inside the
+/// canvas area instead — one app window, the documents floating over the workspace.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum FloatingStyle {
+    Workspace,
+    #[default]
+    Os,
+}
+
+impl FloatingStyle {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Workspace => "workspace",
+            Self::Os => "os",
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct Workspace {
@@ -348,6 +370,8 @@ pub struct Workspace {
     pub open_documents_as_tabs: bool,
     pub enable_floating_document_window_docking: bool,
     pub large_tabs: bool,
+    /// Where floating document windows live: inside the workspace or as OS windows.
+    pub floating_style: FloatingStyle,
     pub enable_narrow_options_bar: bool,
     pub remember_workspace_changes: bool,
 }
@@ -360,6 +384,7 @@ impl Default for Workspace {
             open_documents_as_tabs: true,
             enable_floating_document_window_docking: true,
             large_tabs: false,
+            floating_style: FloatingStyle::Os,
             enable_narrow_options_bar: false,
             remember_workspace_changes: true,
         }

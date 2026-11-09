@@ -520,21 +520,23 @@ fn batch_dialogs_include_all_subfolders() {
     let _ = std::fs::remove_dir_all(&dir);
 }
 
-/// Float in Window takes the document and the screen position a dragged-off tab was dropped at
-/// (#3733); bad params are errors, not panics.
+/// Float in Window takes the document, the screen position a dragged-off tab was dropped at,
+/// and the placeholder's rectangle (#3733); bad params are errors, not panics.
 #[test]
 fn float_in_window_takes_a_document_and_position() {
     let (mut app, ctx) = app_with(3);
-    let r = menu(&mut app, &ctx, "window.arrange.floatInWindow", json!({"document": 1, "position": [1950.0, 40.5]})).unwrap();
+    let r = menu(&mut app, &ctx, "window.arrange.floatInWindow", json!({"document": 1, "position": [1950.0, 40.5], "rect": [100.0, 200.0, 600.0, 400.0]})).unwrap();
     let w = app.ui.windows.last().unwrap();
     assert_eq!(r, json!({"window": w.id}));
     assert_eq!((w.document, w.position), (1, Some([1950.0, 40.5])));
+    assert_eq!(w.rect, Some([100.0, 200.0, 600.0, 400.0]));
     assert!(w.floating);
     assert_eq!(app.session.active_index(), Some(1), "the floated document stays active");
     let again = menu(&mut app, &ctx, "window.arrange.floatInWindow", json!({"document": 1})).unwrap();
     assert_eq!(again, r, "tearing off the same document reuses its window");
     assert_eq!(app.ui.windows.len(), 1);
     assert_eq!(app.ui.windows[0].position, Some([1950.0, 40.5]));
+    assert_eq!(app.ui.windows[0].rect, Some([100.0, 200.0, 600.0, 400.0]));
     for bad in [
         json!({"document": 3}),
         json!({"document": -1}),
@@ -543,6 +545,10 @@ fn float_in_window_takes_a_document_and_position() {
         json!({"position": [1.0, "x"]}),
         json!({"position": [1.0e30, 0.0]}),
         json!({"position": 5}),
+        json!({"document": 1, "rect": [1.0, 2.0, 3.0]}),
+        json!({"document": 1, "rect": [0.0, 0.0, -5.0, 10.0]}),
+        json!({"document": 1, "rect": [0.0, 0.0, 10.0, 1.0e30]}),
+        json!({"document": 1, "rect": 5}),
     ] {
         assert!(menu(&mut app, &ctx, "window.arrange.floatInWindow", bad.clone()).is_err(), "{bad}");
     }

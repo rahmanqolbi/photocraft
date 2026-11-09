@@ -1291,31 +1291,23 @@ fn fs_fxstroke(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
     let a = textureLoad(tex_b, p, 0).a;
     let outline = (op.flags & F_OUTLINE) != 0u;
     let first = (op.flags & F_FIRST) != 0u;
-    var cover = 0.0;
-    var lay_a = 0.0;
     let vector = (op.flags & F_VECTOR) != 0u;
-    if (!first || outline || !vector) {
-        let cv = textureLoad(tex_c, p, 0);
-        cover = cv.r;
-        lay_a = cv.g;
-    }
-    var k = map_value(d, 0.0);
-    if (outline) {
-        k = k * outline_share(a, lay_a);
-    } else if (a > INSIDE_EPS) {
-        // Pixel layers: the stroke shows beneath only through the part the shape leaves
-        // (`effects.rs`): (1 - a) / (1 - layer alpha), none beneath a fully covered pixel.
-        if (vector) {
-            k = 0.0;
-        } else {
-            k = k * outline_share(a, lay_a);
-        }
-    }
-    var cov = k * op.opacity;
-    if (op.mode == M_DISSOLVE) {
-        // effects.rs: a Dissolve stroke covers each pixel fully or not at all.
-        cov = select(0.0, 1.0, cov > 0.0 && dissolve_noise(d) < cov);
-    }
+    // Written with `select`, never a `var` assigned inside a branch: Intel's Windows GLSL compiler
+    // drops the value of such a variable here (it read `k` as 0 however `map_value` and
+    // `outline_share` read), which left an outside stroke off every pixel a partly transparent
+    // layer covers (#10661).
+    let read_cover = !first || outline || !vector;
+    let cv = textureLoad(tex_c, p, 0);
+    let cover = select(0.0, cv.r, read_cover);
+    let lay_a = select(0.0, cv.g, read_cover);
+    let m = map_value(d, 0.0);
+    // Pixel layers: the stroke shows beneath only through the part the shape leaves
+    // (`effects.rs`): (1 - a) / (1 - layer alpha), none beneath a fully covered pixel.
+    let band = select(m * outline_share(a, lay_a), 0.0, vector && !outline);
+    let k = select(m, band, outline || a > INSIDE_EPS);
+    // effects.rs: a Dissolve stroke covers each pixel fully or not at all.
+    let raw = k * op.opacity;
+    let cov = select(raw, select(0.0, 1.0, raw > 0.0 && dissolve_noise(d) < raw), op.mode == M_DISSOLVE);
     let share = cov * (1.0 - cover);
     if (op.kind == 1) { return vec4(cover + share, lay_a, 0.0, 0.0); }
     var acc = vec4(0.0);

@@ -1167,6 +1167,10 @@ fn dragging_a_tab_off_the_strip_floats_it_in_a_window() {
     assert!(!torn_off(strip, egui::pos2(50.0, 26.0 + TEAR_OFF - 1.0)), "a wobble below the strip still reorders");
     assert!(torn_off(strip, egui::pos2(50.0, 26.0 + TEAR_OFF + 1.0)));
     assert!(torn_off(strip, egui::pos2(50.0, -TEAR_OFF - 1.0)), "dragged up, off the window's top");
+    // The tear-off placeholder sits under the pointer's title bar, so the window opens there.
+    let ghost = ghost_rect(egui::pos2(300.0, 200.0), egui::vec2(400.0, 300.0));
+    assert_eq!(ghost.min, egui::pos2(260.0, 188.0));
+    assert_eq!(ghost.min.y + 12.0, 200.0, "the pointer rests on the title bar");
     for kind in [crate::theme::ThemeKind::Studio, crate::theme::ThemeKind::Pro] {
         let mut app = PhotocraftApp::new(photocraft_engine::Session::new(), crate::Services::default());
         for name in ["a", "b", "c"] {
@@ -1197,6 +1201,9 @@ fn dragging_a_tab_off_the_strip_floats_it_in_a_window() {
         assert_eq!(names, ["a", "b", "c"], "{kind:?}: tearing off doesn't reorder");
         assert_eq!(app.ui.windows.iter().map(|w| w.document).collect::<Vec<_>>(), [1], "{kind:?}: b floats in its own window");
         assert_eq!(app.session.active_index(), Some(1), "{kind:?}: the floated document is active");
+        let [rx, ry, rw, rh] = app.ui.windows.first().and_then(|w| w.rect).expect("the window opens where the placeholder was");
+        assert!((rx - (target.x - 40.0)).abs() < 0.5 && (ry - (target.y - 12.0)).abs() < 0.5, "{kind:?}: the title bar stays under the pointer: [{rx}, {ry}, {rw}, {rh}] at {target:?}");
+        assert!(rw >= 240.0 && rh >= 140.0, "{kind:?}: the placeholder is at least the minimum window size: [{rw}, {rh}]");
     }
 }
 

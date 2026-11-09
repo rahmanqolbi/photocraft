@@ -448,7 +448,7 @@ pub(super) fn shortcuts_body(app: &mut PhotocraftApp, ui: &mut egui::Ui, f: &mut
             if ui.button(tl!("Reset All to Defaults")).clicked() {
                 overrides.clear();
                 alt_overrides.clear();
-                message = tl!("All shortcuts reset to PhotoCraft defaults.").into();
+                message = tl!("All shortcuts reset to PhotoSoft defaults.").into();
                 message_warning = false;
             }
             // A Photoshop set (`.kys`) fills the overrides; the file arrives after this frame

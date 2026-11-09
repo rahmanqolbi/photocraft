@@ -36,6 +36,15 @@ fn screen_position(v: &Value) -> Option<[f32; 2]> {
     Some([n(0)?, n(1)?])
 }
 
+/// A finite `[x, y, w, h]` window rectangle in a sane range, with positive size.
+fn window_rect(v: &Value) -> Option<[f32; 4]> {
+    const LIMIT: f64 = 1.0e6;
+    let a = v.as_array().filter(|a| a.len() == 4)?;
+    let n = |i: usize| a.get(i).and_then(Value::as_f64).filter(|x| x.is_finite() && x.abs() <= LIMIT).map(|x| x as f32);
+    let (x, y, w, h) = (n(0)?, n(1)?, n(2)?, n(3)?);
+    (w > 0.0 && h > 0.0).then_some([x, y, w, h])
+}
+
 pub(crate) fn float_window(app: &mut PhotocraftApp, doc: usize, offset: usize, floating: bool) -> u64 {
     let wid = app.ui.alloc_id();
     let mut view = app.ui.views.get(doc).cloned().unwrap_or_default();
@@ -44,7 +53,7 @@ pub(crate) fn float_window(app: &mut PhotocraftApp, doc: usize, offset: usize, f
     view.zoom_transition = None;
     view.display_camera = None;
     view.fit_pending = offset > 0 || view.fit_pending;
-    app.ui.windows.push(crate::state::DocWindow { id: wid, document: doc, view, open: true, floating, focused: false, position: None });
+    app.ui.windows.push(crate::state::DocWindow { id: wid, document: doc, view, open: true, floating, focused: false, position: None, rect: None, maximized: false, minimized: false });
     wid
 }
 
@@ -65,8 +74,10 @@ pub(super) fn arrange(app: &mut PhotocraftApp, k: &str, p: &Value) -> Result<Val
             let doc = app.session.active_index().ok_or("no document")?;
             Ok(json!({"window": float_window(app, doc, 0, false)}))
         }
-        // Optional `document` (index; default the active one) and `position` (`[x, y]`, the
-        // window's screen position in points): dragging a tab off the tab strip uses both (#3733).
+        // Optional `document` (index; default the active one), `position` (`[x, y]`, the
+        // window's screen position in points) and `rect` (`[x, y, w, h]`, the window's
+        // rectangle in the app window's points, for workspace windows): dragging a tab off
+        // the tab strip uses both (#3733).
         "floatInWindow" => {
             let doc = match p.get("document") {
                 None | Some(Value::Null) => app.session.active_index().ok_or("no document")?,
@@ -79,6 +90,10 @@ pub(super) fn arrange(app: &mut PhotocraftApp, k: &str, p: &Value) -> Result<Val
                 None | Some(Value::Null) => None,
                 Some(v) => Some(screen_position(v).ok_or("position must be [x, y] in points")?),
             };
+            let rect = match p.get("rect") {
+                None | Some(Value::Null) => None,
+                Some(v) => Some(window_rect(v).ok_or("rect must be [x, y, w, h] in points")?),
+            };
             // Tearing off the same tab again must not create another viewport for the
             // same document. Keep its existing view and position if it is already open.
             if let Some(w) = app.ui.windows.iter().find(|w| w.open && w.floating && w.document == doc) {
@@ -89,13 +104,16 @@ pub(super) fn arrange(app: &mut PhotocraftApp, k: &str, p: &Value) -> Result<Val
             let wid = float_window(app, doc, 0, true);
             if let Some(w) = app.ui.windows.iter_mut().find(|w| w.id == wid) {
                 w.position = position;
+                w.rect = rect;
             }
             app.session.set_active(doc);
             Ok(json!({"window": wid}))
         }
         "floatAllInWindows" | "cascade" => {
             let n = app.session.documents().len();
-            let ids: Vec<u64> = (0..n).map(|d| float_window(app, d, d, true)).collect();
+            // A document that already floats keeps its window (no duplicates).
+            let missing: Vec<usize> = (0..n).filter(|&d| !document_is_floating(app, d)).collect();
+            let ids: Vec<u64> = missing.into_iter().map(|d| float_window(app, d, d, true)).collect();
             Ok(json!({"windows": ids}))
         }
         "matchZoom" | "matchLocation" | "matchRotation" | "matchAll" => {

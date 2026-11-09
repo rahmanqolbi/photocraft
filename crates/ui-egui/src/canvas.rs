@@ -24,6 +24,7 @@ mod cursors;
 mod display;
 mod drag;
 mod filter_preview;
+mod floating;
 mod gesture;
 pub mod gpu_canvas;
 pub mod guide_select;
@@ -106,7 +107,7 @@ pub(crate) use strokes::{SPOT_HEALING_TRAIL, live_retouch_points};
 pub(crate) use tabs::arranged_cells;
 pub(crate) use tabs::tab_title_at;
 #[cfg(test)]
-use tabs::{TEAR_OFF, pro_tab_title, tab_context_items, tab_drop_index, tab_move_target, tabs, torn_off};
+use tabs::{TEAR_OFF, ghost_rect, pro_tab_title, tab_context_items, tab_drop_index, tab_move_target, tabs, torn_off};
 pub use tabs::{TabStrip, document_area, extra_windows};
 use tabs::{dots, paint_dots};
 #[cfg(test)]

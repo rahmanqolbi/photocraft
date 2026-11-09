@@ -200,6 +200,16 @@ pub struct DocWindow {
     /// A tab dragged off the tab strip opens its window where it was dropped (#3733).
     #[serde(default)]
     pub position: Option<[f32; 2]>,
+    /// Where a floating window sits inside the workspace, in points (`x, y, w, h`); `None`
+    /// cascades it. Only used when Preferences › Workspace › Floating windows is `Workspace`.
+    #[serde(default)]
+    pub rect: Option<[f32; 4]>,
+    /// The window fills the workspace (double-clicking its title bar toggles this).
+    #[serde(default)]
+    pub maximized: bool,
+    /// The window is collapsed to the dock and shown again from the Window menu.
+    #[serde(default)]
+    pub minimized: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
