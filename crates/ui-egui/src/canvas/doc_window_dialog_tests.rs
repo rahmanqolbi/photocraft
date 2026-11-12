@@ -43,7 +43,18 @@ struct DocumentWindow {
 
 impl DocumentWindow {
     fn new(app: &PhotocraftApp) -> Self {
-        let window = DocWindow { id: 7, document: 0, view: app.ui.views[0].clone(), open: true, position: None, floating: false, focused: true };
+        let window = DocWindow {
+            id: 7,
+            document: 0,
+            view: app.ui.views[0].clone(),
+            open: true,
+            position: None,
+            floating: false,
+            focused: true,
+            rect: None,
+            maximized: false,
+            minimized: false,
+        };
         let mut view = window.view.clone();
         let size = app.session.active().unwrap().doc.size;
         view.zoom = 1.0;

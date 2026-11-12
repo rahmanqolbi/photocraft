@@ -1217,3 +1217,14 @@ fn an_effect_cache_above_the_cap_loads_clamped_and_does_not_block_apply() {
         assert_eq!(s.execute("prefs.get", json!({"path": "fileHandling.recentFileCount"})).unwrap(), json!(7), "{saved} MB");
     }
 }
+
+#[test]
+fn floating_style_choices_validate_and_default_to_os_windows() {
+    let mut s = Session::new();
+    assert_eq!(s.prefs().workspace.floating_style, FloatingStyle::Os);
+    s.execute("prefs.set", json!({"path": "workspace.floatingStyle", "value": "workspace"})).unwrap();
+    assert_eq!(s.prefs().workspace.floating_style, FloatingStyle::Workspace);
+    // An unknown mode is an error, not a silent fallback.
+    assert!(s.execute("prefs.set", json!({"path": "workspace.floatingStyle", "value": "mdi"})).is_err());
+    assert_eq!(s.prefs().workspace.floating_style, FloatingStyle::Workspace);
+}
