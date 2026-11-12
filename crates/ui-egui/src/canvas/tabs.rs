@@ -77,10 +77,18 @@ fn documents(app: &mut PhotocraftApp, ui: &mut egui::Ui) {
         open_on_double_click(app, ui, area);
         return;
     }
+    // Which surface floating document windows use. `Workspace` draws them over the canvas (the
+    // Photoshop look); `Os` gives each one its own operating system window (`extra_windows`).
+    let workspace_style = app.session.prefs().workspace.floating_style == photocraft_engine::prefs::FloatingStyle::Workspace;
     if n > 0 && !opening && docked_document_indices(app).is_empty() {
-        // A torn-off document belongs to its OS window. Leaving its canvas in the main
-        // viewport would make the same page appear twice, which is what “New Window” does.
-        paint_dots(ui, ui.available_rect_before_wrap(), app.session.prefs().interface.show_canvas_dots);
+        // Every document floats: the workspace behind them is empty dots.
+        let area = ui.available_rect_before_wrap();
+        paint_dots(ui, area, app.session.prefs().interface.show_canvas_dots);
+        if workspace_style {
+            app.last_canvas_rect = area;
+            app.drop_canvas_rect = Some(area);
+            super::floating::show(app, ui, area);
+        }
         return;
     }
     if !app.ui.view.hides_tabs() || opening {
@@ -141,6 +149,9 @@ fn documents(app: &mut PhotocraftApp, ui: &mut egui::Ui) {
             ui.painter().rect_stroke(cell, 0, stroke, egui::StrokeKind::Inside);
         }
         drag_borders(app, ui, rect);
+        if workspace_style {
+            super::floating::show(app, ui, rect);
+        }
         return;
     }
     if idx != active_doc && main_focused && ui.input(|i| i.pointer.primary_pressed() && i.pointer.interact_pos().is_some_and(|p| rect.contains(p))) {
@@ -148,6 +159,9 @@ fn documents(app: &mut PhotocraftApp, ui: &mut egui::Ui) {
     }
     let view = app.ui.views[idx].clone();
     canvas_view(app, ui, idx, rect, view, app.session.active_index() == Some(idx));
+    if workspace_style {
+        super::floating::show(app, ui, rect);
+    }
 }
 
 /// Window › Arrange: the borders between the documents are dragged to give one more room, as in
@@ -282,9 +296,9 @@ pub(super) fn tabs(app: &mut PhotocraftApp, ui: &mut egui::Ui) -> TabStrip {
             } else if resp.clicked() {
                 activate = Some(doc);
             }
-            match tab_drag(ui, &resp, i, r, row, &placed, &t) {
+            match tab_drag(TabDrag { app, ui, resp: &resp, doc, i, r, strip: row, placed: &placed, t: &t }) {
                 Some(TabDrop::Move(to)) => tab_move = Some((doc, move_target_after_filter(&documents, doc, to, document_count))),
-                Some(TabDrop::Float(at)) => tear_off = Some((doc, at)),
+                Some(TabDrop::Float(off)) => tear_off = Some(off),
                 None => {}
             }
             let has_path = st.path.is_some();
@@ -427,22 +441,46 @@ pub(super) fn torn_off(strip: Rect, p: egui::Pos2) -> bool {
 enum TabDrop {
     /// Reorder the tab to this index.
     Move(usize),
-    /// Float the document in its own OS window at this screen position (points), when known.
-    Float(Option<[f32; 2]>),
+    /// Float the document in its own window.
+    Float(TearOff),
+}
+
+/// A tab dragged off the strip, dropping into its own window: where an OS window opens
+/// (screen position, points) and where a workspace window opens (the placeholder's
+/// rectangle, so the window opens where the placeholder was). Either may be unknown (a
+/// headless context has no screen position).
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct TearOff {
+    doc: usize,
+    position: Option<[f32; 2]>,
+    rect: Option<Rect>,
+}
+
+/// One tab mid-drag: everything its drop decision and its tear-off placeholder need (a struct
+/// rather than parameters, so the drag fn stays inside clippy's argument limit).
+struct TabDrag<'a> {
+    app: &'a PhotocraftApp,
+    ui: &'a egui::Ui,
+    resp: &'a egui::Response,
+    doc: usize,
+    i: usize,
+    r: Rect,
+    strip: Rect,
+    placed: &'a [(usize, Rect)],
+    t: &'a crate::theme::Tokens,
 }
 
 /// Drag a document tab: along the strip it reorders (a line shows where it will land); off the
 /// strip it tears off into a floating window that can go anywhere, other screens included
-/// (an outline under the pointer shows it). Returns the drop once the drag ends.
-fn tab_drag(ui: &egui::Ui, resp: &egui::Response, i: usize, r: Rect, strip: Rect, placed: &[(usize, Rect)], t: &crate::theme::Tokens) -> Option<TabDrop> {
+/// (an empty window at the pointer shows the one that will appear). Returns the drop once
+/// the drag ends.
+fn tab_drag(d: TabDrag<'_>) -> Option<TabDrop> {
+    let TabDrag { app, ui, resp, doc, i, r, strip, placed, t } = d;
     if resp.dragged()
         && let Some(p) = resp.interact_pointer_pos()
     {
         if torn_off(strip, p) {
-            let ghost = Rect::from_min_size(p - egui::vec2(40.0, 12.0), egui::vec2(240.0, 160.0));
-            let painter = ui.ctx().layer_painter(egui::LayerId::new(egui::Order::Tooltip, ui.scope_id().with("tab-tear-off")));
-            painter.rect_filled(ghost, t.radius_sm, t.accent.gamma_multiply(0.12));
-            painter.rect_stroke(ghost, t.radius_sm, Stroke::new(1.5, t.accent), egui::StrokeKind::Inside);
+            super::floating::draw_placeholder(ui, t, tear_ghost(app, ui, doc, p), &pro_tab_title(app, doc));
         } else {
             tab_drop_line(ui, placed, p.x, t);
         }
@@ -452,25 +490,49 @@ fn tab_drag(ui: &egui::Ui, resp: &egui::Response, i: usize, r: Rect, strip: Rect
     }
     let p = resp.interact_pointer_pos().or_else(|| ui.input(|i| i.pointer.interact_pos()));
     if let Some(p) = p.filter(|&p| torn_off(strip, p)) {
+        let rect = tear_ghost(app, ui, doc, p);
         // The pointer is in this window's points; the OS wants screen coordinates. Keep the new
         // window's title bar under the pointer, as the ghost showed.
         let at = ui.ctx().input(|i| i.viewport().inner_rect).map(|inner| {
-            let s = inner.min + p.to_vec2() - egui::vec2(40.0, 12.0);
+            let s = inner.min + rect.min.to_vec2();
             [s.x, s.y]
         });
-        return Some(TabDrop::Float(at));
+        return Some(TabDrop::Float(TearOff { doc, position: at, rect: Some(rect) }));
     }
     let to = tab_move_target(i, tab_drop_index(placed, p.map_or(r.center().x, |p| p.x)));
     (to != i).then_some(TabDrop::Move(to))
 }
 
+/// The placeholder rectangle for a tab torn off and dropped with the pointer at `p`: the size
+/// a new floating window for this document would get, anchored at `p` on its title bar, so
+/// the window that appears on drop is the placeholder you saw.
+fn tear_ghost(app: &PhotocraftApp, ui: &egui::Ui, doc: usize, p: Pos2) -> Rect {
+    let mut area = app.last_canvas_rect;
+    if area.width() < 50.0 || area.height() < 50.0 {
+        area = Rect::from_min_size(egui::pos2(0.0, 0.0), egui::vec2(1200.0, 800.0));
+    }
+    let doc_px = app.session.documents().get(doc).map(|st| [st.doc.size.width as f32, st.doc.size.height as f32]).unwrap_or([800.0, 600.0]);
+    let zoom = app.ui.views.get(doc).map_or(1.0, |v| v.zoom);
+    let zoom_pt = zoom / ui.ctx().pixels_per_point().max(0.1);
+    ghost_rect(p, super::floating::default_size(area, doc_px, zoom_pt))
+}
+
+/// Where the tear-off placeholder sits for a pointer at `p`: its title bar under the pointer
+/// (40 pt in from the left edge, 12 pt down), so dropping opens the window there.
+pub(super) fn ghost_rect(p: Pos2, size: egui::Vec2) -> Rect {
+    Rect::from_min_size(p - egui::vec2(40.0, 12.0), size)
+}
+
 /// Float a torn-off tab's document in its own window (`window.arrange.floatInWindow`).
-fn float_torn_off(app: &mut PhotocraftApp, ctx: &egui::Context, tear_off: Option<(usize, Option<[f32; 2]>)>) {
-    let Some((doc, at)) = tear_off else { return };
-    let params = match at {
-        Some(at) => json!({"document": doc, "position": at}),
-        None => json!({"document": doc}),
-    };
+fn float_torn_off(app: &mut PhotocraftApp, ctx: &egui::Context, tear_off: Option<TearOff>) {
+    let Some(off) = tear_off else { return };
+    let mut params = json!({"document": off.doc});
+    if let Some(at) = off.position {
+        params["position"] = json!(at);
+    }
+    if let Some(r) = off.rect {
+        params["rect"] = json!([r.min.x, r.min.y, r.width(), r.height()]);
+    }
     if let Err(e) = crate::menus::invoke(app, ctx, "window.arrange.floatInWindow", params) {
         app.ui.status = e;
         app.ui.status_error = true;
@@ -643,9 +705,9 @@ fn pro_tabs(app: &mut PhotocraftApp, ui: &mut egui::Ui) -> TabStrip {
         } else if resp.clicked() {
             activate = Some(doc);
         }
-        match tab_drag(ui, &resp, i, r, strip, &placed, &t) {
+        match tab_drag(TabDrag { app, ui, resp: &resp, doc, i, r, strip, placed: &placed, t: &t }) {
             Some(TabDrop::Move(to)) => tab_move = Some((doc, move_target_after_filter(&documents, doc, to, document_count))),
-            Some(TabDrop::Float(at)) => tear_off = Some((doc, at)),
+            Some(TabDrop::Float(off)) => tear_off = Some(off),
             None => {}
         }
         let has_path = app.session.documents().get(doc).is_some_and(|d| d.path.is_some());
@@ -807,12 +869,26 @@ pub(super) fn open_on_double_click(app: &mut PhotocraftApp, ui: &egui::Ui, area:
     }
 }
 
-/// Extra OS windows showing documents (multi-window / multi-monitor).
+/// A floating document is its own operating system window, the way Photoshop tears tabs off:
+/// it stays inside the application (one taskbar group, one Alt+Tab row per window, live
+/// thumbnails), and the window's title is the document's Photoshop title, so window pickers
+/// show "name @ zoom% (RGB/8)" instead of a raw identifier. Closing it closes the document
+/// (the guarded `file.close` raises the save dialog if dirty); it never docks back.
 pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
+    if app.session.prefs().workspace.floating_style == photocraft_engine::prefs::FloatingStyle::Workspace {
+        // Preferences › Workspace › Floating windows: these windows live inside the workspace by
+        // default (`canvas::floating::show`), so no operating system viewport is opened.
+        return;
+    }
     let wins = app.ui.windows.clone();
+    let mut close_docs = Vec::new();
     for w in wins.into_iter().filter(|w| w.open) {
-        let Some(st) = app.session.documents().get(w.document) else { continue };
-        let title = format!("{} — window {}", st.doc.name, w.id);
+        if app.session.documents().get(w.document).is_none() {
+            // Its document is gone (closed elsewhere): close the OS window for good.
+            ctx.send_viewport_cmd_to(egui::ViewportId::from_hash_of(("docwin", w.id)), egui::ViewportCommand::Close);
+            continue;
+        }
+        let title = tab_title_at(app, w.document, w.view.zoom * 100.0);
         let vid = egui::ViewportId::from_hash_of(("docwin", w.id));
         let mut builder = crate::os_window::builder().with_title(title).with_inner_size([800.0, 600.0]);
         if let Some([x, y]) = w.position {
@@ -849,8 +925,15 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
             win.view = view;
             win.focused = focused;
             if close {
-                win.open = false;
+                close_docs.push(w.document);
             }
+        }
+    }
+    // Photoshop closes the *document* (save prompt on dirty docs); it does not dock back.
+    for doc in close_docs {
+        if let Err(e) = crate::menus::invoke(app, ctx, "file.close", json!({"document": doc})) {
+            app.ui.status = e;
+            app.ui.status_error = true;
         }
     }
     app.ui.windows.retain(|w| w.open);

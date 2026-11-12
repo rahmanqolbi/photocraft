@@ -99,10 +99,10 @@ pub struct Panels {
     /// (#6760). Only a view of the moment: not saved, and the panels' own flags stay untouched.
     #[serde(skip)]
     pub full_screen_chrome: bool,
-    /// The right dock's icon rail. An app that embeds PhotoCraft's UI can hide it for a simpler view.
+    /// The right dock's icon rail. An app that embeds PhotoSoft's UI can hide it for a simpler view.
     #[serde(default = "yes")]
     pub rail: bool,
-    /// The title bar with the in-window menus. An app that embeds PhotoCraft's UI and draws its own
+    /// The title bar with the in-window menus. An app that embeds PhotoSoft's UI and draws its own
     /// bar can hide it; the caption buttons of a custom title bar go with it.
     #[serde(default = "yes")]
     pub menu_bar: bool,
@@ -269,6 +269,16 @@ pub struct DocWindow {
     /// A tab dragged off the tab strip opens its window where it was dropped (#3733).
     #[serde(default)]
     pub position: Option<[f32; 2]>,
+    /// Where a floating window sits inside the workspace, in points (`x, y, w, h`); `None`
+    /// cascades it. Only used when Preferences › Workspace › Floating windows is `Workspace`.
+    #[serde(default)]
+    pub rect: Option<[f32; 4]>,
+    /// The window fills the workspace (double-clicking its title bar toggles this).
+    #[serde(default)]
+    pub maximized: bool,
+    /// The window is collapsed to the dock and shown again from the Window menu.
+    #[serde(default)]
+    pub minimized: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

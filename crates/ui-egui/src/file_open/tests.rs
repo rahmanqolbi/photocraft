@@ -1284,7 +1284,7 @@ fn a_drop_slot_counts_documents_not_the_tabs_shown() {
     assert_eq!(crate::canvas::TabStrip { rect: strip.rect, tabs: vec![] }.slot(10.0), 0);
 }
 
-/// #5687: files dropped from another app's window bring PhotoCraft to the front (a focus request
+/// #5687: files dropped from another app's window bring PhotoSoft to the front (a focus request
 /// in the frame that takes the drop), so the source window ends up behind it.
 #[test]
 fn a_drop_brings_the_window_to_the_front() {
@@ -1389,6 +1389,9 @@ fn views_and_windows_stay_with_their_documents() {
             floating: false,
             focused: false,
             position: None,
+            rect: None,
+            maximized: false,
+            minimized: false,
         })
         .collect();
     let zooms = |app: &PhotocraftApp| app.ui.views.iter().map(|v| v.zoom).collect::<Vec<_>>();

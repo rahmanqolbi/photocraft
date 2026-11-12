@@ -1,7 +1,7 @@
 //! Telling the user why a launch failed when there is no window to say it in (#7643).
 //!
 //! A desktop launch has no console — release builds are GUI-subsystem apps on Windows — so the
-//! `Err` that ends `main` used to vanish and PhotoCraft "just closed". This shows one native
+//! `Err` that ends `main` used to vanish and PhotoSoft "just closed". This shows one native
 //! dialog with the error, the renderer that was tried and the log file to attach. The text is
 //! English diagnostics, like Help › System Info, so a bug report reads the same in every language.
 //!
@@ -38,7 +38,7 @@ fn has_display() -> bool {
 /// The dialog's text: the error, the renderer that was tried and why it wasn't the preference,
 /// the version and, when one was opened, the log file.
 pub fn text(error: &str, renderer: &str, note: Option<&str>, version: &str, log: Option<&Path>) -> String {
-    let mut text = format!("PhotoCraft could not start.\n\n{error}\n\nRenderer: {renderer}");
+    let mut text = format!("PhotoSoft could not start.\n\n{error}\n\nRenderer: {renderer}");
     if let Some(note) = note {
         text.push_str(&format!("\nStartup: {note}"));
     }
@@ -57,7 +57,7 @@ pub fn show(error: &str, renderer: &str, note: Option<&str>, log: Option<&Path>)
     log::info!("showing the startup-failure dialog");
     let _ = rfd::MessageDialog::new()
         .set_level(rfd::MessageLevel::Error)
-        .set_title(photocraft_ui_egui::i18n::t("PhotoCraft could not start"))
+        .set_title(photocraft_ui_egui::i18n::t("PhotoSoft could not start"))
         .set_description(body)
         .set_buttons(rfd::MessageButtons::Ok)
         .show();

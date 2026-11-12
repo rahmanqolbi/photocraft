@@ -464,11 +464,11 @@ impl Ex<'_> {
                 };
                 let cged = raw.iter().find(|(k, _)| k == b"CgEd").map(|(_, d)| d.clone());
                 let keep = raw.iter().any(|(k, d)| {
-                    // A previously saved PhotoCraft v2 Photo Filter block may be 18 bytes.
+                    // A previously saved PhotoSoft v2 Photo Filter block may be 18 bytes.
                     // It parses here, but Photoshop requires four-byte alignment, so repair
                     // that legacy record on re-save rather than preserving the broken bytes.
                     let legacy_phfl = k == b"phfl" && d.starts_with(&[0, 2]) && d.len() % 4 != 0;
-                    // Older PhotoCraft builds wrote `grdm` 2 bytes short of four-byte alignment,
+                    // Older PhotoSoft builds wrote `grdm` 2 bytes short of four-byte alignment,
                     // which makes Photoshop refuse the file (#8070): regenerate it too.
                     let legacy_grdm = k == b"grdm" && adjust_map::is_unpadded_photocraft_gradient_map(d);
                     !legacy_phfl && !legacy_grdm && adjust_map::ADJUSTMENT_KEYS.contains(&k) && adjust_map::parse(k, d, cged.as_deref(), channels) == *a
@@ -935,7 +935,7 @@ impl Ex<'_> {
 
     /// Adds `bytes` as an embedded file (converted to PSB when it is a `.pcraft` bundle), once
     /// per contents identity and bytes. Equal bytes in independent objects stay independent.
-    /// `linked`: the bytes were read from a path the document names, so only a file PhotoCraft
+    /// `linked`: the bytes were read from a path the document names, so only a file PhotoSoft
     /// can open is embedded (a link to a text or settings file is written as pixels instead).
     #[cfg(not(target_arch = "wasm32"))]
     fn embed(&mut self, contents_id: SmartContentsId, file_name: &str, bytes: &[u8], linked: bool) -> Result<Source, String> {
@@ -975,7 +975,7 @@ impl Ex<'_> {
             // layer. A linked file we can't decode is not embedded.
             let (size, dpi) = match crate::linked::source_geometry(file_name, bytes, &photocraft_raster::Interrupt::NONE) {
                 Ok(geometry) => geometry,
-                Err(e) if linked => return Err(format!("the linked file {file_name} is not an image PhotoCraft can open: {e}")),
+                Err(e) if linked => return Err(format!("the linked file {file_name} is not an image PhotoSoft can open: {e}")),
                 Err(_) => ((0.0, 0.0), f64::from(self.dpi)),
             };
             (file_name.to_string(), bytes.to_vec(), size, dpi, None)

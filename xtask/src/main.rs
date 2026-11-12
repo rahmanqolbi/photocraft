@@ -7,6 +7,7 @@ mod corpus;
 mod corpus_pins;
 mod i18n_report;
 mod ico;
+mod launch;
 mod layers;
 mod panel_commands;
 mod perf;
@@ -58,6 +59,9 @@ commands:
                   pack square PNGs (<= 256 px) into a Windows .ico (see packaging/icons.sh)
   psd-write-oracle <recipes.json> <corpus-dir> <photocraft-cli> <new-output-dir>
                   run PSD export recipes and write a JSON report and manifest
+  run [app args...]
+                  build and launch the desktop app with this machine's env preset (gnu toolchain,
+                  CARGO_TARGET_DIR, CRAFT_FONTS_DIR) so no env vars or odd flags are needed
 ";
 
 fn main() -> ExitCode {
@@ -79,6 +83,7 @@ fn main() -> ExitCode {
         Some("version") => version::run(&root(), &rest),
         Some("ico") => ico::run(&rest),
         Some("psd-write-oracle") => psd_write_oracle::run(&root(), &rest),
+        Some("run") => launch::run(&root(), &rest),
         Some("-h" | "--help" | "help") | None => {
             print!("{USAGE}");
             Ok(())
@@ -262,6 +267,28 @@ fn cmd_parity() -> Result<(), String> {
     let mut c = cargo();
     c.args(["run", "-q", "-p", "photocraft-ui-egui", "--example", "parity", "--", "--write", "docs/parity-checklist.md"]);
     run(c, "cargo run -p photocraft-ui-egui --example parity")
+}
+
+/// `cargo xtask run [app args...]` — the desktop app (build + launch) with this machine's
+/// environment preset baked in, so no `$env:` lines and no `+toolchain` flag are needed.
+///
+/// The toolchain is chosen by the rustup directory override for this repo (the default
+/// toolchain has no linker on this PC), so plain `cargo` everywhere is already the gnu one;
+/// `$CARGO` is the cargo xtask was launched with and no further toolchain selection is needed.
+/// `CARGO_TARGET_DIR` points at the space-free `F:\pc-target` (the MinGW linker breaks on the
+/// space in the repo path) and `CRAFT_FONTS_DIR` at the cloned craft-fonts, both only when
+/// not already set.
+fn cmd_run(rest: &[&str]) -> Result<(), String> {
+    let mut c = cargo();
+    if std::env::var_os("CARGO_TARGET_DIR").is_none() {
+        c.env("CARGO_TARGET_DIR", r"F:\pc-target");
+    }
+    if std::env::var_os("CRAFT_FONTS_DIR").is_none() {
+        c.env("CRAFT_FONTS_DIR", r"F:\craft-fonts");
+    }
+    c.args(["run", "-p", "photocraft", "--"]);
+    c.args(rest);
+    run(c, "cargo xtask run")
 }
 
 fn cmd_ci() -> Result<(), String> {
