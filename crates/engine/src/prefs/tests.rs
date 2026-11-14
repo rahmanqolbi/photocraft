@@ -1228,3 +1228,21 @@ fn floating_style_choices_validate_and_default_to_os_windows() {
     assert!(s.execute("prefs.set", json!({"path": "workspace.floatingStyle", "value": "mdi"})).is_err());
     assert_eq!(s.prefs().workspace.floating_style, FloatingStyle::Workspace);
 }
+
+/// A file from before the agents switch whose Control Port started the control server keeps
+/// it on; one without a port, or that already says, is left as it is.
+#[test]
+fn a_saved_control_port_turns_the_agent_connection_on() {
+    let load = |text: &str| {
+        let mut session = Session::new();
+        session.load_prefs_json(text).unwrap();
+        session.prefs().integrations.clone()
+    };
+    let legacy = load(r#"{"integrations":{"allowAgentControl":true,"controlPort":7878}}"#);
+    assert!(legacy.connect_agents);
+    assert_eq!(legacy.control_port, 7878);
+    assert!(!load(r#"{"integrations":{"controlPort":0}}"#).connect_agents);
+    assert!(!load(r#"{"integrations":{"controlPort":70000}}"#).connect_agents, "not a usable port");
+    assert!(!load(r#"{"integrations":{"controlPort":7878,"connectAgents":false}}"#).connect_agents, "an explicit choice wins");
+    assert!(!load("{}").connect_agents, "off by default");
+}
