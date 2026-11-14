@@ -18,6 +18,15 @@ as NVIDIA RTX Spark, also select **C++ Clang Compiler for Windows** or ensure `c
 [Rust setup guide](https://learn.microsoft.com/en-us/windows/dev-environment/rust/setup),
 then open a new terminal and check `cargo --version` and `rustc --version`.
 
+Without the MSVC toolchain the GNU toolchain is the fallback, and it cannot build in a path with a
+space: MinGW's `dlltool` and `ar` are handed the target directory's paths unquoted, so a checkout
+under e.g. `F:\jangan dihapus\photocraft` fails with `dlltool could not create import library …
+can't open … for reading`. The checkout path may contain spaces; the target directory may not:
+
+```sh
+CARGO_TARGET_DIR=F:/pc-target cargo +1.95.0-x86_64-pc-windows-gnu build
+```
+
 On Windows 11, Smart App Control can block Cargo, rustc or executables generated during a build.
 If a build reports `An Application Control policy has blocked this file. (os error 4551)`
 ([#1585](https://github.com/storytold/photocraft/issues/1585)), check:
@@ -42,6 +51,8 @@ On Linux and FreeBSD, PhotoCraft keeps its integrated client-side decorated titl
 cargo run --release -p photocraft -- path/to/image.psd      # desktop app
 cargo run --release -p photocraft -- --control 7878 --control-token-file .private/control.token \
   --automation-read-root work --automation-write-root work
+cargo xtask run                                           # the desktop app, debug build (line numbers in panics)
+cargo xtask run --release -- path/to/image.psd            # the release build, with a file
 cargo test --workspace                                     # everything
 cargo xtask test                                           # tests (nextest when installed) + doctests
 cargo xtask ci                                             # the CI gate: fmt, clippy, layers, scorecard, tests, panic_hunt, doctests, wasm, i18n report

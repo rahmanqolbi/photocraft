@@ -269,28 +269,6 @@ fn cmd_parity() -> Result<(), String> {
     run(c, "cargo run -p photocraft-ui-egui --example parity")
 }
 
-/// `cargo xtask run [app args...]` — the desktop app (build + launch) with this machine's
-/// environment preset baked in, so no `$env:` lines and no `+toolchain` flag are needed.
-///
-/// The toolchain is chosen by the rustup directory override for this repo (the default
-/// toolchain has no linker on this PC), so plain `cargo` everywhere is already the gnu one;
-/// `$CARGO` is the cargo xtask was launched with and no further toolchain selection is needed.
-/// `CARGO_TARGET_DIR` points at the space-free `F:\pc-target` (the MinGW linker breaks on the
-/// space in the repo path) and `CRAFT_FONTS_DIR` at the cloned craft-fonts, both only when
-/// not already set.
-fn cmd_run(rest: &[&str]) -> Result<(), String> {
-    let mut c = cargo();
-    if std::env::var_os("CARGO_TARGET_DIR").is_none() {
-        c.env("CARGO_TARGET_DIR", r"F:\pc-target");
-    }
-    if std::env::var_os("CRAFT_FONTS_DIR").is_none() {
-        c.env("CRAFT_FONTS_DIR", r"F:\craft-fonts");
-    }
-    c.args(["run", "-p", "photocraft", "--"]);
-    c.args(rest);
-    run(c, "cargo xtask run")
-}
-
 fn cmd_ci() -> Result<(), String> {
     type Step = (&'static str, Box<dyn Fn() -> Result<(), String>>);
     let steps: Vec<Step> = vec![

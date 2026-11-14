@@ -20,6 +20,11 @@
 //! The dev profile builds PhotoSoft's crates with `opt-level = 1` and line tables, so a panic
 //! keeps its file and line; the image work is much slower than in the release build, which is why
 //! `--release` is the one to use for interactive work (AGENTS.md, "Build and run").
+//!
+//! This machine's environment preset is baked in, so no `$env:` lines and no `+toolchain` flag
+//! are needed: the GNU toolchain (the default one has no linker here), the space-free target
+//! directory `F:\pc-target` (MinGW's linker breaks on the space in the repo path) and the
+//! `craft-fonts` checkout. Each is only a default: an environment variable of the same name wins.
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 
 use std::path::Path;
