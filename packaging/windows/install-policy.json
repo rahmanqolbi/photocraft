@@ -1,6 +1,6 @@
 {
   "id": "photocraft",
-  "name": "PhotoCraft",
+  "name": "PhotoSoft",
   "upgradeCode": "D9660F32-2D0A-4ABE-B73D-17BE25F1542C",
   "sources": [
     "photocraft.wxs"
@@ -154,7 +154,7 @@
       "-1",
       "Software\\Classes\\Applications\\photocraft.exe",
       "FriendlyAppName",
-      "PhotoCraft"
+      "PhotoSoft"
     ],
     [
       "-1",
@@ -296,7 +296,7 @@
     ],
     [
       "-1",
-      "Software\\PhotoCraft",
+      "Software\\PhotoSoft",
       "InstallDir",
       "[INSTALLFOLDER]"
     ]

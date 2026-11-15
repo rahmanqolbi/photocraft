@@ -1,5 +1,5 @@
 //! Paint.NET PDN3 import. File parsing and pixel decompression live in `craft-pdn`;
-//! this module maps its neutral document structures into PhotoCraft's layer model.
+//! this module maps its neutral document structures into PhotoSoft's layer model.
 
 use photocraft_color::{BlendMode, ColorMode, PixelFormat, SampleType};
 use photocraft_doc::{Document, Layer, LayerContent};

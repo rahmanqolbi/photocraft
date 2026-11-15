@@ -42,10 +42,10 @@ pub(super) fn read_sidecar(_: &str) -> Option<(CameraRaw, photocraft_io::camera_
 }
 
 /// Keep the develop settings beside the raw file (Camera Raw Defaults › Write xmp sidecars):
-/// written when the settings aren't the defaults or PhotoCraft's own sidecar is there, so a
+/// written when the settings aren't the defaults or PhotoSoft's own sidecar is there, so a
 /// file reopens as it was developed. `loaded` are the settings the open started from: nothing
 /// is written when they didn't change. Not for DNGs, never over a sidecar another application
-/// wrote (Lightroom's and Bridge's hold crops, masks, ratings and keywords PhotoCraft can't keep),
+/// wrote (Lightroom's and Bridge's hold crops, masks, ratings and keywords PhotoSoft can't keep),
 /// never for a control or MCP request (it has no authority to write beside the user's files), and
 /// never fatal: a folder that can't be written to is reported in a notice.
 pub(super) fn write_sidecar(app: &mut PhotocraftApp, raw: &RawOpen, params: &CameraRaw, loaded: Option<&CameraRaw>) {
@@ -98,7 +98,7 @@ pub(super) fn store_sidecar(app: &mut PhotocraftApp, raw: &RawOpen, params: &Cam
     Stored::Written(name)
 }
 
-/// `None` when there is no sidecar at `sidecar`, else whether PhotoCraft wrote it. One that
+/// `None` when there is no sidecar at `sidecar`, else whether PhotoSoft wrote it. One that
 /// can't be read or is too large to be ours counts as another application's.
 #[cfg(not(target_arch = "wasm32"))]
 pub(super) fn existing_sidecar_is_ours(sidecar: &str) -> Option<bool> {

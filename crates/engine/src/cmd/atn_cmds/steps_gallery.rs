@@ -14,12 +14,12 @@ use photocraft_algo::{GalleryEffect, GalleryFilter};
 enum G {
     /// An integer clamped to `min..=max` on import, as Photoshop clamps it, and its default.
     Int(&'static str, &'static str, i32, i32, i32),
-    /// An enumeration (Photoshop ↔ PhotoCraft values) and Photoshop's default value. An unknown
+    /// An enumeration (Photoshop ↔ PhotoSoft values) and Photoshop's default value. An unknown
     /// value keeps the step.
     Enum(&'static str, &'static str, &'static [(&'static str, &'static str)], &'static str),
     Bool(&'static str, &'static str, bool),
     /// A colour object ↔ `#rrggbb` and Photoshop's default, which a step recorded without the
-    /// key loads with. A PhotoCraft step without it saves the effect's own default colour, the
+    /// key loads with. A PhotoSoft step without it saves the effect's own default colour, the
     /// one it plays with.
     Color(&'static str, &'static str, &'static str),
 }
@@ -598,7 +598,7 @@ fn effect_command(event: &AtnEvent) -> Option<&'static str> {
 pub(crate) const RECORDED_EVENT: &str = "_atnEvent";
 
 /// Remember the event of a step loaded from an effect's own event (`AccE`, `accentedEdges`).
-/// A `GEfc` step carries nothing and saves as `GEfc`, as does a step made in PhotoCraft.
+/// A `GEfc` step carries nothing and saves as `GEfc`, as does a step made in PhotoSoft.
 pub(super) fn remember_event(item: &AtnItem, steps: &mut [(String, Value)]) {
     let [(id, Value::Object(p))] = steps else { return };
     let menu = id == super::MENU_ITEM

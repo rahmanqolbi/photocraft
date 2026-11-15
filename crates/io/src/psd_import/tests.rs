@@ -111,12 +111,12 @@ fn version_info(writer: UnicodeString, reader: UnicodeString, has_real_merged_da
     VersionInfo { version: 1, has_real_merged_data, writer, reader, file_version: 1 }.to_bytes()
 }
 
-/// The 1057 PhotoCraft 0.1.0 to 0.7.0 wrote: Photoshop CS6's names, NUL-terminated.
+/// The 1057 PhotoSoft 0.1.0 to 0.7.0 wrote: Photoshop CS6's names, NUL-terminated.
 fn version_info_cs6(has_real_merged_data: bool) -> Vec<u8> {
     version_info(UnicodeString::new_nul("Adobe Photoshop"), UnicodeString::new_nul("Adobe Photoshop CS6"), has_real_merged_data)
 }
 
-/// The 1057 PhotoCraft writes since 0.8.2: Photoshop 2026's bytes, no NUL.
+/// The 1057 PhotoSoft writes since 0.8.2: Photoshop 2026's bytes, no NUL.
 fn version_info_2026(has_real_merged_data: bool) -> Vec<u8> {
     craft_psd::resources::version_info_resource(has_real_merged_data).data
 }
@@ -147,7 +147,7 @@ fn spots(doc: &Document) -> Vec<bool> {
     doc.channels.iter().map(|c| c.spot.is_some()).collect()
 }
 
-/// `doc` (opaque, 8 or 16-bit) saved the way PhotoCraft 0.1.0 to 0.16.0 saved it: spot planes
+/// `doc` (opaque, 8 or 16-bit) saved the way PhotoSoft 0.1.0 to 0.16.0 saved it: spot planes
 /// straight (the maximum = solid ink), no 1053, and `version_info` as resource 1057. `padded`
 /// lays DisplayInfo out in the 14-byte records of 0.1.0 to 0.7.0.
 fn as_earlier_photocraft_saved(doc: &Document, version_info: Vec<u8>, padded: bool) -> Vec<u8> {
@@ -176,7 +176,7 @@ fn as_earlier_photocraft_saved(doc: &Document, version_info: Vec<u8>, padded: bo
     file.to_bytes().unwrap()
 }
 
-/// PSDs that PhotoCraft 0.1.0 to 0.16.0 saved with spot channels store them straight. They
+/// PSDs that PhotoSoft 0.1.0 to 0.16.0 saved with spot channels store them straight. They
 /// open with the ink they had in those versions (which read every plane straight), whichever
 /// 1057 they carry. Saved again, they get Photoshop's polarity and a 1053, and reopen with the
 /// same ink. (A 0.1.0 to 0.7.0 file's padded records misread every channel's options after
@@ -242,10 +242,10 @@ fn an_early_file_with_an_alpha_channel_first_keeps_its_ink() {
     }
 }
 
-/// A file with spots and no 1053 that no earlier PhotoCraft wrote is read in Photoshop's
+/// A file with spots and no 1053 that no earlier PhotoSoft wrote is read in Photoshop's
 /// polarity (0 = solid ink). psd-tools' `cmyk-spot.psd` is one: its 1057 names psd-tools as
 /// writer and reader. So is a file with no 1057, with Photoshop CS6's names without the NUL,
-/// or with bytes after PhotoCraft's.
+/// or with bytes after PhotoSoft's.
 #[test]
 fn other_files_without_alpha_identifiers_use_photoshop_polarity() {
     let doc = channels_document(SampleType::U8);
@@ -255,7 +255,7 @@ fn other_files_without_alpha_identifiers_use_photoshop_polarity() {
         ("psd-tools", Some(version_info(UnicodeString::new("psd-tools 1.10.0"), UnicodeString::new("psd-tools 1.10.0"), true))),
         ("no 1057", None),
         ("CS6 without a NUL", Some(version_info(UnicodeString::new("Adobe Photoshop"), UnicodeString::new("Adobe Photoshop CS6"), true))),
-        ("bytes after PhotoCraft's 1057", Some(trailing)),
+        ("bytes after PhotoSoft's 1057", Some(trailing)),
     ];
     for (what, info) in cases {
         // Photoshop's polarity, as this version writes it, without 1053.
@@ -270,7 +270,7 @@ fn other_files_without_alpha_identifiers_use_photoshop_polarity() {
     }
 }
 
-/// The rule needs a spot in DisplayInfo and no 1053, besides PhotoCraft's 1057.
+/// The rule needs a spot in DisplayInfo and no 1053, besides PhotoSoft's 1057.
 #[test]
 fn the_earlier_photocraft_rule_needs_a_spot_and_no_alpha_identifiers() {
     let mut doc = channels_document(SampleType::U8);
@@ -287,7 +287,7 @@ fn the_earlier_photocraft_rule_needs_a_spot_and_no_alpha_identifiers() {
     assert!(!earlier_photocraft_spot_planes(&alpha_only), "alpha channels only");
 }
 
-/// `doc` as an earlier PhotoCraft saved a Photoshop file it had opened with the first `kept`
+/// `doc` as an earlier PhotoSoft saved a Photoshop file it had opened with the first `kept`
 /// of `doc`'s channels: it wrote back the Photoshop file's 1053, `stale_ids`, unchanged and
 /// those channels' planes as Photoshop stored them (it had read and written them straight),
 /// and stored the channels added after them straight.
@@ -308,7 +308,7 @@ fn as_earlier_photocraft_resaved(doc: &Document, stale_ids: &[u32], kept: usize)
     file.to_bytes().unwrap()
 }
 
-/// An earlier PhotoCraft kept the 1053 of a Photoshop file it opened and wrote it back
+/// An earlier PhotoSoft kept the 1053 of a Photoshop file it opened and wrote it back
 /// unchanged, so a spot channel added there sits behind a 1053 that doesn't list it: a
 /// transparent Photoshop document's `[0]` (the white plate of a DTF print, added before
 /// saving), the `[0, 3]` of one with a spot channel already, or a `[0]` kept through a
@@ -345,7 +345,7 @@ fn a_spot_added_behind_a_kept_alpha_identifiers_resource_keeps_its_ink() {
 }
 
 /// A 1053 that lists every extra channel, as Photoshop and this version write it, keeps the
-/// file in Photoshop's polarity, with PhotoCraft's (Photoshop 2026's) 1057 too: a transparent
+/// file in Photoshop's polarity, with PhotoSoft's (Photoshop 2026's) 1057 too: a transparent
 /// file with a spot, and Photoshop's own `[0]` in a file without a transparency plane.
 #[test]
 fn a_complete_alpha_identifiers_resource_keeps_photoshop_polarity() {

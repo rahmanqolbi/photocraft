@@ -75,7 +75,7 @@ pub(super) fn reset_transform(s: &mut Session, p: &Value) -> Result<Value> {
     let LayerContent::Smart(sm) = &st.doc.layer(id).ok_or(EngineError::NoLayer(id))?.content else {
         return Err(other("the layer is not a smart object"));
     };
-    // Checked before anything changes, so a filter PhotoCraft doesn't have (kept verbatim from a
+    // Checked before anything changes, so a filter PhotoSoft doesn't have (kept verbatim from a
     // PSD) leaves the document as it was, as `layer.smartObjects.updateModifiedContent` insists on
     // a re-render too.
     let stuck = unapplied_filters(sm);

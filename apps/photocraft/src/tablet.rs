@@ -45,7 +45,7 @@ pub fn install_windows() -> Option<photocraft_tablet::windows::Monitor> {
     Some(monitor)
 }
 
-/// Installs the WinTab backend on the real PhotoCraft window and returns its per-frame poll.
+/// Installs the WinTab backend on the real PhotoSoft window and returns its per-frame poll.
 ///
 /// `enabled` is Preferences > Tools > Pen Tablet > Tablet input set to WinTab. With Windows Ink disabled there, the vendor
 /// driver still moves the cursor; this backend only supplies pressure/tilt/rotation/eraser

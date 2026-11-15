@@ -4,7 +4,7 @@
 //!
 //! Measured in the reference application: an 800 × 500 document, the frame around the whole
 //! canvas, a line rising about 10°. The button commits 633 × 396; ⌘ held commits 800 × 500 with
-//! the uncovered corners in the background colour (Fill: Background). PhotoCraft fitted the frame
+//! the uncovered corners in the background colour (Fill: Background). PhotoSoft fitted the frame
 //! both ways.
 //!
 //! Driven as an agent does, through `ui.pointer` (document px), in both crop modes.

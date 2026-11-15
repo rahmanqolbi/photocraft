@@ -39,7 +39,7 @@ Validation of this follow-up: full engine/UI `cargo test` **6,224 passed, 0 fail
 
 ## Main integration and review (2026-10-24)
 
-Current main integrated: `1c3db2e5c` (PhotoCraft 0.15.1). The overlap with Alt+adjustment last-used settings exposed additional target/context issues. Recall now keeps the current mask target, drops hidden colour records for scalar planes and grayscale layer pixels, and falls back to neutral for an incompatible tone space. Saved preferences retain settings without document/layer/channel addresses. Compatible colour-channel settings remain intact. The Levels localization test now derives the built-in label from the current translator, as upstream's Curves test does, while preserving literal custom-name assertions.
+Current main integrated: `1c3db2e5c` (PhotoSoft 0.15.1). The overlap with Alt+adjustment last-used settings exposed additional target/context issues. Recall now keeps the current mask target, drops hidden colour records for scalar planes and grayscale layer pixels, and falls back to neutral for an incompatible tone space. Saved preferences retain settings without document/layer/channel addresses. Compatible colour-channel settings remain intact. The Levels localization test now derives the built-in label from the current translator, as upstream's Curves test does, while preserving literal custom-name assertions.
 
 Three new regression functions first reproduced the problems and then passed after fixes. They cover 44 recall scenarios across RGB/Gray/CMYK/Lab, Levels/Curves, alpha/mask/Quick Mask and grayscale pixels, compatible/incompatible colour settings, malformed preferences, commit/cancel and preservation of other pixels. This PR now introduces 27 regression functions plus expanded Action metadata checks. Three local review/fix passes completed; the latest found no further actionable bugs within the reviewed scope.
 
@@ -56,7 +56,7 @@ Logs, failure reproductions, review notes and current captures are retained loca
 
 ## Main integration and review (2026-10-26)
 
-Current main integrated: `59cb4c49b` (PhotoCraft 0.16.0 / egui 0.37). The target-resolver conflict now preserves explicit Action targets and captured Smart Filter defaults while adopting upstream Smart Filter mask targeting. The shared scalar discriminator includes filter masks. Black/white pickers read an untouched implicit Reveal All mask without creating or modifying it; its histogram counts the constant white samples without scanning pixels, using the same interval as a stored mask. Existing gray-surface pixel scanning is unchanged. The Levels field interaction now uses egui 0.37's accessible Gamma label.
+Current main integrated: `59cb4c49b` (PhotoSoft 0.16.0 / egui 0.37). The target-resolver conflict now preserves explicit Action targets and captured Smart Filter defaults while adopting upstream Smart Filter mask targeting. The shared scalar discriminator includes filter masks. Black/white pickers read an untouched implicit Reveal All mask without creating or modifying it; its histogram counts the constant white samples without scanning pixels, using the same interval as a stored mask. Existing gray-surface pixel scanning is unchanged. The Levels field interaction now uses egui 0.37's accessible Gamma label.
 
 Two new regression functions cover 48 filter-mask cases across RGB/Gray/CMYK/Lab, U8/U16/F32, Levels/Curves and stored/implicit masks, plus six explicit-alpha Action precedence cases. They check the actual target name, sampling without document mutation, recorded target persistence, mask-only commit and preservation of source pixels, filter stacks and other planes. The captured Smart Filter reopening matrix now also includes a selected filter mask (36 cases total). The implicit histogram regression matches a stored Reveal All at 32 × 32, 6000 × 4000 and uneven 6001 × 4003 dimensions. This PR now introduces 29 regression functions plus expanded existing checks.
 
@@ -71,7 +71,7 @@ Logs, the CI font input, review notes, scripts and current captures are retained
 
 ## Main integration and review (2026-10-27)
 
-Current main integrated: `d42f9da94` (PhotoCraft 0.16.0). Upstream split and relocated the engine commands and UI modules. The existing channel resolver and scalar discriminator now live under `cmd/channel_cmds/`, and the command registry retains the extracted adjustment helpers while using the shared gray-parameter filter. The Actions and adjustment-dialog changes and tests moved into `panels/` and `dialogs/`; normalized comparisons confirm their content matches the previous PR head. Levels imports the shared named-channel picker from its sibling Curves module with parent-only visibility. No intended behavior or imaging algorithm changed.
+Current main integrated: `d42f9da94` (PhotoSoft 0.16.0). Upstream split and relocated the engine commands and UI modules. The existing channel resolver and scalar discriminator now live under `cmd/channel_cmds/`, and the command registry retains the extracted adjustment helpers while using the shared gray-parameter filter. The Actions and adjustment-dialog changes and tests moved into `panels/` and `dialogs/`; normalized comparisons confirm their content matches the previous PR head. Levels imports the shared named-channel picker from its sibling Curves module with parent-only visibility. No intended behavior or imaging algorithm changed.
 
 Validation on Linux with `PHOTOCRAFT_FULL_SWEEP=1` and CI's pinned craft-fonts input:
 
@@ -84,7 +84,7 @@ Current logs, preservation comparisons, review notes, screenshot scripts and cap
 
 ## Further main integration (2026-10-27)
 
-Current main integrated: `dacecbfea` (PhotoCraft 0.16.0; 220 incoming commits since the previous integration). The sole conflict was adjacent helper insertions in `cmd/channel_cmds/targeting.rs`: our gray-target discriminator and upstream's new spot-channel helpers are both retained unchanged. Automatic merges preserve the explicit-target resolver exports, grayscale adjustment routing and upstream channel/history changes. No intended behavior or imaging algorithm change in the conflict resolution.
+Current main integrated: `dacecbfea` (PhotoSoft 0.16.0; 220 incoming commits since the previous integration). The sole conflict was adjacent helper insertions in `cmd/channel_cmds/targeting.rs`: our gray-target discriminator and upstream's new spot-channel helpers are both retained unchanged. Automatic merges preserve the explicit-target resolver exports, grayscale adjustment routing and upstream channel/history changes. No intended behavior or imaging algorithm change in the conflict resolution.
 
 Validation on Linux with `PHOTOCRAFT_FULL_SWEEP=1` and CI's pinned craft-fonts input:
 
@@ -97,7 +97,7 @@ Current evidence is retained in `plan/merge-main-20261027b/` (gitignored).
 
 ## Main integration and review (2026-10-29)
 
-Current main integrated: `69b8fd9c1` (PhotoCraft 0.17.0; 240 incoming commits). Three conflicts were resolved by retaining upstream's extracted dialog-canvas handler, adding the shared named-channel picker to the explicit Levels imports, and retaining both the tone-target and transform-readout integration modules. The existing sampling comment now lives in the extracted handler. Engine target helpers use explicit imports required by main's wildcard-import ban; obsolete imports were removed. No runtime behavior change was introduced by these resolutions.
+Current main integrated: `69b8fd9c1` (PhotoSoft 0.17.0; 240 incoming commits). Three conflicts were resolved by retaining upstream's extracted dialog-canvas handler, adding the shared named-channel picker to the explicit Levels imports, and retaining both the tone-target and transform-readout integration modules. The existing sampling comment now lives in the extracted handler. Engine target helpers use explicit imports required by main's wildcard-import ban; obsolete imports were removed. No runtime behavior change was introduced by these resolutions.
 
 Validation on Linux with `PHOTOCRAFT_FULL_SWEEP=1` and CI's pinned craft-fonts input:
 
@@ -110,7 +110,7 @@ Current evidence is retained in `plan/merge-main-20261029/` (gitignored).
 
 ## Main integration and review (2026-10-30)
 
-Current main integrated: `b1cfff9d3` (PhotoCraft 0.17.0; 879 incoming commits). Production code merged automatically. The sole conflict was adjacent control-protocol documentation: both the named grayscale Levels/Curves behavior and upstream's Brush Mode menu description are retained. Reviewed Action playback's new recorded-parameter resolution and Smart Object save path alongside our explicit-target dialog normalization; target precedence and private-field sanitization remain intact. No CI workflow differs from main, respecting the new shared-workflow policy.
+Current main integrated: `b1cfff9d3` (PhotoSoft 0.17.0; 879 incoming commits). Production code merged automatically. The sole conflict was adjacent control-protocol documentation: both the named grayscale Levels/Curves behavior and upstream's Brush Mode menu description are retained. Reviewed Action playback's new recorded-parameter resolution and Smart Object save path alongside our explicit-target dialog normalization; target precedence and private-field sanitization remain intact. No CI workflow differs from main, respecting the new shared-workflow policy.
 
 Validation on Linux with `PHOTOCRAFT_FULL_SWEEP=1` and CI's pinned craft-fonts input:
 
@@ -124,7 +124,7 @@ Current evidence is retained in `plan/merge-main-20261030/` (gitignored).
 
 ## Main integration and review (2026-11-01)
 
-Current main integrated: `1f984bffb` (PhotoCraft 0.18.0; 225 incoming commits). Resolved conflicts with main's selected-colour-set work by retaining its shared Levels/Curves editor, captured native targets, combined Lab recall and preview routing alongside this PR's explicit scalar target resolution, gray defaults, named controls and native gray sampling. Explicit whole-pixel commands follow main's rule and bypass the selected colour set. Both control-protocol additions are preserved.
+Current main integrated: `1f984bffb` (PhotoSoft 0.18.0; 225 incoming commits). Resolved conflicts with main's selected-colour-set work by retaining its shared Levels/Curves editor, captured native targets, combined Lab recall and preview routing alongside this PR's explicit scalar target resolution, gray defaults, named controls and native gray sampling. Explicit whole-pixel commands follow main's rule and bypass the selected colour set. Both control-protocol additions are preserved.
 
 Added two regression functions for explicit native-colour-set and whole-pixel addressing beside selected alpha/mask targets: 27 engine metadata cases across RGB/Lab/CMYK and 8/16/32-bit data, plus six dialog initialization/reset cases. The incoming Lab mask-recall regression now requires neutral fields and rejects hidden Lightness records. A new captured-space assertion uses the shared resolver. No CI workflow differs from main.
 
@@ -139,7 +139,7 @@ Current evidence is retained in `plan/merge-main-20261031/` (gitignored; work be
 
 ## Main integration and review (2026-11-03)
 
-Current main integrated: `81bd97376` (PhotoCraft 0.20.1; 532 incoming commits). All production code merged automatically. The sole conflict was competing documentation for the command-registry builder; main's comment is retained. Reviewed expanded Action set playback/recording, parameter resolution, adjustment-layer opacity handling and filter-mask layer lookup alongside the existing explicit target normalization. Target precedence, private-field sanitization, captured Smart Filter reopening and all 31 introduced regressions are retained. No CI workflow or contributor entry differs from main.
+Current main integrated: `81bd97376` (PhotoSoft 0.20.1; 532 incoming commits). All production code merged automatically. The sole conflict was competing documentation for the command-registry builder; main's comment is retained. Reviewed expanded Action set playback/recording, parameter resolution, adjustment-layer opacity handling and filter-mask layer lookup alongside the existing explicit target normalization. Target precedence, private-field sanitization, captured Smart Filter reopening and all 31 introduced regressions are retained. No CI workflow or contributor entry differs from main.
 
 Validation on Linux with `PHOTOCRAFT_FULL_SWEEP=1` and CI's pinned craft-fonts input:
 

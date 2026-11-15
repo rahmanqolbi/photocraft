@@ -29,7 +29,7 @@ fn header_follows_the_reference_comment_layout() {
     assert_eq!(
         head,
         [
-            "#Created by: PhotoCraft",
+            "#Created by: PhotoSoft",
             "TITLE \"My Look\"",
             "",
             "#LUT size",

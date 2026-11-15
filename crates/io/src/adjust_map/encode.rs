@@ -128,7 +128,7 @@ pub(super) fn color_lookup(name: &str, lut: Option<&[f32]>, size: u32, dither: b
     let n = size as usize;
     let cube = lut.zip(photocraft_doc::adjust::lut3d_len(size)).and_then(|(table, len)| table.get(..len)).filter(|_| n <= 256);
     // Like Photoshop, embed the LUT file as loaded, in its own format; a table made or
-    // changed in PhotoCraft is written as `.cube`, named to match.
+    // changed in PhotoSoft is written as `.cube`, named to match.
     let (format, data, name, dither) = match cube {
         Some(cube) => match lut_source_for(source, cube, n) {
             Some(src) => (src.format, src.bytes.to_vec(), name.to_string(), dither),

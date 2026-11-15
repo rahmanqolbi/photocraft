@@ -2,9 +2,9 @@
 
 > **Last reviewed:** 2026-10-12 · **Last updated:** 2026-11-14 · **Change:** minor (Graphics Adapter choice on Linux, #1885; Camera Raw's preview develops its per-pixel stages on the GPU; GPU, Wayland (tilt and eraser end via Xwayland) and monitor-profile rows refreshed against main; Windows: flipping the pen to its eraser end selects the Eraser with Windows Ink on, #2285, not yet confirmed on a pen with an eraser end; previously minor: optional WinTab backend on Windows: pressure and the eraser end; tilt on devices with orientation axes; rotation only with a pen and driver that report twist, with Windows Ink off; Windows `auto` uses a GPU's OpenGL adapter when its driver has no DX12 or Vulkan, instead of software WARP, and composites through it once that adapter is selected, #7331) · **Target:** Adobe Photoshop 2026
 
-Each hardware feature Photoshop 2026 (27.11.0) uses, per platform, against PhotoCraft. Photoshop
+Each hardware feature Photoshop 2026 (27.11.0) uses, per platform, against PhotoSoft. Photoshop
 side: its bundle (Metal and OpenCL paths, "Precise Color Management for HDR Display" and EDR
-strings, Touch Bar resources, pen pressure/tilt strings) and Adobe's GPU FAQ. PhotoCraft side:
+strings, Touch Bar resources, pen pressure/tilt strings) and Adobe's GPU FAQ. PhotoSoft side:
 `crates/tablet`, `crates/ui-egui/src/stylus.rs`, `apps/photocraft/src/gpu_startup.rs`,
 `engine/src/display_color.rs`, `apps/photocraft/src/monitor_profile.rs`.
 
@@ -17,7 +17,7 @@ HDR display to verify.
 
 ## GPU
 
-| Feature | Photoshop | PhotoCraft | Status |
+| Feature | Photoshop | PhotoSoft | Status |
 |---|---|---|---|
 | GPU canvas, zoom/pan, rotate view | Metal (macOS), DirectX/OpenCL (Windows) | wgpu 30: Metal, Vulkan, DX12, GL; backend selectable, `gl` included on Windows | done |
 | GPU compositing of layers, blend modes, effects | partial (Photoshop composites mostly on CPU) | wgpu compositor, ≤ 1/255 vs CPU oracle; Multichannel and > texture-limit regions fall back to CPU | done (ahead in places) |
@@ -47,7 +47,7 @@ rotation; its eraser end comes from the pointer hooks (#2285).
 
 ## Displays and colour
 
-| Feature | Photoshop | PhotoCraft | Status |
+| Feature | Photoshop | PhotoSoft | Status |
 |---|---|---|---|
 | Colour-managed canvas (document → monitor profile) | yes | yes, folded into the GPU 3D LUT | done |
 | Monitor profile detection | per display, live | macOS and Linux X11 (per XRandR output, #2962) per display, following each window's display (#591); Windows and Wayland: sRGB or a chosen .icc | partial |
@@ -58,7 +58,7 @@ rotation; its eraser end comes from the pointer hooks (#2285).
 
 ## Input devices
 
-| Feature | Photoshop | PhotoCraft | Status |
+| Feature | Photoshop | PhotoSoft | Status |
 |---|---|---|---|
 | Trackpad pinch zoom, two-finger pan | yes | yes; pinch scrolls instead in 0.6.0 (#2463) | partial |
 | Trackpad rotate (Rotate View) | yes | yes (`rotate_view.rs`) | done |

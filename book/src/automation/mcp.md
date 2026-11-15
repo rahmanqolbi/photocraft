@@ -11,7 +11,7 @@ The simplest setup needs no terminal: turn on ArtCraft Launcher › Settings ›
 For a source checkout, first [install the CLI on PATH and register the server](../../../docs/mcp.md#install-and-register).
 The installed binary survives `cargo clean`; a symlink into `target/release` does not.
 
-Start the headless server with (without `--headless`, `mcp` works in the open PhotoCraft window
+Start the headless server with (without `--headless`, `mcp` works in the open PhotoSoft window
 while the ArtCraft Launcher's agents switch is on):
 
 ```sh
@@ -42,13 +42,13 @@ The release packages ship `photocraft-cli` alongside the desktop app, so no buil
 
 | Install | CLI |
 |---|---|
-| Windows (MSI) | `%LOCALAPPDATA%\Programs\ArtCraft\PhotoCraft\photocraft-cli.exe` by default (`C:\Program Files\ArtCraft\PhotoCraft\photocraft-cli.exe` for an all-users install, under `Program Files (x86)` instead for the 32-bit build, or wherever you installed it otherwise), not on `PATH` |
+| Windows (MSI) | `%LOCALAPPDATA%\Programs\ArtCraft\PhotoSoft\photocraft-cli.exe` by default (`C:\Program Files\ArtCraft\PhotoSoft\photocraft-cli.exe` for an all-users install, under `Program Files (x86)` instead for the 32-bit build, or wherever you installed it otherwise), not on `PATH` |
 | Linux (deb, rpm) | `/usr/bin/photocraft-cli` |
 | macOS | the separate `photocraft-cli-<version>-macos-<arch>.zip` release asset (the `.app` holds only the desktop app) |
 
 ```sh
 # Windows (PowerShell), default install folder
-claude mcp add photocraft -- "$env:LOCALAPPDATA\Programs\ArtCraft\PhotoCraft\photocraft-cli.exe" mcp --automation-read-root <dir> --automation-write-root <dir>
+claude mcp add photocraft -- "$env:LOCALAPPDATA\Programs\ArtCraft\PhotoSoft\photocraft-cli.exe" mcp --automation-read-root <dir> --automation-write-root <dir>
 # Linux, or macOS with the CLI unzipped onto PATH
 claude mcp add photocraft -- photocraft-cli mcp --automation-read-root <dir> --automation-write-root <dir>
 ```
@@ -64,7 +64,7 @@ The launcher's switch (off by default) opens the same loopback, token-authentica
 listener as `--control`, with a token the app keeps in its settings folder (`agent-control.token`,
 user-only on Unix; delete it for a new one). The folders chosen in Preferences › AI Integrations
 are the desktop process's roots, and the roots of a `mcp` headless session only when agents may
-use the app and *When PhotoCraft is closed* is set to work without a window.
+use the app and *When PhotoSoft is closed* is set to work without a window.
 
 The current server does not issue scoped sessions or distinguish trusted tools from high-impact tools. Authentication proves possession of the token; it does not restrict an authenticated client to document-only access. Do not expose either transport through an untrusted broker, shell, proxy, or remote service without adding an external policy boundary.
 

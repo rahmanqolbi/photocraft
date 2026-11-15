@@ -1558,7 +1558,7 @@ fn options_bar(ui: &mut egui::Ui, w: &mut SelectMaskWorkspace) -> Option<Value> 
         if widgets::secondary_button(ui, tl!("Select Subject"), 0.0).clicked() {
             edit = Some(json!({"tool": "subject", "sampleAllLayers": w.sample_all}));
         }
-        // Refine Hair needs hair detection PhotoCraft doesn't have yet (#2671): greyed, saying so.
+        // Refine Hair needs hair detection PhotoSoft doesn't have yet (#2671): greyed, saying so.
         ui.add_enabled_ui(false, |ui| widgets::secondary_button(ui, tl!("Refine Hair"), 0.0))
             .inner
             .on_disabled_hover_text(tl!("Refine Hair needs hair detection, which isn't available yet"));

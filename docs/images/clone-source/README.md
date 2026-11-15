@@ -1,7 +1,7 @@
 # Clone source preview captures
 
 These screenshots use an original synthetic red circle on white, rendered offscreen with the
-PhotoCraft `snapshot` example. UI and artwork: PhotoCraft contributors, MIT OR Apache-2.0;
+PhotoSoft `snapshot` example. UI and artwork: PhotoSoft contributors, MIT OR Apache-2.0;
 see the repository license files. No external artwork or fonts are included here.
 
 - `opacity-flow-before.png`: the original hover renderer, with full-strength preview despite

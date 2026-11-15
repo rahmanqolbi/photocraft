@@ -358,7 +358,7 @@ pub(crate) fn retarget_gradient_map(data: &mut [u8], target: &Adjustment, channe
     }
 }
 
-/// `true` for a `grdm` block exactly as older PhotoCraft builds wrote it: [`write_gradient_map`]'s
+/// `true` for a `grdm` block exactly as older PhotoSoft builds wrote it: [`write_gradient_map`]'s
 /// output without the two padding bytes, which makes Photoshop refuse the file (#8070). Blocks
 /// from other writers, whatever their length, are not matched.
 pub(crate) fn is_unpadded_photocraft_gradient_map(data: &[u8]) -> bool {

@@ -1,5 +1,5 @@
 //! Krita import. `craft-kra` owns the archive, XML and tile formats; this module maps its
-//! neutral document representation into PhotoCraft's layer model.
+//! neutral document representation into PhotoSoft's layer model.
 
 #[cfg(test)]
 mod tests;

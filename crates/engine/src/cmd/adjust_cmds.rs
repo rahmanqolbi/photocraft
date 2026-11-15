@@ -733,7 +733,7 @@ const AUTO_BW_SAMPLES: usize = 1 << 16;
 const AUTO_BW_BINS: usize = 32;
 
 /// Black & White's Auto (#9269): the colour weights (%, in [`crate::adjust_params::HUE_RANGES`]
-/// order) that spread the image's greys over the most grey levels. PhotoCraft's own search, not
+/// order) that spread the image's greys over the most grey levels. PhotoSoft's own search, not
 /// Photoshop's: from the default mix, each weight in turn steps through 0..=150 % to the value
 /// that most raises the entropy of the greys' histogram ([`AUTO_BW_BINS`] levels), less a pull
 /// back towards the default, until a pass changes nothing. So colours the default mix turns into

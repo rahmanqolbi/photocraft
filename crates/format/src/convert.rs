@@ -155,7 +155,7 @@ fn layer_m(l: &Layer, sink: &mut dyn Sink) -> LayerM {
             psd_raw: opt_blob(&s.psd_raw, sink),
             path: s.path.clone(),
             stroke: s.stroke.clone(),
-            // Older PhotoCraft versions cannot deserialize ArrowLine.
+            // Older PhotoSoft versions cannot deserialize ArrowLine.
             // The saved path preserves the arrow's visual appearance.
             live: match &s.live {
                 Some(photocraft_doc::LiveShape::ArrowLine { .. } | photocraft_doc::LiveShape::Triangle { .. }) => None,

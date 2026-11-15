@@ -1376,7 +1376,7 @@ pub fn body(ui: &mut egui::Ui, f: &mut Map<String, Value>) {
                 ui.horizontal(|ui| {
                     ui.label(egui::RichText::new(&name).color(t.text_dim));
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        // PhotoCraft's Color Picker, as everywhere else (#2144).
+                        // PhotoSoft's Color Picker, as everywhere else (#2144).
                         clicked = crate::widgets::color_swatch_button(ui, egui::Color32::from_rgb(bytes[0], bytes[1], bytes[2]), &name).clicked();
                         if eyedropper {
                             // Photoshop's three eyedroppers (#6280), right to left here: Subtract
@@ -1456,7 +1456,7 @@ pub fn params_of(f: &Map<String, Value>) -> Value {
 }
 
 /// Filter › Distort › Displace confirmed with no map: no open document picked and no path typed
-/// (#5806). Photoshop asks for the displacement map file after OK; so does PhotoCraft.
+/// (#5806). Photoshop asks for the displacement map file after OK; so does PhotoSoft.
 pub(crate) fn needs_displace_map(command: &str, params: &Value) -> bool {
     command == "filter.distort.displace"
         && params.get("mapPath").and_then(Value::as_str).is_none_or(|p| p.trim().is_empty())

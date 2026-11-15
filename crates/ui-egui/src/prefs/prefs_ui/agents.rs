@@ -1,7 +1,7 @@
 //! Preferences › AI Integrations: whether agents can use the open app (one switch for every Craft
 //! app, in the ArtCraft Launcher), the port, the folders agents may use, and what
 //! `photocraft-cli mcp` does while the app is closed. Changes apply at once, without a restart.
-//! Adding PhotoCraft to an MCP client is the launcher's job too, so there is nothing for it here.
+//! Adding PhotoSoft to an MCP client is the launcher's job too, so there is nothing for it here.
 
 use super::dialogs::is_preferences;
 use super::fields::{choice_label, humanize};

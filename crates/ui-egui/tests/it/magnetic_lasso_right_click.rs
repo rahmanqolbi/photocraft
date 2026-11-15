@@ -2,7 +2,7 @@
 //!
 //! Measured in Photoshop: with a Magnetic Lasso border in progress, a right-click on the canvas
 //! opens nothing and changes nothing; the border stays live, and ↩ still closes it. With no border
-//! in progress the right-click opens the selection tools' menu as before. PhotoCraft opened that
+//! in progress the right-click opens the selection tools' menu as before. PhotoSoft opened that
 //! menu over the live border, from the canvas and from the control channel alike.
 //!
 //! The border is drawn with ⌥-clicks (straight segments), so its points don't depend on edges.

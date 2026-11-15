@@ -452,7 +452,7 @@ pub(super) fn camera_raw_from(d: &Descriptor) -> Mapped {
 }
 
 /// An imported Camera Raw Filter step back as its recorded descriptor, unchanged. Only while the
-/// params are still what that descriptor imports as: an edited step, or one PhotoCraft recorded,
+/// params are still what that descriptor imports as: an edited step, or one PhotoSoft recorded,
 /// has no verified Photoshop form and Save Actions refuses it.
 pub(super) fn camera_raw_to(_: &str, p: &Value) -> Option<Descriptor> {
     let d = Descriptor::from_bytes(&photocraft_paint::tile::b64_decode(jstr(p, CAMERA_RAW_DESCRIPTOR)?)?).ok()?;
@@ -483,7 +483,7 @@ pub(super) fn refine_edge_to(_: &str, p: &Value) -> Option<Descriptor> {
 }
 
 /// Select and Mask (`refineSelectionEdge`). Smart Radius, decontamination and the output follow
-/// Photoshop's; the edge itself is PhotoCraft's own matting, so results differ in detail.
+/// Photoshop's; the edge itself is PhotoSoft's own matting, so results differ in detail.
 pub(super) const REFINE_EDGE: &[F] = &[
     F("refineEdgeBorderRadius", "radius", Kind::Px),
     F("refineEdgeAutoRadius", "smartRadius", Kind::Bool),

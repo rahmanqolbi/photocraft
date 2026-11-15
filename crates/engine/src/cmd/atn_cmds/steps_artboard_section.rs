@@ -103,7 +103,7 @@ fn recorded(d: &Descriptor) -> Option<Settings> {
     Some(Settings { section, name })
 }
 
-/// The descriptor a step recorded in PhotoCraft saves as: the measured keys without the session
+/// The descriptor a step recorded in PhotoSoft saves as: the measured keys without the session
 /// ids, `Nm  ` only for a name of the step's own.
 fn canonical(settings: &Settings) -> Descriptor {
     let mut d = desc("null").with("null", class_ref("artboardSection"));

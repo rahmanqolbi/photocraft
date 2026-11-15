@@ -1,4 +1,4 @@
-//! Format-neutral DNG correction data used by PhotoCraft's develop pipeline.
+//! Format-neutral DNG correction data used by PhotoSoft's develop pipeline.
 
 /// One GainMap opcode: a grid of gains, bilinearly interpolated, applied to
 /// the pixels of an area (in active-area coordinates) at a row / column pitch.

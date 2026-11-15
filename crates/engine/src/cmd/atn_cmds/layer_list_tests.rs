@@ -122,7 +122,7 @@ fn export_refuses_a_layer_id_beyond_the_idnt_range() {
     assert_eq!(skipped, [Skipped { action: "Targets".into(), step: 0, id: "layer.setProps".into() }]);
 }
 
-/// A name on a several-layers change can't be exact either: PhotoCraft's own command refuses
+/// A name on a several-layers change can't be exact either: PhotoSoft's own command refuses
 /// that step, and strict export refuses it too.
 #[test]
 fn export_refuses_a_rename_carrying_a_layers_list() {

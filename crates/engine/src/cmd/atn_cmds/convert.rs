@@ -5,7 +5,7 @@ use super::{Action, AtnAction, AtnEvent, AtnFile, AtnItem, D, DEFAULT_SET, Descr
 
 // ------------------------------------------------------------------ import
 
-/// A step with no PhotoCraft equivalent.
+/// A step with no PhotoSoft equivalent.
 #[derive(Clone, Debug, PartialEq, serde::Serialize)]
 pub struct Unsupported {
     pub action: String,
@@ -147,7 +147,7 @@ pub(super) fn export_item(id: &str, params: &Value, set: &str) -> Option<AtnItem
             Some(Value::String(kind)) if kind == "code" => AtnEvent::Code(event.as_bytes().try_into().ok()?),
             Some(Value::String(kind)) if kind == "name" => AtnEvent::name(event),
             Some(_) => return None,
-            // Older PhotoCraft action data did not retain the event kind. Keep its previous
+            // Older PhotoSoft action data did not retain the event kind. Keep its previous
             // best-effort export behavior for compatibility.
             None => match event.as_bytes() {
                 [a, b, c, d] => AtnEvent::Code([*a, *b, *c, *d]),
@@ -184,7 +184,7 @@ pub(super) fn export_item(id: &str, params: &Value, set: &str) -> Option<AtnItem
 /// list must not replay on the active layer alone (#7246). The list is split into one-target
 /// params before the step maps, so the keyed check that refuses the keys the `.atn` adapters
 /// cannot write (#7196) sees a mapped one. A step unable to represent the whole list exactly
-/// (an id beyond `Idnt`'s u32; a rename of several layers, which PhotoCraft itself refuses)
+/// (an id beyond `Idnt`'s u32; a rename of several layers, which PhotoSoft itself refuses)
 /// comes back as `None`, to refuse or skip the source step.
 fn export_items(id: &str, params: &Value, set: &str) -> Option<Vec<AtnItem>> {
     if id == "layer.setProps" {

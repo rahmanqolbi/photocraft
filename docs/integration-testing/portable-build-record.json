@@ -50,7 +50,7 @@
     {
       "platform": "FreeBSD aarch64",
       "job_id": 123425395796,
-      "reason": "VM provisioning failed because pkg could not find cmake in configured repositories; no PhotoCraft build executed."
+      "reason": "VM provisioning failed because pkg could not find cmake in configured repositories; no PhotoSoft build executed."
     }
   ],
   "build_run_status": "in_progress",

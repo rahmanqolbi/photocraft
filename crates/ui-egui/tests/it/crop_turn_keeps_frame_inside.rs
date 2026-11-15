@@ -4,7 +4,7 @@
 //! frame with Auto Center Preview off: the frame keeps its size where it fits the turned image,
 //! else moves the shortest way into it, else shrinks about its centre keeping its proportions.
 //! With Ctrl (⌘) held the frame isn't adjusted and the uncovered corners get the Fill.
-//! PhotoCraft never adjusted the frame, so ↵ filled the corners with the background colour.
+//! PhotoSoft never adjusted the frame, so ↵ filled the corners with the background colour.
 //!
 //! Driven as an agent does, through `ui.pointer` (document px as the view showed them at the
 //! press).

@@ -87,7 +87,7 @@ fn a_loaded_scale_step_plays_and_undoes() {
     assert_eq!(s.execute(SET_SCALE, json!({})).unwrap()["default"], json!(true));
 }
 
-/// The step PhotoCraft writes for a native custom scale is the measured form, with `T   ` of
+/// The step PhotoSoft writes for a native custom scale is the measured form, with `T   ` of
 /// class `measurementScale`, and it loads back without a stored descriptor.
 #[test]
 fn a_native_scale_saves_the_measured_form() {

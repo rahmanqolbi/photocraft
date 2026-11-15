@@ -43,7 +43,7 @@ change the document. Locks and invalid geometry are rejected before committing a
 
 Native `.pcraft` saves keep the complete frame model, with a default for old files. PSD export
 uses editable groups, vector masks, Smart Objects, and a separate vector border to preserve the
-appearance. Private `pcFr` metadata restores PhotoCraft frame editability when reopened here;
+appearance. Private `pcFr` metadata restores PhotoSoft frame editability when reopened here;
 unknown Photoshop blocks remain preserved. These exports are **not Photoshop's native frame layer
 type**: its private frame metadata has not been independently established. Old anonymous masked
 groups are not guessed to be frames from their names.

@@ -368,7 +368,7 @@ pub struct AgentLinkStatus {
     /// Why the connection, or one of its folders, couldn't be set up.
     pub error: Option<String>,
     /// The suite's `AI-MCP` feature flag (`craft-flags`): without it the page shows only the
-    /// connection settings PhotoCraft had before (Allow Agent Control, Control Port).
+    /// connection settings PhotoSoft had before (Allow Agent Control, Control Port).
     pub mcp_flag: bool,
     /// The ArtCraft Launcher's switch (Settings › AI agents) lets agents use the Craft apps: with
     /// the `AI-MCP` flag, the one consent for agents in this window.

@@ -34,7 +34,7 @@ fn a_background_is_written_without_a_transparency_channel() {
 }
 
 /// A flat 1-bit Bitmap file (no layers) opens in Photoshop as its Background; so does it in
-/// PhotoCraft, and it is written back as one (no transparency channel).
+/// PhotoSoft, and it is written back as one (no transparency channel).
 #[test]
 fn a_flat_bitmap_file_opens_and_saves_as_a_background() {
     let file = craft_psd::testgen::merged_only(Version::Psd, PsdMode::Bitmap, 1, Compression::Raw, 8, 4);

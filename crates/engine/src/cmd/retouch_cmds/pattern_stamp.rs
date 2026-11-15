@@ -29,7 +29,7 @@ pub const INDEXED_REFUSAL: &str = "Could not fill because the pattern and image 
 
 /// The reference refuses every pattern in an Indexed Color document before painting: RGB,
 /// Grayscale, CMYK, Lab and Indexed ones from another image. It paints only a pattern with the
-/// document's own colour table, which PhotoCraft can't tell apart, so that one is refused too.
+/// document's own colour table, which PhotoSoft can't tell apart, so that one is refused too.
 /// Bitmap, Duotone and Multichannel documents weren't measured and paint as before.
 fn mode_refusal(s: &Session) -> Result<()> {
     if s.active().is_some_and(|st| st.doc.mode == ColorMode::Indexed) { Err(EngineError::Other(INDEXED_REFUSAL.into())) } else { Ok(()) }

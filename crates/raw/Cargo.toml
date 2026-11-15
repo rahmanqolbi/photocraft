@@ -1,6 +1,6 @@
 [package]
 name = "photocraft-raw"
-description = "PhotoCraft camera-raw develop pipeline over craft-raw's format-neutral decoded sensor model"
+description = "PhotoSoft camera-raw develop pipeline over craft-raw's format-neutral decoded sensor model"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

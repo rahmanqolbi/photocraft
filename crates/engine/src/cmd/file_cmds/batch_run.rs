@@ -164,13 +164,13 @@ pub(crate) fn process_tree(
 }
 
 /// The extension a batch output takes with Format "Same": the input's own, except for formats
-/// PhotoCraft opens but can't write, camera raws above all (#5799: a folder of ARWs failed on
+/// PhotoSoft opens but can't write, camera raws above all (#5799: a folder of ARWs failed on
 /// every file), GIMP files (`gz` is the last extension of `.xcf.gz`), Photoshop templates and the
 /// codec formats without a writer in this build. Those are saved as PSD, the format Photoshop's
 /// Save As offers for a raw. An input whose file name has no extension (a dot in a folder name
 /// doesn't count) is saved as PNG.
 /// The format Batch's "Save in the same format" writes for `path`: its own, or PSD for a file
-/// PhotoCraft only opens.
+/// PhotoSoft only opens.
 pub fn same_format(path: &str) -> String {
     const IMPORT_ONLY: &[&str] =
         &["pdn", "kra", "krz", "af", "afdesign", "afphoto", "afpub", "heic", "heif", "hif", "svg", "svgz", "cin", "pcx", "xpm", "xcf", "xcfgz", "gz", "psdt"];
@@ -188,7 +188,7 @@ fn same_format_takes_the_file_names_extension() {
     assert_eq!(same_format("/in/IMG_0001.HEIC"), "psd");
     assert_eq!(same_format("/in/logo.svg"), "psd");
     assert_eq!(same_format("/in/scan.cin"), "psd");
-    // Formats PhotoCraft opens and does not write are saved as PSD.
+    // Formats PhotoSoft opens and does not write are saved as PSD.
     for name in ["/in/scan.dcm", "/in/scan.DICOM", "/in/scan.dc3", "/in/page.xcf", "/in/page.xcf.gz", "/in/page.xcfgz", "/in/card.psdt"] {
         assert_eq!(same_format(name), "psd", "{name}");
     }
@@ -993,7 +993,7 @@ pub(super) fn batch(s: &mut Session, p: &Value) -> Result<Value> {
                     .unwrap_or_default();
                 let encode_format = if format == "same" { same_format(&source_path) } else { format.trim_start_matches('.').to_ascii_lowercase() };
                 // Save and Close writes over the source, so its bytes must be the source's own
-                // format: a source PhotoCraft reads but saves as PSD (Cineon, whose extension has
+                // format: a source PhotoSoft reads but saves as PSD (Cineon, whose extension has
                 // a writer elsewhere) would otherwise get PSD bytes under its own name.
                 if save_and_close
                     && !extension(out).is_some_and(|ext| {

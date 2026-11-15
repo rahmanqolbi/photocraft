@@ -105,7 +105,7 @@ fn live_config(a: &McpArgs) -> Result<photocraft_automation::live::LiveConfig> {
     let other = |m: &str| crate::CliError::Other(m.to_string());
     let dir = photocraft_automation::app_dirs::from_env()
         .dir
-        .ok_or_else(|| other("can't find PhotoCraft's settings folder (no home folder; set PHOTOCRAFT_CONFIG_DIR)"))?;
+        .ok_or_else(|| other("can't find PhotoSoft's settings folder (no home folder; set PHOTOCRAFT_CONFIG_DIR)"))?;
     let mut config = photocraft_automation::live::LiveConfig::new(dir);
     config.when_closed = a.when_closed;
     // As a headless `mcp` always did: folders that can't be opened stop the start, before the

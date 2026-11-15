@@ -3,13 +3,13 @@
 //! `x:xmpmeta/rdf:RDF/rdf:Description`, as attributes or as child elements.
 //!
 //! Loading applies only the settings the file holds, over the current ones, as Camera Raw's
-//! Load Settings does; settings PhotoCraft has no control for (lens corrections, geometry,
+//! Load Settings does; settings PhotoSoft has no control for (lens corrections, geometry,
 //! defringe, …) are ignored and named in the report. The same reader fills the dialog from a
 //! raw file's sidecar (`IMG_0001.xmp` beside `IMG_0001.CR2`), and the writer keeps it. Saving writes every supported
 //! control, so loading the file in Photoshop reproduces the dialog.
 //!
 //! White balance: a Camera Raw Filter on a rendered image uses the relative
-//! `IncrementalTemperature` / `IncrementalTint` (−100..=100), which are PhotoCraft's Temperature
+//! `IncrementalTemperature` / `IncrementalTint` (−100..=100), which are PhotoSoft's Temperature
 //! and Tint. The absolute `Temperature` (kelvin) / `Tint` of raw-file settings have no
 //! counterpart and are ignored.
 //!
@@ -26,7 +26,7 @@ use photocraft_algo::camera_raw::{CameraRaw, validate_curve};
 
 type Field = fn(&mut CameraRaw) -> &mut f32;
 
-/// `crs:` scalar name, PhotoCraft field, and the slider range values are clamped to.
+/// `crs:` scalar name, PhotoSoft field, and the slider range values are clamped to.
 const SCALARS: &[(&str, Field, f32, f32)] = &[
     ("IncrementalTemperature", |p| &mut p.temperature, -100.0, 100.0),
     ("IncrementalTint", |p| &mut p.tint, -100.0, 100.0),
@@ -158,7 +158,7 @@ const METADATA: &[&str] = &[
 pub struct LoadReport {
     /// How many settings were applied (a crop counts as one).
     pub applied: usize,
-    /// `crs:` settings without a PhotoCraft control (set to something other than their neutral
+    /// `crs:` settings without a PhotoSoft control (set to something other than their neutral
     /// value), or with an unusable value, in file order; then the keys of a crop that isn't
     /// applied (straightened, unreadable or empty).
     pub ignored: Vec<String>,
@@ -171,7 +171,7 @@ pub struct LoadReport {
 fn curve(items: &[String]) -> Option<Vec<[f32; 2]>> {
     let mut pts = points(items)?;
     validate_curve(&pts).ok()?;
-    // Camera Raw's linear curve is the identity's two end points; PhotoCraft's is empty.
+    // Camera Raw's linear curve is the identity's two end points; PhotoSoft's is empty.
     if pts == [[0.0, 0.0], [255.0, 255.0]] {
         pts.clear();
     }
@@ -262,9 +262,9 @@ pub fn load(params: &mut CameraRaw, bytes: &[u8]) -> Result<LoadReport, String> 
 }
 
 /// The XMP toolkit [`save`] names on `x:xmpmeta`.
-const TOOLKIT: &str = "PhotoCraft";
+const TOOLKIT: &str = "PhotoSoft";
 
-/// Did [`save`] write this file? True when its `x:xmpmeta` names PhotoCraft as the toolkit
+/// Did [`save`] write this file? True when its `x:xmpmeta` names PhotoSoft as the toolkit
 /// (`x:xmptk`). Lightroom, Bridge and Camera Raw put their own toolkit there when they write a
 /// file, so a sidecar another application touched since reads false. Never panics.
 pub fn is_photocraft_xmp(bytes: &[u8]) -> bool {
@@ -361,7 +361,7 @@ mod tests {
         assert_eq!((p.hsl_hue[3], p.hsl_sat[3]), (25.0, 20.0));
         assert_eq!((p.sharpen_amount, p.noise_luminance, p.grain_amount), (15.0, 5.0, 10.0));
         assert_eq!(p.grade_blending, 50.0);
-        // The linear tone curve is PhotoCraft's empty one; an element-form setting is read too.
+        // The linear tone curve is PhotoSoft's empty one; an element-form setting is read too.
         assert!(p.point_curve.is_empty());
         assert_eq!(p.point_curve_red, vec![[0.0, 0.0], [128.0, 140.0], [255.0, 255.0]]);
         assert_eq!(p.dehaze, 12.0);
@@ -452,9 +452,9 @@ mod tests {
             &b""[..],
             b"<x:xmpmeta",
             b"<x:xmpmeta xmlns:x=\"adobe:ns:meta/\"/>",
-            b"<x:xmpmeta xmlns:x=\"adobe:ns:meta/\" xmptk=\"PhotoCraft\"/>",
-            b"<x:xmpmeta xmlns:x=\"other:ns/\" x:xmptk=\"PhotoCraft\"/>",
-            b"<x:xmpmeta xmlns:x=\"adobe:ns:meta/\" x:xmptk=\"PhotoCraft 2\"/>",
+            b"<x:xmpmeta xmlns:x=\"adobe:ns:meta/\" xmptk=\"PhotoSoft\"/>",
+            b"<x:xmpmeta xmlns:x=\"other:ns/\" x:xmptk=\"PhotoSoft\"/>",
+            b"<x:xmpmeta xmlns:x=\"adobe:ns:meta/\" x:xmptk=\"PhotoSoft 2\"/>",
             b"\xff\xfe",
         ] {
             assert!(!is_photocraft_xmp(other), "{}", String::from_utf8_lossy(other));

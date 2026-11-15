@@ -211,7 +211,7 @@ pub fn show(app: &mut PhotocraftApp, ctx: &egui::Context) {
         response
     });
     let window = egui::ViewportId::from_hash_of("camera-raw-window");
-    // Coming back to PhotoCraft (⌘Tab, the Dock) can bring the main window over Camera Raw,
+    // Coming back to PhotoSoft (⌘Tab, the Dock) can bring the main window over Camera Raw,
     // leaving only the dimmed window that takes no input: the main window gaining focus, or a
     // click on it, brings Camera Raw back to the front.
     let main_focused = ctx.input(|i| i.viewport().focused.unwrap_or(false));
@@ -596,7 +596,7 @@ fn draw(app: &mut PhotocraftApp, ctx: &egui::Context, own_window: bool) {
 mod tests {
     use super::*;
 
-    /// Coming back to PhotoCraft can put the main window over Camera Raw's: the main window
+    /// Coming back to PhotoSoft can put the main window over Camera Raw's: the main window
     /// gaining focus brings Camera Raw's window to the front, once per activation, and so does a
     /// click on the dimmed main window.
     #[test]

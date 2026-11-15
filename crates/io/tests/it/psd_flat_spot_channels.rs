@@ -119,7 +119,7 @@ fn flat_file_without_channel_names_keeps_its_transparency() {
     assert!(!alpha.merged_has_alpha());
 }
 
-/// A spot whose DisplayInfo colour is in a space PhotoCraft doesn't read takes its ink from the
+/// A spot whose DisplayInfo colour is in a space PhotoSoft doesn't read takes its ink from the
 /// Alternate Spot Colors (1067), as in the reference editor's cmyk-alpha-spot.psd (Lab 58.47 /
 /// −33.27 / −14.59 for channel id 3).
 #[test]

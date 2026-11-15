@@ -687,7 +687,7 @@ pub fn options_bar(app: &mut PhotocraftApp, ui: &mut egui::Ui, tool: Tool) -> bo
                 let _ = app.run("count.clear", json!({}));
             }
             let rgb = g.color.to_rgb();
-            // PhotoCraft's Color Picker (sRGB), as everywhere else (#2144).
+            // PhotoSoft's Color Picker (sRGB), as everywhere else (#2144).
             if crate::widgets::color_swatch_button(ui, color32(rgb), tl!("Count group color")).on_hover_text(tl!("Count group color")).clicked()
                 && let Some(gi) = group
             {

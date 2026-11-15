@@ -7,7 +7,7 @@
 //! - ⇧-click still draws a line from the last painted point in any direction.
 //! - The Freeform Pen's and the Gradient tool's ⇧ 45° snap are unchanged.
 //!
-//! The bounds below are PhotoCraft's own: the default 20 px round tip covers 24 px in each
+//! The bounds below are PhotoSoft's own: the default 20 px round tip covers 24 px in each
 //! direction (start dab 88,88 → 112,112), so a line from 100,100 to 200,100 bounds 88,88 →
 //! 212,112 -- the same flat band the reference application's 89,89 → 110,110 start dab shows.
 

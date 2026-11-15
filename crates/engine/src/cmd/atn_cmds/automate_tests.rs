@@ -66,7 +66,7 @@ fn a_recorded_fit_image_step_loads_and_saves_back_unchanged() {
     }
 }
 
-/// The empty-message form in the measured key order is what a step recorded in PhotoCraft saves
+/// The empty-message form in the measured key order is what a step recorded in PhotoSoft saves
 /// as, so loading it keeps no descriptor of its own.
 #[test]
 fn the_canonical_form_carries_only_the_settings() {
@@ -76,7 +76,7 @@ fn the_canonical_form_carries_only_the_settings() {
     assert_eq!(item.descriptor.map(|d| d.to_bytes()), Some(recorded("", 300.0, 200.0, false).to_bytes()));
 }
 
-/// A step recorded in PhotoCraft writes the measured descriptor byte for byte: an empty class name,
+/// A step recorded in PhotoSoft writes the measured descriptor byte for byte: an empty class name,
 /// class `cjsp`, then `Msge` TEXT, `Hght` and `Wdth` UntF `#Pxl`, `limit` bool under a long key; the
 /// step is enabled, without its dialog, with a descriptor (flag -1).
 #[test]
@@ -232,7 +232,7 @@ fn changed_settings_save_with_the_recorded_message() {
 }
 
 /// A damaged recorded descriptor doesn't stop a step with valid settings from saving: it saves
-/// as a step recorded in PhotoCraft would (CodeRabbit review on steps_automate.rs:87-95).
+/// as a step recorded in PhotoSoft would (CodeRabbit review on steps_automate.rs:87-95).
 #[test]
 fn a_damaged_recorded_descriptor_saves_the_settings() {
     let other_event = photocraft_paint::tile::b64_encode(&desc("null").with("Rds ", px(2.0)).to_bytes());

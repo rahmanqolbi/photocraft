@@ -415,7 +415,7 @@ fn original_vector_formats_save_atomically_and_survive_undo_and_persistence() {
     }
 }
 
-/// A save from an external editor whose SVG embeds an image PhotoCraft can't read (here a BMP)
+/// A save from an external editor whose SVG embeds an image PhotoSoft can't read (here a BMP)
 /// is accepted with that image left out, as placing the same SVG is.
 #[test]
 fn saved_svg_with_an_unreadable_embedded_image_still_updates() {

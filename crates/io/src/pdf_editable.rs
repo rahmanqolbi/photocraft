@@ -957,7 +957,7 @@ fn uniform_transform(transform: &KurboAffine) -> bool {
     same && square
 }
 
-/// A PDF colour as a straight-alpha PhotoCraft colour.
+/// A PDF colour as a straight-alpha PhotoSoft colour.
 fn to_color(color: &HayroColor) -> Color {
     let rgba = color.to_rgba();
     // `AlphaColor` components are straight (not premultiplied), despite the raster path being
@@ -966,13 +966,13 @@ fn to_color(color: &HayroColor) -> Color {
     Color::rgba(r.clamp(0.0, 1.0), g.clamp(0.0, 1.0), b.clamp(0.0, 1.0), a.clamp(0.0, 1.0))
 }
 
-/// A kurbo affine as PhotoCraft's affine (same `[a, b, c, d, e, f]` layout).
+/// A kurbo affine as PhotoSoft's affine (same `[a, b, c, d, e, f]` layout).
 fn knots_affine(transform: &KurboAffine) -> Affine {
     let [a, b, c, d, e, f] = transform.as_coeffs();
     Affine { m: [a, b, c, d, e, f] }
 }
 
-/// A Hayro stroke as PhotoCraft's stroke: width in pixels, dashes in multiples of the width.
+/// A Hayro stroke as PhotoSoft's stroke: width in pixels, dashes in multiples of the width.
 fn to_stroke(stroke: &craft_pdf::interpret::StrokeProps, color: Color, scale: f64) -> Option<ShapeStroke> {
     if !stroke.line_width.is_finite() || stroke.line_width < 0.0 || !scale.is_finite() || scale <= 0.0 {
         return None;
@@ -1010,7 +1010,7 @@ fn to_stroke(stroke: &craft_pdf::interpret::StrokeProps, color: Color, scale: f6
     })
 }
 
-/// Converts a kurbo path to PhotoCraft's cubic knot model. `None` once `knots` passes the cap.
+/// Converts a kurbo path to PhotoSoft's cubic knot model. `None` once `knots` passes the cap.
 fn to_path(bez: &BezPath, transform: &Affine, knots: &mut usize) -> Option<Path> {
     let mut subpaths = Vec::new();
     let mut current: Option<Subpath> = None;

@@ -143,7 +143,7 @@ fn os_locale() -> Option<String> {
 }
 
 /// `reg query` for the UI locale, with `reg.exe` by full path: by bare name, Windows first looks in
-/// the app's own folder, so a `reg.exe` lying next to a portable PhotoCraft would start (#9666).
+/// the app's own folder, so a `reg.exe` lying next to a portable PhotoSoft would start (#9666).
 #[cfg(target_os = "windows")]
 fn locale_query() -> std::process::Command {
     use std::os::windows::process::CommandExt;

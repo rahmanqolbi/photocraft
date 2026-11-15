@@ -1,6 +1,6 @@
 # Automation architecture
 
-PhotoCraft exposes the same engine through several transports:
+PhotoSoft exposes the same engine through several transports:
 
 ```text
 photocraft-cli commands/run/batch

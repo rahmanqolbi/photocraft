@@ -50,7 +50,7 @@ fn recorded(d: &Descriptor) -> Option<Scale> {
     (*pixels > 0 && logical.is_finite() && *logical > 0.0 && !units.trim().is_empty()).then_some(Scale { pixels: *pixels, logical: *logical, units })
 }
 
-/// The descriptor a step recorded in PhotoCraft saves as; `T   ` takes the property's class.
+/// The descriptor a step recorded in PhotoSoft saves as; `T   ` takes the property's class.
 fn canonical(scale: &Scale) -> Descriptor {
     let t = desc("measurementScale")
         .with("pixelLength", D::Integer(scale.pixels))

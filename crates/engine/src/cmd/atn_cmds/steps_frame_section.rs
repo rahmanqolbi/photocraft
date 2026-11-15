@@ -30,7 +30,7 @@ fn plain(t: &super::UnicodeString) -> Option<String> {
 }
 
 /// `From`: a layer by name, or the target layer (`Lyr ` `Ordn.Trgt`), the form a step recorded
-/// in PhotoCraft without a layer of its own writes.
+/// in PhotoSoft without a layer of its own writes.
 fn source_layer(v: &D) -> Option<Option<String>> {
     let D::Reference(r) = v else { return None };
     match r.as_slice() {
@@ -60,7 +60,7 @@ fn recorded(d: &Descriptor) -> Option<Settings> {
     Some(Settings { layer: source_layer(d.get("From")?)?, name })
 }
 
-/// The descriptor a step recorded in PhotoCraft saves as: the measured keys without the session
+/// The descriptor a step recorded in PhotoSoft saves as: the measured keys without the session
 /// ids, `Nm  ` only for a name of the step's own (not blank).
 fn canonical(settings: &Settings) -> Descriptor {
     let from = settings.layer.as_deref().map_or_else(|| target_ref("Lyr "), |layer| name_ref("Lyr ", layer));

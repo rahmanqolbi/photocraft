@@ -4,7 +4,7 @@
 //! In order:
 //! 1. `PHOTOCRAFT_CONFIG_DIR`, when set (tests, agents, custom setups).
 //! 2. **Portable mode** (#228): a marker file ([`PORTABLE_MARKERS`]) beside the executable puts
-//!    everything in `<exe dir>/PhotoCraftData`, so a portable copy on a USB stick leaves nothing in
+//!    everything in `<exe dir>/PhotoSoftData`, so a portable copy on a USB stick leaves nothing in
 //!    `%APPDATA%`. The Windows portable zip ships with `portable.txt`; the MSI doesn't. If that
 //!    folder can't be written (read-only medium, Program Files), the app warns and falls back.
 //! 3. The platform convention: macOS `~/Library/Application Support/Photocraft`, Windows
@@ -93,7 +93,7 @@ pub fn resolve_recovery(data: &DataDir, env: impl Fn(&str) -> Option<OsString>) 
     data.dir.as_ref().map(|d| d.join(RECOVERY))
 }
 
-/// The lock file, beside the recovery folder, that keeps two PhotoCraft processes starting at
+/// The lock file, beside the recovery folder, that keeps two PhotoSoft processes starting at
 /// once (`--new-instance`, control launches) from moving the same autosaves.
 const MIGRATION_LOCK: &str = "recovery-migration.lock";
 
@@ -143,7 +143,7 @@ fn adopt_legacy_recovery_waiting(legacy: &Path, dir: &Path, wait: std::time::Dur
             Err(std::fs::TryLockError::WouldBlock) if std::time::Instant::now() < deadline => std::thread::sleep(std::time::Duration::from_millis(50)),
             Err(std::fs::TryLockError::WouldBlock) => {
                 // Another process is moving and may yet remove the old folder: never write there.
-                log::info!("another PhotoCraft is moving crash-recovery autosaves; using {}", dir.display());
+                log::info!("another PhotoSoft is moving crash-recovery autosaves; using {}", dir.display());
                 return dir.to_path_buf();
             }
             Err(std::fs::TryLockError::Error(e)) => {
@@ -304,7 +304,7 @@ fn move_path(from: &Path, to: &Path) -> std::io::Result<()> {
 
 /// Move `from` to `to` by copying. `from` is first renamed aside on its own volume
 /// (`.<name>.<pid>-<n>.held`, [`hold`]), so a process still writing to the old path (another
-/// launch that couldn't take the lock, an older PhotoCraft) starts a new `from` there instead of
+/// launch that couldn't take the lock, an older PhotoSoft) starts a new `from` there instead of
 /// adding to what is copied, and nothing it writes is removed. The held original is copied to a
 /// staged path ([`stage_copy`]), published without replacing anything ([`publish`]), and only
 /// then removed. If the copy or publish fails, the held original is put back ([`put_back`]).

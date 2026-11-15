@@ -1,4 +1,4 @@
-//! Numeric analysis for PhotoCraft's ordinary Auto Tone/Contrast/Color policy.
+//! Numeric analysis for PhotoSoft's ordinary Auto Tone/Contrast/Color policy.
 //! Display-bin sampling and clipping are independent of document/layer models.
 use photocraft_geom::{Rect, TILE_SIZE};
 use photocraft_raster::{Interrupt, Surface};

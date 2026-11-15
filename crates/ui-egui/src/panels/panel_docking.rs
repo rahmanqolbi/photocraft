@@ -5,7 +5,7 @@
 //! operation the layout is built each frame from the native dock's state (`crate::dock`), so its
 //! groups, tab order, selection, heights and collapse follow that state; from then on
 //! `app.ui.docking` holds a craft-ui [`Workspace`]. The layout, hidden panels and their return
-//! places, and the lock are craft-ui's; PhotoCraft keeps the panel registry, the collapsed custom
+//! places, and the lock are craft-ui's; PhotoSoft keeps the panel registry, the collapsed custom
 //! groups and where a floated panel docks back.
 
 use crate::dock::Group;
@@ -43,7 +43,7 @@ const PANELS: &[(&str, &str, Group)] = &[
     ("brushes", "Brushes", Group::Brushes),
 ];
 
-/// PhotoCraft's wording of craft-ui's docking labels, translated through `tl!`. The others keep
+/// PhotoSoft's wording of craft-ui's docking labels, translated through `tl!`. The others keep
 /// craft-ui's English.
 const DOCK_LABELS: &[(&str, &str)] = &[
     ("dock.float", "Float Panel"),
@@ -305,7 +305,7 @@ pub(crate) fn valid(layout: &Layout<String>) -> bool {
     layout.validate().is_ok() && layout.panels().iter().all(|id| registered(id)) && docked(layout).contains(&CANVAS.to_owned())
 }
 
-/// craft-ui's checks plus PhotoCraft's registry, for the layout and every hidden panel.
+/// craft-ui's checks plus PhotoSoft's registry, for the layout and every hidden panel.
 pub(crate) fn valid_workspace(workspace: &Workspace) -> bool {
     workspace.validate().is_ok()
         && valid(&workspace.layout)
@@ -682,7 +682,7 @@ fn dock_back(workspace: &mut Workspace, returns: &Returns, panel: &String) -> Re
     Ok(true)
 }
 
-/// Named workspaces and Reset are PhotoCraft's (Window › Workspace).
+/// Named workspaces and Reset are PhotoSoft's (Window › Workspace).
 fn app_owned(app: &mut PhotocraftApp, command: DockCommand<String>) -> Result<Value, String> {
     let (id, params) = match command {
         DockCommand::Workspace { name } => ("window.workspace.select", json!({"name": name})),
@@ -868,7 +868,7 @@ fn show_layout(app: &mut PhotocraftApp, ui: &mut egui::Ui, dock_only: bool) {
     pin_group_heights(ui.ctx(), &layout, &mut actions);
     for action in actions {
         let result = match action {
-            // A dock group minimizes as PhotoCraft's collapsed group, which the native dock's
+            // A dock group minimizes as PhotoSoft's collapsed group, which the native dock's
             // collapse also sets.
             Action::SetMinimized { panel, minimized } if in_dock_column(&layout, &panel) => {
                 group_command(app, &json!({"panel": panel, "operation": if minimized {"collapse"} else {"expand"}}))
@@ -1355,7 +1355,7 @@ fn root_groups(layout: &Layout<String>) -> Vec<Vec<String>> {
     layout.root.iter().flat_map(tree_groups).map(|group| group.panels).filter(|panels| !panels.iter().any(|id| id == CANVAS)).collect()
 }
 
-/// `window.panel.group {panel, operation}`: PhotoCraft's commands for a panel's whole group.
+/// `window.panel.group {panel, operation}`: PhotoSoft's commands for a panel's whole group.
 fn group_command(app: &mut PhotocraftApp, params: &Value) -> Result<Value, String> {
     let panel = params.get("panel").and_then(Value::as_str).and_then(normalize).ok_or("panel must name a registered panel")?;
     let operation = params.get("operation").and_then(Value::as_str).ok_or("operation is required")?;

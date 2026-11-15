@@ -1106,7 +1106,7 @@ fn render_and_spool(doc: &Document, p: &Value, cmd: &str, spooler: Option<&Spool
         printer: p.get("printer").and_then(Value::as_str).filter(|v| !v.is_empty()).map(str::to_string),
         copies,
         title: doc.name.clone(),
-        // PhotoCraft already placed and scaled the image on its physical sheet. Scaling again
+        // PhotoSoft already placed and scaled the image on its physical sheet. Scaling again
         // in the driver would change the preview, print resolution and crop-mark positions.
         scaling: craft_print::Scaling::Exact,
         ..Default::default()
@@ -1496,7 +1496,7 @@ fn package(s: &mut Session, p: &Value) -> Result<Value> {
                     missing.push(path.clone());
                     continue;
                 };
-                // Only a file PhotoCraft can place is copied; anything else is packaged as missing.
+                // Only a file PhotoSoft can place is copied; anything else is packaged as missing.
                 match read_file(&file.to_string_lossy()).ok().filter(|bytes| crate::file_cmds::import(&fname, bytes).is_ok()) {
                     Some(bytes) => {
                         write_file(&t, &bytes)?;
@@ -1551,7 +1551,7 @@ pub fn paths_to_ai(doc: &Document, which: &str) -> Result<(String, usize)> {
         name => chosen.extend(doc.paths.iter().filter(|p| p.name == name).map(|p| &p.path)),
     }
     let mut s = String::new();
-    s.push_str("%!PS-Adobe-2.0 EPSF-1.2\n%%Creator: PhotoCraft\n");
+    s.push_str("%!PS-Adobe-2.0 EPSF-1.2\n%%Creator: PhotoSoft\n");
     s.push_str(&format!("%%Title: ({})\n", ps_comment_text(&doc.name).replace([')', '('], "_")));
     s.push_str(&format!(
         "%%BoundingBox: 0 0 {} {}\n%%HiResBoundingBox: 0 0 {w:.4} {h:.4}\n%AI3_Cropmarks: 0 0 {w:.4} {h:.4}\n",

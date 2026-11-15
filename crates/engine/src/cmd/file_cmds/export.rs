@@ -179,7 +179,7 @@ fn bake_cube_layers(size: usize, title: &str, layers: &[&Layer], depth: photocra
     // The reference application's comment layout. There is no Copyright input yet (#13748), so the
     // `#Copyright:` line is never written.
     let mut s = format!(
-        "#Created by: PhotoCraft\nTITLE \"{}\"\n\n#LUT size\nLUT_3D_SIZE {n}\n\n#data domain\nDOMAIN_MIN 0.0 0.0 0.0\nDOMAIN_MAX 1.0 1.0 1.0\n\n#LUT data points\n",
+        "#Created by: PhotoSoft\nTITLE \"{}\"\n\n#LUT size\nLUT_3D_SIZE {n}\n\n#data domain\nDOMAIN_MIN 0.0 0.0 0.0\nDOMAIN_MAX 1.0 1.0 1.0\n\n#LUT data points\n",
         title.replace('"', "'")
     );
     // 8- and 16-bit documents write values on 1/32768 steps; 32-bit stays unquantised.

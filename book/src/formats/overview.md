@@ -1,6 +1,6 @@
 # Format overview
 
-External bytes enter PhotoCraft through four main paths:
+External bytes enter PhotoSoft through four main paths:
 
 - `craft-psd` parses and writes PSD and PSB structures.
 - `photocraft-codecs` decodes and encodes flat raster formats.

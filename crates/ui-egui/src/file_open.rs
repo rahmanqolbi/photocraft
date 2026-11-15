@@ -92,7 +92,7 @@ pub(crate) fn folder_error(path: &std::path::Path) -> Option<String> {
 
 /// Log, once per drag, that files are being dragged over the window (`hovering` of them). Together
 /// with the line `open_dropped` logs for a drop, it shows how far a drag got: nothing logged
-/// means the operating system never offered the files to PhotoCraft (a window running as
+/// means the operating system never offered the files to PhotoSoft (a window running as
 /// administrator is not offered files from a File Explorer that isn't, #10492).
 pub(crate) fn log_drag_over(ctx: &egui::Context, hovering: usize) {
     let id = egui::Id::unique("log-drag-over");

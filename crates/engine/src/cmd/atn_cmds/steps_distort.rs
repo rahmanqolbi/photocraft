@@ -110,7 +110,7 @@ pub(super) enum Key {
     /// An integer clamped to `min..=max` on import, as Photoshop clamps it; `default` when the
     /// step leaves it out.
     Int { key: &'static str, param: &'static str, min: i32, max: i32, default: i32 },
-    /// An enumeration (`ty`, Photoshop ↔ PhotoCraft values); `default` is Photoshop's value when
+    /// An enumeration (`ty`, Photoshop ↔ PhotoSoft values); `default` is Photoshop's value when
     /// the step leaves it out. An unknown value, or one of another type, keeps the step.
     Enum { key: &'static str, param: &'static str, ty: &'static str, table: &'static [(&'static str, &'static str)], default: &'static str },
 }

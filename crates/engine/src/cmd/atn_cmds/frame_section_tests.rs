@@ -29,13 +29,13 @@ fn without(mut d: Descriptor, drop: &[&str]) -> Descriptor {
     d
 }
 
-/// The step PhotoCraft writes: the measured keys without the session ids.
+/// The step PhotoSoft writes: the measured keys without the session ids.
 fn canonical(from: D, name: Option<&str>) -> Descriptor {
     let d = without(recorded(from, name.unwrap_or("")), &["layerSectionStart", "layerSectionEnd"]);
     if name.is_some() { d } else { without(d, &["Nm  "]) }
 }
 
-/// The target layer, the `From` of a step recorded in PhotoCraft without a layer of its own.
+/// The target layer, the `From` of a step recorded in PhotoSoft without a layer of its own.
 fn target_layer() -> D {
     D::Reference(vec![ReferenceItem::Enumerated { class: class("Lyr "), type_id: Id::new("Ordn"), value: Id::new("Trgt") }])
 }
@@ -168,7 +168,7 @@ fn without_a_layer_the_selected_layers_are_framed() {
     assert!(doc.layer(other).is_none() && doc.layers.iter().any(|l| l.id == photo));
 }
 
-/// A step recorded in PhotoCraft writes the measured keys without the session ids: the layer by
+/// A step recorded in PhotoSoft writes the measured keys without the session ids: the layer by
 /// name (the target layer without one) and `Nm  ` for a name that isn't blank. It loads back to
 /// the same settings.
 #[test]

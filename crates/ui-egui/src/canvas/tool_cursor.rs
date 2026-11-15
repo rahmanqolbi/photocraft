@@ -84,7 +84,7 @@ pub(crate) struct CursorLifecycle;
 
 impl egui::plugin::Plugin for CursorLifecycle {
     fn debug_name(&self) -> &'static str {
-        "PhotoCraft tool cursor"
+        "PhotoSoft tool cursor"
     }
 
     fn on_begin_pass(&mut self, ui: &mut egui::Ui) {
@@ -137,7 +137,7 @@ impl CountCursor {
 }
 
 /// Draw the Count cursor `kind` at `at`: the OS arrow (hotspot at its tip) with its badge below right
-/// of it, dark digits on a light halo so they read on any pixel. PhotoCraft's own artwork.
+/// of it, dark digits on a light halo so they read on any pixel. PhotoSoft's own artwork.
 pub(crate) fn count(ctx: &egui::Context, at: Pos2, kind: CountCursor) -> CursorIcon {
     let pos = at + vec2(12.0, 16.0);
     // Painted straight onto a tooltip-order layer, above the canvas and its overlays: an Area

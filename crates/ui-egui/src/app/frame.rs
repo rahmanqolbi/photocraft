@@ -129,7 +129,7 @@ impl PhotocraftApp {
         if !dropped.is_empty() {
             let at = self.cursor_pos(ctx);
             self.open_dropped(ctx, dropped, at);
-            // Files dragged in from another app's window: PhotoCraft comes to the front and takes
+            // Files dragged in from another app's window: PhotoSoft comes to the front and takes
             // the keyboard, as Photoshop does, instead of staying behind the source (#5687).
             ctx.send_viewport_cmd(egui::ViewportCommand::Focus);
         }
@@ -180,7 +180,7 @@ impl PhotocraftApp {
         i18n::set_current(i18n::Lang::from_pref(&self.session.prefs().interface.language));
         // Fonts registered via set_fonts only take effect next frame; named families would panic now.
         if !self.fonts_ready {
-            // egui consumed this pass's input without PhotoCraft handling it: keep the synthetic
+            // egui consumed this pass's input without PhotoSoft handling it: keep the synthetic
             // batch for the next pass instead of losing the step.
             self.defer_synthetic_pass();
             ctx.request_repaint();

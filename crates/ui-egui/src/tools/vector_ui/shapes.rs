@@ -137,7 +137,7 @@ pub(super) fn shape_geometry(o: &ToolOptions, tool: Tool, start: [f64; 2], end: 
                 json!({"kind": "triangle", "rect": [rect[0] + r - half_base, rect[1], 2.0 * half_base, 1.5 * r]})
             }
             Tool::Triangle => json!({"kind": "triangle", "rect": rect}),
-            // PhotoCraft's star defaults; the Star Tool's own options are not measured yet (#11377).
+            // PhotoSoft's star defaults; the Star Tool's own options are not measured yet (#11377).
             Tool::Star => json!({"kind": "star", "rect": rect, "sides": 5, "starRatio": 0.5}),
             _ => json!({"kind": "polygon", "rect": rect, "sides": o.polygon_sides.max(3)}),
         }

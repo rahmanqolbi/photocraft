@@ -10,7 +10,7 @@ with the typed fields, error and last valid preview. Retrying uses the original 
 revision; switching documents or editing the target before retry still invalidates the draft.
 
 The UI uses the `edit_session` module in ui-egui (`crates/ui-egui/src/edit_session.rs`) for the draft lifecycle and no-op/stale checks.
-PhotoCraft retains guide selection, parsing, rendering and history ownership. Validation runs
+PhotoSoft retains guide selection, parsing, rendering and history ownership. Validation runs
 the existing command on a temporary COW document only when parameters change. The live document
 is changed only by the ordinary command after successful confirmation. Rounded ruler text that
 was left untouched preserves the exact original position.
@@ -18,9 +18,9 @@ was left untouched preserves the exact original position.
 ## Running the scenarios
 
 The [interaction-check](https://github.com/PerchAnton/interaction-check) runner is development-only;
-Python is not a PhotoCraft runtime dependency. To run the scenarios locally, use the
+Python is not a PhotoSoft runtime dependency. To run the scenarios locally, use the
 revision below. Automated execution needs a separate shared workflow and maintainer review.
-The adapter belongs to PhotoCraft and calls the shipped dialog handlers, control field setter,
+The adapter belongs to PhotoSoft and calls the shipped dialog handlers, control field setter,
 egui canvas/dialog frames, engine commands and history. Expectations are never passed to the
 adapter. These are semantic integration checks, not a substitute for screenshot or pointer tests.
 

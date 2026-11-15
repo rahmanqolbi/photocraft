@@ -4,7 +4,7 @@ use craft_pdf::write_raster::{ContentFillRule, ContentPath, ContentStroke, Devic
 use photocraft_color::ColorMode;
 use photocraft_doc::{Fill, FillRule, LineCap, LineJoin, PathOp, ShapeLayer, StrokeAlign};
 
-/// Convert a directly representable PhotoCraft shape to neutral vector geometry.
+/// Convert a directly representable PhotoSoft shape to neutral vector geometry.
 pub(super) fn shape_content(layer: &ShapeLayer, mode: ColorMode) -> Option<ContentPath> {
     if layer.has_soft_mask() || layer.path.inverted || layer.path.subpaths.len() != 1 {
         return None;

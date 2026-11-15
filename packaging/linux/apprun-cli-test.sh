@@ -6,10 +6,10 @@ set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 test_dir="$(mktemp -d)"
 trap 'rm -rf "$test_dir"' EXIT
-app_dir="$test_dir/PhotoCraft test.AppDir"
+app_dir="$test_dir/PhotoSoft test.AppDir"
 mkdir -p "$app_dir/usr/bin" "$app_dir/usr/share/applications"
 cp "$HERE/AppRun" "$app_dir/AppRun"
-printf '[Desktop Entry]\nType=Application\nName=PhotoCraft\nExec=photocraft %%F\n' \
+printf '[Desktop Entry]\nType=Application\nName=PhotoSoft\nExec=photocraft %%F\n' \
   >"$app_dir/usr/share/applications/ai.storyteller.photocraft.desktop"
 cat >"$app_dir/usr/bin/photocraft" <<'EOF'
 #!/bin/sh
@@ -32,7 +32,7 @@ case "${1:-}" in
 esac
 EOF
 chmod +x "$app_dir/AppRun" "$app_dir/usr/bin/photocraft" "$app_dir/usr/bin/photocraft-cli"
-export APPIMAGE="$test_dir/PhotoCraft test.AppImage"
+export APPIMAGE="$test_dir/PhotoSoft test.AppImage"
 : >"$APPIMAGE"
 export ARGV0="$APPIMAGE"
 export XDG_DATA_HOME="$test_dir/data"

@@ -372,7 +372,7 @@ fn starting_at(path: &Subpath, s: f64) -> Subpath {
 
 /// The path a frame is written with for `TextShape::Path { path, start, flip }` with its range
 /// left at the default: flipped type is the path run backwards and a moved start the path from
-/// there on (exactly how PhotoCraft lays type on a path out), so the reference editor, which
+/// there on (exactly how PhotoSoft lays type on a path out), so the reference editor, which
 /// starts at the path's beginning, sets the same type.
 pub(crate) fn frame_path(path: &Subpath, start: f32, flip: bool) -> Subpath {
     let path = if flip { reversed(path) } else { path.clone() };

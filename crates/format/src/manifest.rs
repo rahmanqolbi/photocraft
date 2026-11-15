@@ -285,7 +285,7 @@ pub enum ContentM {
         #[serde(default)]
         live: Option<LiveShape>,
         /// Arrow parameters stored separately for backward compatibility.
-        /// Older PhotoCraft versions ignore this optional field.
+        /// Older PhotoSoft versions ignore this optional field.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         arrow_live: Option<LiveShape>,
         /// A live triangle, stored apart from `live` because builds from before the kind cannot

@@ -1,4 +1,4 @@
-//! Checked replay of PhotoCraft's native local HDR adaptation. No format-specific controls.
+//! Checked replay of PhotoSoft's native local HDR adaptation. No format-specific controls.
 use super::{HdrToning, curve_eval, luma};
 use crate::fxutil::gauss_box_radii;
 use photocraft_geom::Rect;
@@ -35,7 +35,7 @@ impl std::error::Error for Error {}
 fn check(ctl: &Interrupt<'_>) -> Result<(), Error> {
     ctl.check().map_err(|_| Error::Cancelled)
 }
-// Independent pixel phases use PhotoCraft's normal native rayon scheduling. No parallel
+// Independent pixel phases use PhotoSoft's normal native rayon scheduling. No parallel
 // reduction: the visibility-weighted mean retains its original deterministic serial order.
 /// Process disjoint chunks in parallel only on sufficiently large native workloads; preserve chunk offsets and the
 /// serial wasm path.

@@ -1,4 +1,4 @@
-//! Format-neutral sensor data consumed by PhotoCraft's develop pipeline.
+//! Format-neutral sensor data consumed by PhotoSoft's develop pipeline.
 
 use crate::RawFormat;
 use crate::color::ColorInfo;

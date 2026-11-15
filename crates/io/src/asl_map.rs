@@ -1,11 +1,11 @@
-//! Layer style libraries (`.asl`) ⇄ PhotoCraft styles.
+//! Layer style libraries (`.asl`) ⇄ PhotoSoft styles.
 //!
 //! The container is parsed by [`craft_psd::asl`]. Each style's `Lefx` is the same effects
 //! tree as a layer's `lfx2` block ([`crate::effects_map`]); `blendOptions` ("Include Layer
 //! Blending Options") carries the blend mode, opacity and fill opacity; the file's patterns feed
 //! the styles' Pattern Overlays, pattern strokes and bevel textures.
 //!
-//! What PhotoCraft doesn't model (an effect kind it doesn't know, advanced blending keys, an
+//! What PhotoSoft doesn't model (an effect kind it doesn't know, advanced blending keys, an
 //! effects scale other than 100 %) is left out with a warning naming the style, and the rest of
 //! the file still imports.
 
@@ -20,7 +20,7 @@ use crate::blocks::{enum_of, get_desc, num};
 use crate::effects_map::{blend_from_id, blend_value, effects_descriptor, effects_from_descriptor, is_known_effects_key};
 use crate::pattern_map::{from_psd, to_psd_patterns};
 
-/// One style as PhotoCraft keeps it.
+/// One style as PhotoSoft keeps it.
 #[derive(Clone, Debug, PartialEq)]
 pub struct AslStyle {
     /// Unique within the file (empty names get "Style N", repeats get "Name 2").

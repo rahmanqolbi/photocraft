@@ -43,7 +43,7 @@ pub(super) fn bare_to(_: &str, p: &Value) -> Option<Descriptor> {
     (pixel_target(p) && sets_only(p, &["target"])).then(|| desc("null"))
 }
 
-/// An enumeration key: (key, param, type, Photoshop ↔ PhotoCraft values, Photoshop's default).
+/// An enumeration key: (key, param, type, Photoshop ↔ PhotoSoft values, Photoshop's default).
 type EnumKey = (&'static str, &'static str, &'static str, &'static [(&'static str, &'static str)], &'static str);
 
 pub(super) const DE_INTERLACE: &[EnumKey] = &[

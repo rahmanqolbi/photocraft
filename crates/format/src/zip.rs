@@ -1,7 +1,7 @@
 //! Compatibility surface for callers that inspect ZIP archives.
 //!
 //! ZIP parsing, decompression, CRC checks, and writing are owned by `craft-zip`. This module only
-//! adapts its bounded archive API to the older PhotoCraft call shape while downstream callers
+//! adapts its bounded archive API to the older PhotoSoft call shape while downstream callers
 //! migrate.
 
 use std::collections::HashMap;

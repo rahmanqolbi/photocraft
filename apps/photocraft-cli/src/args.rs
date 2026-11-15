@@ -20,7 +20,7 @@ use photocraft_codecs::{JpegFormat, TiffCompression};
 use photocraft_io::{DdsCompression, DpxBits, TgaBits, XmpEmbed};
 use serde_json::Value;
 
-/// photocraft-cli: headless PhotoCraft
+/// photocraft-cli: headless PhotoSoft
 #[derive(Parser)]
 #[command(name = "photocraft-cli", version = photocraft_engine::build_info::long_version_static(), arg_required_else_help = true)]
 pub(crate) struct Cli {
@@ -270,7 +270,7 @@ pub(crate) struct CommandsArgs {
     pub(crate) filter: Option<String>,
 }
 
-/// Run the MCP server on stdio: in the open PhotoCraft window when the person lets agents use it
+/// Run the MCP server on stdio: in the open PhotoSoft window when the person lets agents use it
 /// (ArtCraft Launcher › Settings › AI agents), otherwise headless
 ///
 /// The open window is found again on every call, with no port or token to configure. Without
@@ -284,11 +284,11 @@ pub(crate) struct McpArgs {
     /// Always work headless, without the open window
     #[arg(long, conflicts_with = "when_closed")]
     pub(crate) headless: bool,
-    /// While agents may use PhotoCraft but it is closed: start it, serve a headless session, or
-    /// fail (default: the app's When PhotoCraft Is Closed setting)
+    /// While agents may use PhotoSoft but it is closed: start it, serve a headless session, or
+    /// fail (default: the app's When PhotoSoft Is Closed setting)
     #[arg(long, value_name = "launch|headless|error", value_parser = when_closed)]
     pub(crate) when_closed: Option<photocraft_engine::prefs::WhenAppClosed>,
-    /// Bridge to the PhotoCraft app listening here instead of a headless engine; a bare port means
+    /// Bridge to the PhotoSoft app listening here instead of a headless engine; a bare port means
     /// 127.0.0.1:<PORT>
     #[arg(long, value_name = "127.0.0.1:PORT", env = "PHOTOCRAFT_CONTROL_PORT", value_parser = bridge)]
     pub(crate) bridge: Option<Bridge>,

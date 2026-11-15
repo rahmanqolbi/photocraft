@@ -50,7 +50,7 @@ pub struct SmartLink {
 /// PSD placed-layer keys that describe the smart object's source; stale once we change it.
 const PLACED_KEYS: [&[u8; 4]; 3] = [b"SoLd", b"PlLd", b"SoLE"];
 
-/// Command id of a Photoshop smart filter PhotoCraft does not implement (kept verbatim from PSD).
+/// Command id of a Photoshop smart filter PhotoSoft does not implement (kept verbatim from PSD).
 pub use photocraft_io::smart_map::UNSUPPORTED_FILTER;
 
 fn other(msg: impl Into<String>) -> EngineError {
@@ -243,7 +243,7 @@ pub fn specs() -> Vec<CommandSpec> {
             "layer.smartObjects.resetTransform",
             "Reset Transform",
             SO,
-            r##"{"layer":id?} (the placement returns to 100 % of the current contents' own size with rotation, skew, Distort, Perspective and the Warp cleared, centred on the average of the placement's four corners; the smart filters stay; refused with nothing changed when the object can't be re-rendered (a visible filter PhotoCraft doesn't have, or contents that can't be read); one undo step)"##,
+            r##"{"layer":id?} (the placement returns to 100 % of the current contents' own size with rotation, skew, Distort, Perspective and the Warp cleared, centred on the average of the placement's four corners; the smart filters stay; refused with nothing changed when the object can't be re-rendered (a visible filter PhotoSoft doesn't have, or contents that can't be read); one undo step)"##,
             has_smart,
             reset_transform
         ),

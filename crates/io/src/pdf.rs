@@ -1,4 +1,4 @@
-//! PDF export model mapping for PhotoCraft.
+//! PDF export model mapping for PhotoSoft.
 //!
 //! This module projects document rasters, vectors, spot channels and print policy into the
 //! neutral page records in craft-pdf. PDF object layout and serialization live in craft-pdf.
@@ -12,7 +12,7 @@ mod shapes;
 mod text;
 
 /// Neutral page records and PDF syntax are owned by craft-pdf; this module only maps the
-/// PhotoCraft document to those records and supplies its product-level cancellation policy.
+/// PhotoSoft document to those records and supplies its product-level cancellation policy.
 pub use craft_pdf::write_raster::{ContentOp, Image as PrintImage, Marks, Page as PrintPage, SelectionFont, SpotPlate, VectorContent};
 
 /// A one-page PDF.

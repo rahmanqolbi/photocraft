@@ -289,7 +289,7 @@ fn locks_and_labels() {
     for bits in [0u32, 1, 2, 4, 8, 0x0D, 0x8000_0000, 0x8000_000F] {
         assert_eq!(lspf_from_locks(&locks_from_lspf(bits)), bits);
     }
-    // Older PhotoCraft files wrote the artboard lock at 0x10; it reads back as artboard
+    // Older PhotoSoft files wrote the artboard lock at 0x10; it reads back as artboard
     // and is rewritten at the reference value 0x08.
     assert!(locks_from_lspf(0x10).artboard);
     assert_eq!(lspf_from_locks(&locks_from_lspf(0x10)), 0x08);

@@ -263,7 +263,7 @@ fn command_params_do_not_leak_private_dialog_fields() {
     assert_eq!(out["color"], "#ff0000");
 }
 
-/// The Stroke dialog's colour swatch opens PhotoCraft's Color Picker on the stroke colour (as in
+/// The Stroke dialog's colour swatch opens PhotoSoft's Color Picker on the stroke colour (as in
 /// Photoshop), not egui's compact popup; OK sets the stroke colour, not the foreground, and the
 /// stroke is drawn in it.
 #[test]

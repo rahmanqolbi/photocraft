@@ -359,7 +359,7 @@ fn transformed_text_lands_where_resvg_draws_it() {
     }
 }
 
-/// #4266: a group clipped by one path (the PhotoCraft icon's rounded square) stays editable
+/// #4266: a group clipped by one path (the PhotoSoft icon's rounded square) stays editable
 /// shapes with the clip as its vector mask, and looks as resvg draws the drawing; a clip of
 /// two shapes is still rasterised, with the warning.
 #[test]
@@ -394,7 +394,7 @@ fn a_single_path_clip_becomes_the_groups_vector_mask() {
         .collect();
     let off = ours.chunks(4).zip(theirs.chunks(4)).filter(|(a, b)| a.iter().zip(*b).any(|(x, y)| x.abs_diff(*y) > 48)).count();
     assert!(off < 64, "{off} pixels differ");
-    // The report's file: PhotoCraft's own icon opens without the clip-path warning.
+    // The report's file: PhotoSoft's own icon opens without the clip-path warning.
     let icon = import_svg("photocraft.svg", include_bytes!("../../../../assets/app-icon/photocraft.svg")).unwrap();
     assert!(icon.warnings.iter().all(|w| !w.contains("clip-path")), "{:?}", icon.warnings);
     assert!(icon.document.layers.iter().any(|l| l.vector_mask.is_some()), "its rounded square is a vector mask");
@@ -900,7 +900,7 @@ fn resolve_data_rejects_nested_gzip_and_handles_text_plain_svgz() {
     assert!(resolve("text/plain", Arc::new(twice), &opt).is_none());
 }
 
-/// The outer gzip is size-limited by PhotoCraft. Its result must be XML, never another
+/// The outer gzip is size-limited by PhotoSoft. Its result must be XML, never another
 /// compressed stream which usvg could inflate independently without that byte limit.
 #[test]
 fn bounded_svg_rejects_nested_gzip_at_top_level_and_inside_data_urls() {

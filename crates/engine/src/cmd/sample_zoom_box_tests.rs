@@ -63,7 +63,7 @@ fn grey(v: i64) -> [i64; 3] {
 fn at_100_percent_the_test_document_reads_the_measured_table() {
     // Sample Size: stripes x 351, stripes x 352 (y 150), grey x 139 (y 400), red left edge x 100 (y 150).
     // The reference application's table, except grey x 139 up to 51 by 51: that box is exactly
-    // half 100 and half 105, a mean of 102.5, which the reference reads 102 and PhotoCraft's shared
+    // half 100 and half 105, a mean of 102.5, which the reference reads 102 and PhotoSoft's shared
     // `average` rounds to 103 (half up, as every Sample Size average does today). The box is right
     // (101 by 101, whose mean is no tie, reads 122 in both).
     const TIE: i64 = 103;

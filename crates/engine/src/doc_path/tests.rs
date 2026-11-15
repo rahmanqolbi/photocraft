@@ -256,7 +256,7 @@ fn data_sets_and_footage_read_only_followed_files() {
     footage(&mut s, "blue.png").unwrap();
 }
 
-/// A link to a file PhotoCraft can't place (a text or settings file) is never embedded: a saved
+/// A link to a file PhotoSoft can't place (a text or settings file) is never embedded: a saved
 /// PSD would otherwise carry bytes no reader can show as the layer's contents. The layer is
 /// written as pixels; Convert to Embedded and Relink refuse.
 #[test]
@@ -320,7 +320,7 @@ photocraft-shared-marker
     }
 }
 
-/// Package copies only linked files PhotoCraft can open: a link to a text file is listed as
+/// Package copies only linked files PhotoSoft can open: a link to a text file is listed as
 /// missing and no copy of it is written into the package's Links folder.
 #[test]
 fn package_copies_only_links_to_images() {

@@ -304,7 +304,7 @@ fn export_global_blocks_with_warnings_limit(doc: &Document, warnings: &mut Vec<S
     out
 }
 
-/// `raw` with each pattern block that keeps transparency where older PhotoCraft builds put it
+/// `raw` with each pattern block that keeps transparency where older PhotoSoft builds put it
 /// (which Photoshop refuses, #8054) rewritten in place from its own patterns. Every other block,
 /// unreadable pattern blocks included, is kept verbatim. Blocks are decoded in order with one
 /// shared budget, as [`from_global_blocks`] decodes them.

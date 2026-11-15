@@ -402,7 +402,7 @@ fn auto_appearance_replaces_a_restored_egui_dark_pin() {
     appearance_frame(&mut app, &ctx, Some(egui::Theme::Light));
     assert_palette(&ctx, ThemeKind::ProLight);
     assert_eq!(app.session.prefs().interface.appearance_mode, AppearanceMode::Auto);
-    // A restored pin must also clear when the concrete PhotoCraft palette stays the same.
+    // A restored pin must also clear when the concrete PhotoSoft palette stays the same.
     ctx.set_theme(egui::ThemePreference::Dark);
     appearance_frame(&mut app, &ctx, Some(egui::Theme::Light));
     assert_eq!(ctx.options(|o| o.theme_preference), egui::ThemePreference::System);

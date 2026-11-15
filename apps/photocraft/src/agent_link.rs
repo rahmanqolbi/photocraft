@@ -71,7 +71,7 @@ fn apply(running: &mut Option<Running>, dir: Option<&Path>, integrations: &Integ
     }
     let Some(dir) = dir else {
         out.stopped = running.take().is_some();
-        out.status.error = Some("Agents can't connect: PhotoCraft has no settings folder (no home folder).".into());
+        out.status.error = Some("Agents can't connect: PhotoSoft has no settings folder (no home folder).".into());
         return out;
     };
     if running.as_ref().is_none_or(|r| r.port_pref != integrations.control_port) {

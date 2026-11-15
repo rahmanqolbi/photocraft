@@ -58,7 +58,7 @@ pub(super) fn humanize(key: &str) -> String {
         "connectAgents" => return "Let AI agents connect (MCP)".into(),
         "readRoot" => return "Folder agents can open from".into(),
         "writeRoot" => return "Folder agents can save to".into(),
-        "whenAppClosed" => return "When PhotoCraft is closed".into(),
+        "whenAppClosed" => return "When PhotoSoft is closed".into(),
         _ => {}
     }
     if key == "notificationDurationSeconds" {
@@ -135,10 +135,10 @@ pub(super) fn choice_label(v: &str) -> String {
         "ahd" => "AHD (adaptive homogeneity)".into(),
         "mhc" => "Malvar–He–Cutler".into(),
         "cpu" => "CPU (no GPU acceleration)".into(),
-        // MCP › When PhotoCraft is closed.
-        "launch" => "Open PhotoCraft".into(),
+        // MCP › When PhotoSoft is closed.
+        "launch" => "Open PhotoSoft".into(),
         "headless" => "Work without a window".into(),
-        "error" => "Ask to open PhotoCraft".into(),
+        "error" => "Ask to open PhotoSoft".into(),
         v => humanize(v),
     }
 }
@@ -275,7 +275,7 @@ fn prefs_body(ui: &mut egui::Ui, f: &mut Map<String, Value>, system: Option<egui
                 } else if section == "integrations"
                     && let Some(obj) = values.get_mut(&section).and_then(Value::as_object_mut)
                 {
-                    // Without the AI-MCP feature flag: the settings PhotoCraft had before.
+                    // Without the AI-MCP feature flag: the settings PhotoSoft had before.
                     let mut shown: Map<String, Value> =
                         obj.iter().filter(|(k, _)| LEGACY_INTEGRATIONS.contains(&k.as_str())).map(|(k, v)| (k.clone(), v.clone())).collect();
                     section_fields(ui, &section, &mut shown, &order, lang, system, filter);
@@ -400,7 +400,7 @@ fn interface_groups(ui: &mut egui::Ui, obj: &mut Map<String, Value>, keys: &[Str
 
 /// Where a clicked colour swatch leaves its preference path and label for the dialog body, which
 /// holds the fields the Color Picker request goes in.
-/// Preferences › AI Integrations without the AI-MCP feature flag: the settings PhotoCraft had
+/// Preferences › AI Integrations without the AI-MCP feature flag: the settings PhotoSoft had
 /// before the agent connection page.
 const LEGACY_INTEGRATIONS: [&str; 2] = ["allowAgentControl", "controlPort"];
 

@@ -22,7 +22,7 @@ const SOFT: [[u8; 6]; 6] = [
     [0, 0, 0, 0, 0, 0],
 ];
 
-/// Anti-alias off: the reference and PhotoCraft before #11391 agree.
+/// Anti-alias off: the reference and PhotoSoft before #11391 agree.
 const HARD: [[u8; 6]; 6] =
     [[255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 0, 0], [255, 255, 255, 0, 0, 0], [255, 255, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]];
 

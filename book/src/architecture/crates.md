@@ -18,8 +18,8 @@ Workspace applications are:
 
 | Application | Path | Purpose |
 |---|---|---|
-| PhotoCraft desktop | `apps/photocraft` | eframe/wgpu application and loopback control server |
-| PhotoCraft CLI | `apps/photocraft-cli` | Convert, inspect, run, batch, JSON-lines serve, and MCP |
-| PhotoCraft web | `apps/photocraft-web` | The UI and engine compiled for WebAssembly |
+| PhotoSoft desktop | `apps/photocraft` | eframe/wgpu application and loopback control server |
+| PhotoSoft CLI | `apps/photocraft-cli` | Convert, inspect, run, batch, JSON-lines serve, and MCP |
+| PhotoSoft web | `apps/photocraft-web` | The UI and engine compiled for WebAssembly |
 
 New crates must be registered in `xtask/src/layers.rs`. Nothing below `ui-egui` may depend on egui, eframe, winit, or rfd. The `psd` and `codecs` crates have additional independence requirements documented in [`AGENTS.md`](https://github.com/storytold/photocraft/blob/main/AGENTS.md).

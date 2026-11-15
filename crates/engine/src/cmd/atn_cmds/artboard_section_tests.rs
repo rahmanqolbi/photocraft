@@ -168,7 +168,7 @@ fn a_loaded_artboard_from_layers_step_plays_and_undoes() {
     assert_eq!(s.active().unwrap().doc.artboard_of(square), None);
 }
 
-/// A step recorded in PhotoCraft writes the measured keys without the session ids, `Nm  ` only
+/// A step recorded in PhotoSoft writes the measured keys without the session ids, `Nm  ` only
 /// for a name of its own, and loads back to the same settings.
 #[test]
 fn native_steps_save_the_measured_keys() {

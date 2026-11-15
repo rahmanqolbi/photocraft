@@ -270,7 +270,7 @@ fn corpus_photoshop_path_text_opens_on_its_path() {
     }
 }
 
-/// A text layer created in PhotoCraft (no PSD data) exports as an editable type layer and
+/// A text layer created in PhotoSoft (no PSD data) exports as an editable type layer and
 /// imports back with the same model.
 #[test]
 fn created_text_layer_roundtrips_through_psd() {

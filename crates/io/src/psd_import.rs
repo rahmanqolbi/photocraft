@@ -878,7 +878,7 @@ const LAYER_INFO_KEYS: [&[u8; 4]; 50] = [
 ];
 
 /// The key of an adjustment layer whose type no mapper knows (#6575), e.g. Photoshop 4's
-/// `hue ` or a type newer than PhotoCraft. Photoshop writes every adjustment layer without
+/// `hue ` or a type newer than PhotoSoft. Photoshop writes every adjustment layer without
 /// pixels and with "pixel data irrelevant" set (every one in the corpus; pixel, type and smart
 /// layers never have it). Such a record that is not a group and carries exactly one block that
 /// is neither a known layer-information key nor a known adjustment is that adjustment. More than
@@ -1075,7 +1075,7 @@ pub(crate) fn psd_to_document_owned(
     psd_to_document_global(&file, ctl, decoded, global, true)
 }
 
-/// Whether `file` stores spot planes the way earlier PhotoCraft versions (releases 0.1.0 to
+/// Whether `file` stores spot planes the way earlier PhotoSoft versions (releases 0.1.0 to
 /// 0.16.0) wrote them: straight (the maximum = solid ink), the opposite of Photoshop, which
 /// stores 0 = solid ink in every PSD and TIFF it saves. Their files are recognised by three
 /// things together:
@@ -1083,8 +1083,8 @@ pub(crate) fn psd_to_document_owned(
 /// - DisplayInfo (1077) marks at least one spot channel;
 /// - there is no Alpha Identifiers resource (1053), or one that lists fewer channels than the
 ///   file has ([`photoshop_identified_channels`]). Photoshop has written it, one identifier per
-///   extra channel, in every file with an extra channel since version 6, and PhotoCraft writes it
-///   now. No earlier PhotoCraft wrote one of its own, but each kept the 1053 of a Photoshop file
+///   extra channel, in every file with an extra channel since version 6, and PhotoSoft writes it
+///   now. No earlier PhotoSoft wrote one of its own, but each kept the 1053 of a Photoshop file
 ///   it opened (a transparent document's `[0]`, for one) and wrote it back unchanged, after the
 ///   channels added in it, which it stored straight;
 /// - the version info (1057) is byte for byte what those versions wrote: writer "Adobe Photoshop"
@@ -1093,7 +1093,7 @@ pub(crate) fn psd_to_document_owned(
 ///
 /// Any other file is read in Photoshop's polarity. psd-tools' `cmyk-spot.psd`, for one, also has
 /// spots and no 1053, but names psd-tools in 1057 and stores Photoshop's polarity. A Photoshop
-/// file that an earlier PhotoCraft opened and saved again kept Photoshop's 1053 and its planes as
+/// file that an earlier PhotoSoft opened and saved again kept Photoshop's 1053 and its planes as
 /// Photoshop stored them, so it is read in Photoshop's polarity too; when channels were added
 /// there, only the planes after the ones the kept 1053 lists are read straight.
 ///
@@ -1132,7 +1132,7 @@ pub(crate) fn earlier_photocraft_spot_planes(file: &PsdFile) -> bool {
 /// How many extra channels, after the merged transparency, the Alpha Identifiers resource (1053)
 /// lists: its identifiers other than 0, which Photoshop gives the merged transparency (first, and
 /// in some files with no transparency plane at all). 0 without a 1053. In a file from an earlier
-/// PhotoCraft ([`earlier_photocraft_spot_planes`]) these are the channels of the Photoshop file
+/// PhotoSoft ([`earlier_photocraft_spot_planes`]) these are the channels of the Photoshop file
 /// it opened, stored as Photoshop stored them; the channels after them were added there.
 pub(crate) fn photoshop_identified_channels(file: &PsdFile) -> usize {
     file.resource(crate::channel_map::ALPHA_IDENTIFIERS).map_or(0, |r| r.data.as_chunks::<4>().0.iter().filter(|id| **id != [0; 4]).count())
@@ -1586,7 +1586,7 @@ fn import_flattened(
     }
 }
 
-/// Spot inks whose DisplayInfo colour is in a space PhotoCraft doesn't read take their colour
+/// Spot inks whose DisplayInfo colour is in a space PhotoSoft doesn't read take their colour
 /// from the Alternate Spot Colors (1067), matched by the identifiers of 1053. `ids_from` is the
 /// first imported channel's position in 1053 (1 past a merged transparency), `skip` the
 /// DisplayInfo records before it.
@@ -1628,7 +1628,7 @@ fn import_extra_channels(import: DecodedImport<'_>, doc: &mut Document, cx: &mut
     let names = names.get(skip..).unwrap_or_default();
     // Which planes hold spot ink in Photoshop's polarity (0 = solid): the DisplayInfo records
     // the channel options are read from below, the transparency's first when `skip` is 1.
-    // A file from an earlier PhotoCraft stores them straight as it was written,
+    // A file from an earlier PhotoSoft stores them straight as it was written,
     // past the channels of the Photoshop file it opened, if any.
     let straight_from = if earlier_photocraft_spot_planes(file) { photoshop_identified_channels(file) } else { usize::MAX };
     let photoshop_spots = if let Some(r) = file.resource(crate::channel_map::DISPLAY_INFO) {

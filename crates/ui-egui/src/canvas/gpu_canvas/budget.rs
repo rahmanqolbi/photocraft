@@ -140,7 +140,7 @@ fn detect_video_memory(vendor: u32, device: u32) -> Option<u64> {
 pub(super) const NVIDIA_VENDOR: u32 = 0x10de;
 
 /// How long `nvidia-smi` gets to answer: it runs on the UI thread while the window opens, and a
-/// driver that hangs the query must not keep PhotoCraft from starting.
+/// driver that hangs the query must not keep PhotoSoft from starting.
 #[cfg(target_os = "linux")]
 const NVIDIA_SMI_DEADLINE: std::time::Duration = std::time::Duration::from_secs(2);
 

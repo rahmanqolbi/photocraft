@@ -1,12 +1,12 @@
 # UI localisation and live language switching
 
-PhotoCraft uses the same Rust catalog implementation in the native egui shell and the
+PhotoSoft uses the same Rust catalog implementation in the native egui shell and the
 WebAssembly build: the `craft-i18n` crate (craft-libs) over the catalogs of
 [storytold/craft-i18n](https://github.com/storytold/craft-i18n), shared by the Crafting Apps.
 English source strings are lookup keys. UTF-8 TSV catalogs (`locales/<code>/photocraft.tsv`, over
 the shared `common.tsv`) supply plain, contextual, command-ID and plural translations; missing
 entries fall back to English. The build embeds them from the checkout `CRAFT_I18N_DIR` names, at
-the commit in `craft-i18n.rev`; without it PhotoCraft builds and runs in English only.
+the commit in `craft-i18n.rev`; without it PhotoSoft builds and runs in English only.
 
 ## Supported languages
 
@@ -123,7 +123,7 @@ a scoped preview restores the previous language even if drawing unwinds. Menu an
 identity continues to use command IDs, independent of translated labels.
 
 This is hot switching among the embedded catalogs. `build.rs` embeds the craft-i18n catalogs with
-`include_str!`; a catalog change reaches PhotoCraft when `craft-i18n.rev` moves to a commit that
+`include_str!`; a catalog change reaches PhotoSoft when `craft-i18n.rev` moves to a commit that
 has it, and needs a rebuild. External catalog watching and file-resource hot reload are not
 implemented.
 
@@ -139,7 +139,7 @@ Not mirrored yet: panel interiors, dialogs, menu rows (shortcuts stay on the rig
 (they open to the right), document tabs and the canvas. egui 0.37 lays text out with the Unicode
 Bidirectional Algorithm (each paragraph takes the direction of its first strong letter), so
 catalogs, layer names and document names are handed to it in logical order, as typed; never
-pre-reorder a label. The title line forces a left-to-right paragraph so "— PhotoCraft" stays at
+pre-reorder a label. The title line forces a left-to-right paragraph so "— PhotoSoft" stays at
 the right of a right-to-left document name, and `bidi_text::elide` cuts a right-to-left name at
 its logical end. Document text is laid out by the text engine.
 
@@ -166,7 +166,7 @@ detection remain separate outstanding work. Switching catalogs does not supply m
 
 ## Add or maintain a catalog
 
-Translations live in craft-i18n, not here (its `docs/integration.md`). A PhotoCraft PR that adds
+Translations live in craft-i18n, not here (its `docs/integration.md`). A PhotoSoft PR that adds
 or changes interface text adds the English only; translators add the other languages to
 `locales/<code>/photocraft.tsv` in craft-i18n PRs, and they show here once `craft-i18n.rev` moves
 to a commit that has them. A missing translation never fails a build or a release: the string shows
@@ -177,9 +177,9 @@ updated.
 1. Translate the meaning of the English source keys. Preserve `{name}` placeholders, escaped
    characters and the trailing `…` on dialog commands (an `@id` row without them is skipped and
    the label's translation shows). Use `@id` to disambiguate a command label and `@plural` for
-   count-sensitive text, one form per CLDR category. Keep product names such as PhotoCraft.
+   count-sensitive text, one form per CLDR category. Keep product names such as PhotoSoft.
 2. A new language: craft-i18n gets `locales/<code>/photocraft.tsv` with its `@id language.name`
-   row, then PhotoCraft registers its code in `i18n::LANGUAGES`.
+   row, then PhotoSoft registers its code in `i18n::LANGUAGES`.
 3. Set `complete_menus` once `cargo xtask i18n-report` lists nothing missing for the language.
 
 ```sh

@@ -50,7 +50,7 @@ fn recorded(d: &Descriptor) -> Option<Fit> {
     Some(Fit { width: side(d.get("Wdth")?)?, height: side(d.get("Hght")?)?, dont_enlarge: *dont_enlarge })
 }
 
-/// The descriptor a step recorded in PhotoCraft saves as: the measured class and key order. The
+/// The descriptor a step recorded in PhotoSoft saves as: the measured class and key order. The
 /// message is empty: it is the script's own text, not a setting, and no text of the reference
 /// application is copied.
 fn canonical(fit: &Fit) -> Descriptor {

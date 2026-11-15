@@ -250,11 +250,11 @@ async fn a_launch_that_never_listens_times_out_with_advice() {
     c.launch = Some(Box::new(|| Err("no such file".into())));
     let client2 = connect(PhotocraftMcp::live(c)).await;
     let r = call(&client2, "ui_inspect", json!({})).await;
-    assert!(text(&r).contains("couldn't start PhotoCraft: no such file"), "{}", text(&r));
+    assert!(text(&r).contains("couldn't start PhotoSoft: no such file"), "{}", text(&r));
     // No launcher (Flatpak, the app not installed beside the CLI): ask the user.
     let client3 = connect(PhotocraftMcp::live(live(&dir, Some(WhenAppClosed::Launch)))).await;
     let r = call(&client3, "ui_inspect", json!({})).await;
-    assert!(text(&r).contains("open PhotoCraft"), "{}", text(&r));
+    assert!(text(&r).contains("open PhotoSoft"), "{}", text(&r));
     for c in [client, client2, client3] {
         c.cancel().await.unwrap();
     }

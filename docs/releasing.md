@@ -1,11 +1,11 @@
-# Releasing PhotoCraft
+# Releasing PhotoSoft
 
 Every push to the `release` branch runs `.github/workflows/release.yml`. The workflow builds
 signed installers for macOS, Windows, Linux and the web, plus a FreeBSD tarball, then creates
-or updates a **draft** GitHub Release named `PhotoCraft v<version>`. Nobody sees a draft until a
+or updates a **draft** GitHub Release named `PhotoSoft v<version>`. Nobody sees a draft until a
 maintainer publishes it.
 
-User-facing names say **PhotoCraft**. Files, binaries and ids stay lowercase (`photocraft-<version>-<platform>-<arch>.<ext>`, `ai.storyteller.photocraft`).
+User-facing names say **PhotoSoft**. Files, binaries and ids stay lowercase (`photocraft-<version>-<platform>-<arch>.<ext>`, `ai.storyteller.photocraft`).
 
 ## In-app update checks
 
@@ -36,7 +36,7 @@ changes are required: publishing a newer stable GitHub Release makes it discover
    Commit the change (`Cargo.toml` + `Cargo.lock`) through the normal review flow.
 2. **Merge `main` into `release`** (or fast-forward it) and push. The workflow starts by itself.
 3. **Wait for the draft.** After about 30 to 45 minutes (notarization is the slow part), the
-   Releases page has a draft `PhotoCraft v0.2.0`, tagged `v0.2.0` on the pushed commit, with
+   Releases page has a draft `PhotoSoft v0.2.0`, tagged `v0.2.0` on the pushed commit, with
    every artifact and `SHA256SUMS.txt`. The notes are generated from the merged PRs.
 4. **Check it.** Download an installer or two and look at the job summaries. Any
    `::warning::` there means a signing secret was missing and that artifact is unsigned.
@@ -72,7 +72,7 @@ in the dialog.
 | Web | `photocraft-web-<v>.zip` (static site; see [`packaging/web/README.md`](../packaging/web/README.md)) | `ubuntu-latest` |
 
 Every binary reports its version, the commit and the build date: `photocraft --version`,
-`photocraft-cli --version`, and *Help › About PhotoCraft*. CI sets `PHOTOCRAFT_BUILD_SHA` and
+`photocraft-cli --version`, and *Help › About PhotoSoft*. CI sets `PHOTOCRAFT_BUILD_SHA` and
 `PHOTOCRAFT_BUILD_DATE`, and `crates/engine/src/build_info.rs` reads them at compile time. A plain
 `cargo build` doesn't set them and reports `0.2.0 (dev build)`.
 
@@ -87,11 +87,11 @@ in `ci.yml`. Build option: `docs/development.md` › Fonts.
 ### macOS
 
 `packaging/macos/package.sh` builds `aarch64-apple-darwin` and `x86_64-apple-darwin` with
-`MACOSX_DEPLOYMENT_TARGET=11.0`, joins them with `lipo`, and assembles `PhotoCraft.app`:
+`MACOSX_DEPLOYMENT_TARGET=11.0`, joins them with `lipo`, and assembles `PhotoSoft.app`:
 
 - `Info.plist` is generated from `Info.plist.in`. The bundle id is `ai.storyteller.photocraft`.
   The plist sets `LSMinimumSystemVersion` 11.0, `NSHighResolutionCapable`, and document types:
-  `.pcraft` (Owner), plus PSD/PSB and the image formats PhotoCraft reads (Alternate, so it never
+  `.pcraft` (Owner), plus PSD/PSB and the image formats PhotoSoft reads (Alternate, so it never
   takes over Preview's defaults). The icon is `assets/app-icon/photocraft.icns`.
 - **Signing** goes inside-out with the hardened runtime and a secure timestamp. The executable
   is signed first, then the bundle. There's no `--deep` on the final signature. The
@@ -101,9 +101,9 @@ in `ci.yml`. Build option: `docs/development.md` › Fonts.
   to drag onto). The DMG is signed, notarized and stapled too. The script checks the results
   with `codesign --verify --strict`, `stapler validate` and `spctl -a -vvv`.
   Its Finder window (background, icon size and positions) comes from
-  [`packaging/macos/dmg/`](../packaging/macos/dmg/README.md), and its volume is named `PhotoCraft`
+  [`packaging/macos/dmg/`](../packaging/macos/dmg/README.md), and its volume is named `PhotoSoft`
   without the version, which the window's background needs; the DMG file name keeps the version.
-- **CLI:** `PhotoCraft.app/Contents/MacOS/photocraft-cli` is bundled and signed so generated
+- **CLI:** `PhotoSoft.app/Contents/MacOS/photocraft-cli` is bundled and signed so generated
   droplet scripts can run without installing the separate CLI download. The scripts prefer
   `PHOTOCRAFT_CLI` when set, then the bundled CLI in `/Applications` or `~/Applications`, then
   `photocraft-cli` on `PATH`. Finder drag-and-drop onto droplets still requires an app wrapper.
@@ -142,10 +142,10 @@ goes in `CARGO_TARGET_<TRIPLE>_RUSTFLAGS`, so host build scripts aren't affected
   (`assets/app-icon/photocraft.ico`) and VERSIONINFO with the `winresource` crate
   (build dependency `0.1`). They only do this when targeting Windows. Elsewhere each
   script is a no-op, even if `PHOTOCRAFT_REQUIRE_WINRES` is set, and the web build
-  doesn't touch that crate. Both set ProductName to PhotoCraft, CompanyName to
+  doesn't touch that crate. Both set ProductName to PhotoSoft, CompanyName to
   Learning Machines LLC and the same copyright line. The GUI description is
-  "PhotoCraft image editor" (`photocraft.exe`). The CLI description is
-  "PhotoCraft command-line interface", with OriginalFilename `photocraft-cli.exe`
+  "PhotoSoft image editor" (`photocraft.exe`). The CLI description is
+  "PhotoSoft command-line interface", with OriginalFilename `photocraft-cli.exe`
   and InternalName `photocraft-cli`. Version strings are the Cargo package version,
   so a pre-release tag is kept; the numeric file and product versions are
   winresource's `major.minor.patch.0`. A missing resource compiler warns, so an
@@ -155,11 +155,11 @@ goes in `CARGO_TARGET_<TRIPLE>_RUSTFLAGS`, so host build scripts aren't affected
 - Release builds use the GUI subsystem, so Start Menu launches don't open a console window.
   The CLI stays console subsystem 3 so its output reaches the terminal.
 - `photocraft.wxs` (WiX v5) is a dual-scope package (Microsoft "Single Package Authoring"):
-  it installs per-user by default, without a UAC prompt, into `%LOCALAPPDATA%\Programs\ArtCraft\PhotoCraft`
+  it installs per-user by default, without a UAC prompt, into `%LOCALAPPDATA%\Programs\ArtCraft\PhotoSoft`
   (Windows Installer redirects the ProgramFiles folder in a per-user install); the setup
   wizard's "Everyone on this computer" option, or `msiexec ... ALLUSERS=1`, installs per-machine into
-  `Program Files\ArtCraft\PhotoCraft` (`Program Files (x86)` for the 32-bit build). It installs an advertised Start Menu shortcut associated with the
-  `PhotocraftExe` file component. PhotoCraft
+  `Program Files\ArtCraft\PhotoSoft` (`Program Files (x86)` for the 32-bit build). It installs an advertised Start Menu shortcut associated with the
+  `PhotocraftExe` file component. PhotoSoft
   becomes the default app for `.pcraft` and is listed under "Open with" for PSD/PSB and image
   files (in a per-user install those registrations and the `InstallDir` record live under
   HKCU instead of HKLM; the package's registry roots follow the context automatically). It also
@@ -171,9 +171,9 @@ goes in `CARGO_TARGET_<TRIPLE>_RUSTFLAGS`, so host build scripts aren't affected
 - Double-clicking the MSI opens a setup wizard (WixUI_InstallDir without the licence page; the scope page appears only for a new full-UI install, not for
   maintenance, uninstall or reduced and silent runs):
   a scope page ("Only for me" or "Everyone on this computer"), Welcome, the install folder
-  (remembered for upgrades in `HKLM` or `HKCU\Software\PhotoCraft\InstallDir` according to context),
+  (remembered for upgrades in `HKLM` or `HKCU\Software\PhotoSoft\InstallDir` according to context),
   Ready, a progress page, and a Finish page that says where to find the app, with a ticked "Launch
-  PhotoCraft" box. The pages name the full version (`photocraft.en-us.wxl`). `package.ps1` draws
+  PhotoSoft" box. The pages name the full version (`photocraft.en-us.wxl`). `package.ps1` draws
   the wizard's banner and side bitmaps from the app icon, so no WiX stock art ships. `msiexec /qn`
   installs a new product silently per-user unless `ALLUSERS=1` is passed. Maintenance keeps the
   existing installation context, and a major upgrade of an existing per-machine installation without
@@ -184,8 +184,8 @@ goes in `CARGO_TARGET_<TRIPLE>_RUSTFLAGS`, so host build scripts aren't affected
   icon. `packaging/windows/check-icons.ps1` checks the references and extensions in CI;
   `package.ps1` also validates the built MSI with ICE50 before signing it.
 - **Portable zip:** it ships `packaging/windows/portable.txt` beside `photocraft.exe`. That
-  marker (or a `PhotoCraft.portable` file) switches on portable mode: preferences, presets,
-  recovery autosaves and the GPU startup marker go to `PhotoCraftData\` next to the exe instead
+  marker (or a `PhotoSoft.portable` file) switches on portable mode: preferences, presets,
+  recovery autosaves and the GPU startup marker go to `PhotoSoftData\` next to the exe instead
   of `%APPDATA%\Photocraft`. If that folder isn't writable the app warns and uses `%APPDATA%`.
   The MSI has no marker. The logic is in `apps/photocraft/src/app_dirs.rs` and works the same
   on macOS and Linux.
@@ -313,7 +313,7 @@ flatpak run --command=photocraft-cli ai.storyteller.photocraft mcp \
   --automation-write-root "$HOME/Documents/project"
 ```
 
-The automation roots restrict PhotoCraft's file access; they do not grant Flatpak access to
+The automation roots restrict PhotoSoft's file access; they do not grant Flatpak access to
 other host directories. For a project elsewhere, also grant that directory with Flatpak's
 `--filesystem=/absolute/project` run option. Stdio MCP needs no network permission.
 
@@ -332,7 +332,7 @@ For example, read the Flatpak's MCP guide without opening the GUI:
 flatpak run --command=cat ai.storyteller.photocraft /app/share/doc/photocraft/mcp.md
 ```
 
-To read an AppImage's guides, run `./PhotoCraft.AppImage --appimage-extract` in a directory
+To read an AppImage's guides, run `./PhotoSoft.AppImage --appimage-extract` in a directory
 where you want its `squashfs-root` contents, using the downloaded file's actual name. Then
 open either guide in `squashfs-root/usr/share/doc/photocraft/`. Extraction is an explicit user
 action; launching the app does not extract documentation into the home directory. These two

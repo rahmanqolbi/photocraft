@@ -1857,7 +1857,7 @@ assert_eq!(names.len(), encoded.len());
 
   - Perform the explicit artifact inspection below; mark BLOCKED if fixtures are absent.
 
-- Expected: ZIP has photocraft.pdb, photocraft_cli.pdb and symbols.txt. Each PDB GUID/age matches its same-run executable; debugger/profiler resolves a PhotoCraft function. Portable/MSI launches without optional symbols.
+- Expected: ZIP has photocraft.pdb, photocraft_cli.pdb and symbols.txt. Each PDB GUID/age matches its same-run executable; debugger/profiler resolves a PhotoSoft function. Portable/MSI launches without optional symbols.
 - Separate coverage / prerequisites: Inspect PE CodeView/PDB identity, record run/job/artifact IDs and hashes. Same SHA rebuilt is not the same PDB identity. Source lines are not required because release omits line tables. Missing packaging artifacts/identity evidence is BLOCKED; do not publish a release just for fixtures.
 - Status: NOT RUN
 - Actual:
@@ -4271,7 +4271,7 @@ Expected assertion context (overlapping windows merged):
 - Tester/date:
 - Tested SHA:
 
-## PR-4547: fix(icons): PhotoCraft icon corner radius matches other Craft apps (#4478)
+## PR-4547: fix(icons): PhotoSoft icon corner radius matches other Craft apps (#4478)
 
 - Fixture/setup and action: execute **all** identified changed regression functions below on the final frozen tree. Their checked-in setup constructs the concrete inputs; preserve those inputs, capability prerequisites and assertions.
 

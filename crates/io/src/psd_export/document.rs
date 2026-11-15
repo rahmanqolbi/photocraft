@@ -153,7 +153,7 @@ fn export_supported_document(
         resources.push(ImageResource::new(1045, unicode_names_resource(&names)));
         resources.push(ImageResource::new(crate::channel_map::DISPLAY_INFO, crate::channel_map::display_info(&extra, has_alpha)));
         // Photoshop writes 1053 in every file with an extra channel. Its absence is how a file from
-        // an earlier PhotoCraft is told apart (`psd_import::earlier_photocraft_spot_planes`).
+        // an earlier PhotoSoft is told apart (`psd_import::earlier_photocraft_spot_planes`).
         resources.push(ImageResource::new(crate::channel_map::ALPHA_IDENTIFIERS, crate::channel_map::alpha_identifiers(has_alpha, extra.len())));
     }
     if let Some(id) = quick_mask_id {

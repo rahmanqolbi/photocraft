@@ -572,9 +572,9 @@
           "path": "crates/ui-egui/src/actions.rs",
           "package": "photocraft-ui-egui",
           "command": "cargo test -p photocraft-ui-egui --locked default_actions_load_from_empty_panel_and_play -- --nocapture",
-          "fixture_and_action_excerpt": "        use egui_kittest::{Harness, kittest::Queryable};\n        let app = PhotocraftApp::new(photocraft_engine::Session::new(), crate::Services::default());\n        let mut h = Harness::builder().with_size(vec2(360.0, 400.0)).build_ui_state(|ui, app| panel(app, ui), app);\n        h.run_steps(3);\n        h.get_by_label(\"Load Default Actions\").click();\n        h.run_steps(3);\n        assert!(h.query_by_label(\"PhotoCraft Essentials\").is_some());\n        for name in [\"Auto Tone\", \"Auto Contrast\", \"Auto Color\", \"Select Subject\", \"Blur Background\"] {\n            assert!(h.query_by_label(name).is_some(), \"missing preset {name}\");\n        }\n        assert_eq!(h.state().ui.actions.selected, Some(0));\n        h.state_mut().run(\"file.new\", json!({\"width\": 16, \"height\": 16})).unwrap();",
+          "fixture_and_action_excerpt": "        use egui_kittest::{Harness, kittest::Queryable};\n        let app = PhotocraftApp::new(photocraft_engine::Session::new(), crate::Services::default());\n        let mut h = Harness::builder().with_size(vec2(360.0, 400.0)).build_ui_state(|ui, app| panel(app, ui), app);\n        h.run_steps(3);\n        h.get_by_label(\"Load Default Actions\").click();\n        h.run_steps(3);\n        assert!(h.query_by_label(\"PhotoSoft Essentials\").is_some());\n        for name in [\"Auto Tone\", \"Auto Contrast\", \"Auto Color\", \"Select Subject\", \"Blur Background\"] {\n            assert!(h.query_by_label(name).is_some(), \"missing preset {name}\");\n        }\n        assert_eq!(h.state().ui.actions.selected, Some(0));\n        h.state_mut().run(\"file.new\", json!({\"width\": 16, \"height\": 16})).unwrap();",
           "expected_assertions": [
-            "        assert!(h.query_by_label(\"PhotoCraft Essentials\").is_some());\n        for name in [\"Auto Tone\", \"Auto Contrast\", \"Auto Color\", \"Select Subject\", \"Blur Background\"] {\n            assert!(h.query_by_label(name).is_some(), \"missing preset {name}\");\n        }\n        assert_eq!(h.state().ui.actions.selected, Some(0));\n        h.state_mut().run(\"file.new\", json!({\"width\": 16, \"height\": 16})).unwrap();\n        h.run_steps(3);\n        h.get_by_label(\"Play selection\").click();\n        assert!(!h.state().ui.status_error, \"{}\", h.state().ui.status);\n        assert!(h.state().session.journal.iter().any(|(id, _)| id == \"image.autoTone\"));\n    }"
+            "        assert!(h.query_by_label(\"PhotoSoft Essentials\").is_some());\n        for name in [\"Auto Tone\", \"Auto Contrast\", \"Auto Color\", \"Select Subject\", \"Blur Background\"] {\n            assert!(h.query_by_label(name).is_some(), \"missing preset {name}\");\n        }\n        assert_eq!(h.state().ui.actions.selected, Some(0));\n        h.state_mut().run(\"file.new\", json!({\"width\": 16, \"height\": 16})).unwrap();\n        h.run_steps(3);\n        h.get_by_label(\"Play selection\").click();\n        assert!(!h.state().ui.status_error, \"{}\", h.state().ui.status);\n        assert!(h.state().session.journal.iter().any(|(id, _)| id == \"image.autoTone\"));\n    }"
           ],
           "reviewed_source": "https://github.com/storytold/photocraft/blob/61d9e8cc1aed29ed6bea0d0fd2702fa87c4f0206/crates/ui-egui/src/actions.rs",
           "ignored_requires_explicit_execution": false,
@@ -585,7 +585,7 @@
           "path": "crates/ui-egui/src/actions.rs",
           "package": "photocraft-ui-egui",
           "command": "cargo test -p photocraft-ui-egui --locked default_actions_flyout_preserves_custom_actions_and_reveals_restored_set -- --nocapture",
-          "fixture_and_action_excerpt": "        use egui_kittest::{Harness, kittest::Queryable};\n        let mut app = PhotocraftApp::new(photocraft_engine::Session::new(), crate::Services::default());\n        let custom = Action::new(\"Auto Tone\", vec![(\"view.fitOnScreen\".into(), json!({}))]);\n        app.session.actions.list.push(custom.clone());\n        app.ui.actions.collapsed_sets.push(\"PhotoCraft Essentials\".into());\n        let mut h = Harness::builder().with_size(vec2(360.0, 400.0)).build_ui_state(\n            |ui, app| {\n                ui.menu_button(\"Actions menu\", |ui| panel_menu(app, ui));\n                panel(app, ui);\n            },\n            app,\n        );",
+          "fixture_and_action_excerpt": "        use egui_kittest::{Harness, kittest::Queryable};\n        let mut app = PhotocraftApp::new(photocraft_engine::Session::new(), crate::Services::default());\n        let custom = Action::new(\"Auto Tone\", vec![(\"view.fitOnScreen\".into(), json!({}))]);\n        app.session.actions.list.push(custom.clone());\n        app.ui.actions.collapsed_sets.push(\"PhotoSoft Essentials\".into());\n        let mut h = Harness::builder().with_size(vec2(360.0, 400.0)).build_ui_state(\n            |ui, app| {\n                ui.menu_button(\"Actions menu\", |ui| panel_menu(app, ui));\n                panel(app, ui);\n            },\n            app,\n        );",
           "expected_assertions": [
             "        assert_eq!(h.state().session.actions.list[0], custom);\n        assert_eq!(h.state().session.actions.list.len(), 5);\n        assert_eq!(h.state().ui.actions.selected, Some(1));\n        assert!(h.state().ui.actions.collapsed_sets.is_empty());\n        assert!(h.query_by_label(\"Select Subject\").is_some());\n    }"
           ],
@@ -4017,7 +4017,7 @@
       "action": [
         "Manual artifact/identity inspection described below"
       ],
-      "expected": "ZIP has photocraft.pdb, photocraft_cli.pdb and symbols.txt. Each PDB GUID/age matches its same-run executable; debugger/profiler resolves a PhotoCraft function. Portable/MSI launches without optional symbols.",
+      "expected": "ZIP has photocraft.pdb, photocraft_cli.pdb and symbols.txt. Each PDB GUID/age matches its same-run executable; debugger/profiler resolves a PhotoSoft function. Portable/MSI launches without optional symbols.",
       "status": "NOT RUN",
       "actual": "",
       "evidence": "",
@@ -8157,9 +8157,9 @@
           "path": "crates/ui-egui/src/prefs_ui.rs",
           "package": "photocraft-ui-egui",
           "command": "cargo test -p photocraft-ui-egui --locked native_gradient_icons_apply_cancel_and_restart -- --nocapture",
-          "fixture_and_action_excerpt": "        use egui_kittest::{Harness, kittest::Queryable};\n        let (mut app, store) = app_with_store();\n        app.run(\"prefs.set\", json!({\"path\": \"interface.language\", \"value\": \"en\"})).unwrap();\n        let id = open_preferences(&mut app, \"interface\");\n        let mut h = Harness::builder().with_size(vec2(1280.0, 800.0)).build_eframe(move |cc| {\n            PhotocraftApp::setup_context(&cc.egui_ctx, Default::default());\n            app\n        });\n        h.run_steps(4);\n        h.get_by_label(\"Use PhotoCraft-native gradient icons\").scroll_to_me();\n        h.run_steps(4);\n        for desired in [true, false] {",
+          "fixture_and_action_excerpt": "        use egui_kittest::{Harness, kittest::Queryable};\n        let (mut app, store) = app_with_store();\n        app.run(\"prefs.set\", json!({\"path\": \"interface.language\", \"value\": \"en\"})).unwrap();\n        let id = open_preferences(&mut app, \"interface\");\n        let mut h = Harness::builder().with_size(vec2(1280.0, 800.0)).build_eframe(move |cc| {\n            PhotocraftApp::setup_context(&cc.egui_ctx, Default::default());\n            app\n        });\n        h.run_steps(4);\n        h.get_by_label(\"Use PhotoSoft-native gradient icons\").scroll_to_me();\n        h.run_steps(4);\n        for desired in [true, false] {",
           "expected_assertions": [
-            "            assert_eq!(h.state().session.prefs().interface.native_gradient_icons, !desired, \"draft waits for Apply\");\n            h.get_by_label(\"Apply\").click();\n            h.run_steps(4);\n            assert_eq!(h.state().session.prefs().interface.native_gradient_icons, desired);\n            assert_eq!(stored(&store)[\"interface\"][\"nativeGradientIcons\"], desired);\n            let (restarted, _) = app_with_saved(store.lock().unwrap().clone());\n            assert_eq!(restarted.session.prefs().interface.native_gradient_icons, desired);\n        }\n        h.get_by_label(\"Use PhotoCraft-native gradient icons\").click();\n        h.run_steps(4);\n        assert!(h.state().ui.dialogs.iter().all(|d| d.id != id));\n        assert!(!h.state().session.prefs().interface.native_gradient_icons);\n        assert_eq!(stored(&store)[\"interface\"][\"nativeGradientIcons\"], false);\n    }"
+            "            assert_eq!(h.state().session.prefs().interface.native_gradient_icons, !desired, \"draft waits for Apply\");\n            h.get_by_label(\"Apply\").click();\n            h.run_steps(4);\n            assert_eq!(h.state().session.prefs().interface.native_gradient_icons, desired);\n            assert_eq!(stored(&store)[\"interface\"][\"nativeGradientIcons\"], desired);\n            let (restarted, _) = app_with_saved(store.lock().unwrap().clone());\n            assert_eq!(restarted.session.prefs().interface.native_gradient_icons, desired);\n        }\n        h.get_by_label(\"Use PhotoSoft-native gradient icons\").click();\n        h.run_steps(4);\n        assert!(h.state().ui.dialogs.iter().all(|d| d.id != id));\n        assert!(!h.state().session.prefs().interface.native_gradient_icons);\n        assert_eq!(stored(&store)[\"interface\"][\"nativeGradientIcons\"], false);\n    }"
           ],
           "reviewed_source": "https://github.com/storytold/photocraft/blob/bfb691f84896fe68543980426632153dc4b4ea69/crates/ui-egui/src/prefs_ui.rs",
           "ignored_requires_explicit_execution": false,
@@ -9328,9 +9328,9 @@
           "path": "crates/ui-egui/src/adjust_editors_tests.rs",
           "package": "photocraft-ui-egui",
           "command": "cargo test -p photocraft-ui-egui --locked preset_menus_say_they_are_photocrafts_own -- --nocapture",
-          "fixture_and_action_excerpt": "    for kind in [\"levels\", \"exposure\", \"blackWhite\", \"channelMixer\"] {\n        let mut h = app_harness(kind, \"rgb\", 8);\n        let caption = h.get_by_label(\"PhotoCraft Preset:\");\n        caption.hover();\n        h.run_steps(30);\n        assert!(h.query_by_label_contains(\"not Photoshop's presets\").is_some(), \"{kind}: the caption explains the presets are PhotoCraft's own\");\n    }\n}",
+          "fixture_and_action_excerpt": "    for kind in [\"levels\", \"exposure\", \"blackWhite\", \"channelMixer\"] {\n        let mut h = app_harness(kind, \"rgb\", 8);\n        let caption = h.get_by_label(\"PhotoSoft Preset:\");\n        caption.hover();\n        h.run_steps(30);\n        assert!(h.query_by_label_contains(\"not Photoshop's presets\").is_some(), \"{kind}: the caption explains the presets are PhotoSoft's own\");\n    }\n}",
           "expected_assertions": [
-            "        assert!(h.query_by_label_contains(\"not Photoshop's presets\").is_some(), \"{kind}: the caption explains the presets are PhotoCraft's own\");\n    }\n}"
+            "        assert!(h.query_by_label_contains(\"not Photoshop's presets\").is_some(), \"{kind}: the caption explains the presets are PhotoSoft's own\");\n    }\n}"
           ],
           "reviewed_source": "https://github.com/storytold/photocraft/blob/20803d1f15900ed6ecc7b5c79b4c68f6c3d6dcce/crates/ui-egui/src/adjust_editors_tests.rs",
           "ignored_requires_explicit_execution": false,
@@ -9847,7 +9847,7 @@
       {
         "platform": "FreeBSD aarch64",
         "job_id": 123425395796,
-        "reason": "VM provisioning failed because pkg could not find cmake in configured repositories; no PhotoCraft build executed."
+        "reason": "VM provisioning failed because pkg could not find cmake in configured repositories; no PhotoSoft build executed."
       }
     ],
     "build_run_status": "in_progress",

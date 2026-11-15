@@ -623,7 +623,7 @@ fn batch_naming_keeps_the_tree_order_and_the_selected_encoder() {
     std::fs::remove_dir_all(root).unwrap();
 }
 
-/// Without --format, a file PhotoCraft only opens is saved as PSD, with or without --naming:
+/// Without --format, a file PhotoSoft only opens is saved as PSD, with or without --naming:
 /// the encoder gets the format the planned name uses, not the input's import-only extension.
 #[test]
 fn batch_saves_import_only_inputs_as_psd() {
@@ -1407,7 +1407,7 @@ fn a_non_unicode_path_is_taken_and_non_unicode_text_is_a_usage_error() {
 }
 
 /// `batch --actions set.atn`: a Photoshop Actions file plays like an Actions set, and its steps
-/// PhotoCraft can't play are warned about up front.
+/// PhotoSoft can't play are warned about up front.
 #[test]
 fn batch_plays_a_photoshop_actions_file() {
     use photocraft_engine::actions_cmds::Action;
@@ -2030,7 +2030,7 @@ fn info_detail_adds_text_runs_and_antialiasing() {
     let _ = std::fs::remove_dir_all(&dir);
 }
 
-/// Flags that don't go together are usage errors before anything starts. Adding PhotoCraft to an
+/// Flags that don't go together are usage errors before anything starts. Adding PhotoSoft to an
 /// MCP client is the ArtCraft Launcher's job, so there is no `mcp install`, and plain `mcp` does
 /// what `--live` did, so there is no `--live` either.
 #[test]
@@ -2114,7 +2114,7 @@ fn mcp_without_consent_works_headless() {
     assert_ne!(r[0]["isError"], true, "{}", r[0]);
     // Without the `AI-MCP` flag a Control Port saved before the agents switch (which the app
     // reads as "agents may connect") still leaves plain `mcp` headless: it neither looks for
-    // the app nor applies When PhotoCraft Is Closed ("error" would fail this call).
+    // the app nor applies When PhotoSoft Is Closed ("error" would fail this call).
     std::fs::write(dir.join("preferences.json"), r#"{"integrations": {"controlPort": 7878}}"#).unwrap();
     let r = mcp_session(&["mcp", "--when-closed", "error"], &env[..2], &calls[..1]);
     assert_ne!(r[0]["isError"], true, "without the flag plain mcp stays headless: {}", r[0]);

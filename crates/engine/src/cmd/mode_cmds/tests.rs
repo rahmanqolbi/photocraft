@@ -158,7 +158,7 @@ fn rotate_arbitrary_keeps_the_pixels_of_type_in_a_missing_font() {
                 .edit("type", |doc, _| {
                     let mut t = photocraft_doc::TextLayer { text: "Hello!".into(), font_family: font.into(), size_pt: 26.0, ..Default::default() };
                     t.transform = Affine::translate(10.0, 40.0);
-                    // Deliberately not what PhotoCraft would draw, so a re-render shows.
+                    // Deliberately not what PhotoSoft would draw, so a re-render shows.
                     let fmt = doc.pixel_format();
                     let mut cache = Surface::new(fmt);
                     cache.fill_rect(Rect::new(10, 20, 90, 40), &photocraft_raster::from_rgba(&fmt, [0.4, 0.2, 0.6, 1.0]));

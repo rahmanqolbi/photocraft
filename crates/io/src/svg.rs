@@ -368,7 +368,7 @@ fn parse_at_depth<T: Send>(depth: usize, isolated: bool, parse: impl FnOnce(bool
             return parse(isolated).map_err(ParseFailure::Decode);
         }
         Err(ParseFailure::Isolation(IoError::Svg(format!(
-            "SVG parsing deeper than {INLINE_XML_DEPTH} levels requires the native app's isolated parser; simplify the drawing or open it in PhotoCraft desktop"
+            "SVG parsing deeper than {INLINE_XML_DEPTH} levels requires the native app's isolated parser; simplify the drawing or open it in PhotoSoft desktop"
         ))))
     }
 }
@@ -414,10 +414,10 @@ fn parse(bytes: &[u8]) -> Result<Parsed, IoError> {
 fn tree_limits(depth: usize, raster_pixels: u64) -> craft_svg::tree::Limits {
     craft_svg::tree::Limits {
         bytes: usize::try_from(MAX_INFLATED_BYTES).unwrap_or(usize::MAX),
-        // PhotoCraft's stack guard counts open tags; the shared SVG preflight counts every
+        // PhotoSoft's stack guard counts open tags; the shared SVG preflight counts every
         // element, including a self-closing leaf. Allow that leaf at the same guarded depth.
         depth: depth.saturating_add(1),
-        // The shared default is intentionally conservative for general consumers. PhotoCraft
+        // The shared default is intentionally conservative for general consumers. PhotoSoft
         // already guards XML nesting and reference expansion against its 512-level parser
         // budget, so pass that same explicit limit through instead of inheriting 256.
         tree_depth: depth.saturating_add(1),
@@ -476,7 +476,7 @@ fn guarded_parse<T>(f: impl FnOnce() -> T) -> Result<T, IoError> {
 
 fn svg_parse_error(error: craft_svg::tree::Error) -> IoError {
     match error {
-        // PhotoCraft's bounded render walk has always reported a refusal in layer terms. The
+        // PhotoSoft's bounded render walk has always reported a refusal in layer terms. The
         // shared parser can now reject expanded reference depth before usvg builds a recursive
         // tree, so retain that user-facing contract at this adapter boundary.
         craft_svg::tree::Error::TooDeep(_) => IoError::Svg("layers are nested too deeply".into()),

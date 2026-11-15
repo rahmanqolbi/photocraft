@@ -36,7 +36,7 @@ jobs:
     with:
       dry-run: ${{ github.event_name == 'schedule' }}
       app-name: photocraft
-      app-title: PhotoCraft
+      app-title: PhotoSoft
       craft-fonts-ref: b076417b5880bd4154bd22f00695b1d28c6bea83
       version: ${{ inputs.version }}
       contributors-artifact: ${{ needs.credits.outputs.artifact-name }}

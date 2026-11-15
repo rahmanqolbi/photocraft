@@ -141,7 +141,7 @@ fn camera_raw_stays_in_a_full_screen_or_wayland_maximized_window() {
     }
 }
 
-/// Coming back to PhotoCraft (⌘Tab, the Dock) can put the main window over Camera Raw's, or
+/// Coming back to PhotoSoft (⌘Tab, the Dock) can put the main window over Camera Raw's, or
 /// leave Camera Raw minimized: the main window gaining focus, or a click on its dimmed surface,
 /// restores Camera Raw's window and focuses it, once per activation.
 #[test]
@@ -963,7 +963,7 @@ fn a_sidecar_fills_the_dialog_and_open_writes_it_back() {
     assert_eq!(sidecar_path("/a/b.c/noext"), "/a/b.c/noext.xmp");
     std::fs::write(
         sidecar_path(&raw_path),
-        "<x:xmpmeta xmlns:x=\"adobe:ns:meta/\" x:xmptk=\"PhotoCraft\"><rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><rdf:Description xmlns:crs=\"http://ns.adobe.com/camera-raw-settings/1.0/\" crs:Exposure2012=\"+1.50\" crs:ShadowTint=\"20\" crs:Temperature=\"5500\"/></rdf:RDF></x:xmpmeta>",
+        "<x:xmpmeta xmlns:x=\"adobe:ns:meta/\" x:xmptk=\"PhotoSoft\"><rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><rdf:Description xmlns:crs=\"http://ns.adobe.com/camera-raw-settings/1.0/\" crs:Exposure2012=\"+1.50\" crs:ShadowTint=\"20\" crs:Temperature=\"5500\"/></rdf:RDF></x:xmpmeta>",
     )
     .unwrap();
     type Written = Arc<Mutex<Vec<(String, Vec<u8>)>>>;
@@ -1106,7 +1106,7 @@ fn notice_titles(app: &PhotocraftApp) -> Vec<String> {
     app.ui.notices.iter().map(|n| n.title.clone()).filter(|t| t.contains(".xmp")).collect()
 }
 
-/// A Lightroom or Bridge sidecar holds settings PhotoCraft can't keep (crop, masks, rating,
+/// A Lightroom or Bridge sidecar holds settings PhotoSoft can't keep (crop, masks, rating,
 /// keywords): Open uses its develop settings but never writes over it, and says so.
 #[test]
 fn a_foreign_sidecar_is_never_overwritten() {
@@ -1123,7 +1123,7 @@ fn a_foreign_sidecar_is_never_overwritten() {
     let _ = std::fs::remove_dir_all(&dir);
 }
 
-/// Bridge writes a sidecar with only a rating (no Camera Raw settings): it is not PhotoCraft's
+/// Bridge writes a sidecar with only a rating (no Camera Raw settings): it is not PhotoSoft's
 /// to replace, with or without a change in the dialog.
 #[test]
 fn a_rating_only_sidecar_is_left_alone() {
@@ -1143,7 +1143,7 @@ fn a_rating_only_sidecar_is_left_alone() {
 
 /// #9985: the crop of a Lightroom sidecar crops the opened raw (with the dialog's Open and
 /// without the dialog), and neither its edges nor the raw's file name are named as unsupported.
-/// A straightened crop isn't applied and is named. PhotoCraft's own sidecar keeps the crop.
+/// A straightened crop isn't applied and is named. PhotoSoft's own sidecar keeps the crop.
 #[test]
 fn a_sidecar_crop_crops_the_opened_raw() {
     let lightroom = r#"<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 7.0"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><rdf:Description rdf:about="" xmlns:crs="http://ns.adobe.com/camera-raw-settings/1.0/" crs:RawFileName="IMG_0100.cr2" crs:HasCrop="True" crs:CropTop="0.25" crs:CropLeft="0.125" crs:CropBottom="0.75" crs:CropRight="0.625" crs:CropAngle="0"/></rdf:RDF></x:xmpmeta>"#;
@@ -1168,7 +1168,7 @@ fn a_sidecar_crop_crops_the_opened_raw() {
     assert!(app.ui.status.contains("CropAngle") && !app.ui.status.contains("RawFileName"), "{}", app.ui.status);
     menu(&mut app, &ctx, "filter.cameraRaw", &json!({"ui": {"commit": true}})).unwrap().unwrap();
     assert_eq!(size(&app), Some((48, 32)));
-    // PhotoCraft's own sidecar: a changed setting rewrites it, with the crop it was opened with.
+    // PhotoSoft's own sidecar: a changed setting rewrites it, with the crop it was opened with.
     let crop = photocraft_io::camera_raw_xmp::Crop { top: 0.25, left: 0.125, bottom: 0.75, right: 0.625 };
     std::fs::write(sidecar_path(&raw_path), photocraft_io::camera_raw_xmp::save_with_crop(&CameraRaw::default(), Some(crop))).unwrap();
     open_dialog_at(&mut app, &ctx, &dng, &raw_path);

@@ -1,4 +1,4 @@
-//! The black arrow pointer: a filled black arrow with a white edge, PhotoCraft's own drawing from
+//! The black arrow pointer: a filled black arrow with a white edge, PhotoSoft's own drawing from
 //! one polygon (tip at the top left, body down to the right, a short tail), as a signed distance
 //! field (negative inside) in logical pixels from the tip with y pointing down. The hotspot is the
 //! tip; the bitmap is cropped to the arrow so the tip sits one pixel in from its top left corner,

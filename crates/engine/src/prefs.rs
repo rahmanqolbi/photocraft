@@ -121,7 +121,7 @@ choice!(
     RawDemosaic { Ahd = "ahd", Mhc = "mhc", Bilinear = "bilinear" } default Ahd
 );
 choice!(
-    /// MCP › When PhotoCraft Is Closed: what `photocraft-cli mcp` does when an
+    /// MCP › When PhotoSoft Is Closed: what `photocraft-cli mcp` does when an
     /// agent calls a tool and the app isn't running.
     WhenAppClosed { Launch = "launch", Headless = "headless", Error = "error" } default Launch
 );
@@ -1202,7 +1202,7 @@ pub fn migrate_integrations(section: &mut Value) {
 /// A saved `integrations` section read as the app's preference load reads it: migrated, and
 /// leniently (a value of the wrong type keeps its default, the rest still loads). The desktop
 /// app's launch read and `photocraft-cli mcp` use it, so a bad value can't reset, say, When
-/// PhotoCraft Is Closed for them alone.
+/// PhotoSoft Is Closed for them alone.
 pub fn read_integrations_section(mut section: Value) -> Integrations {
     migrate_integrations(&mut section);
     read_section(section)

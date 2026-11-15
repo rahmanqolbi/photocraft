@@ -47,7 +47,7 @@ with tempfile.TemporaryDirectory(prefix="photocraft-package-docs-") as temporary
         else:
             shutil.copy2(source, destination)
 
-    binary = "#!/usr/bin/env bash\nprintf 'PhotoCraft packaging fixture\\n'\n"
+    binary = "#!/usr/bin/env bash\nprintf 'PhotoSoft packaging fixture\\n'\n"
     target = fixture / "target"
     for name in ("photocraft", "photocraft-cli"):
         path = target / "release" / name
@@ -76,7 +76,7 @@ verify_appimagetool_override() { return 1; }
     env.update(CARGO_TARGET_DIR=str(target), DIST=str(temp / "dist"), CROSS_ARCH="x86_64", PHOTOCRAFT_BUILD_DATE="2026-01-01")
     run(["bash", "packaging/linux/package.sh", "--skip-build", "--formats", "tar appimage"], fixture, env)
     assert_docs(target / "linux-package/root/usr/share/doc/photocraft")
-    assert_docs(target / "linux-package/PhotoCraft.AppDir/usr/share/doc/photocraft")
+    assert_docs(target / "linux-package/PhotoSoft.AppDir/usr/share/doc/photocraft")
     archives = list((temp / "dist").glob("*.tar.gz"))
     assert len(archives) == 1, f"expected one tarball, found {archives}"
     unpacked = temp / "unpacked"
@@ -101,7 +101,7 @@ for index, arg in enumerate(args[:-1]):
     if arg == "-p":
         path = Path("target/release") / args[index + 1]
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text("#!/usr/bin/env bash\\nprintf 'PhotoCraft packaging fixture\\\\n'\\n")
+        path.write_text("#!/usr/bin/env bash\\nprintf 'PhotoSoft packaging fixture\\\\n'\\n")
         path.chmod(0o755)
 ''')
     cargo.chmod(0o755)

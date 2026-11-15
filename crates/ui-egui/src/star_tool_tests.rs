@@ -1,5 +1,5 @@
 //! The Star Tool (#11377): in the shape slot between Polygon and Line, on U, and a drag makes a
-//! live star shape layer with PhotoCraft's star defaults (5 points, star ratio 0.5).
+//! live star shape layer with PhotoSoft's star defaults (5 points, star ratio 0.5).
 
 use egui::{Key, Modifiers};
 use photocraft_doc::{Color, Fill, LayerContent, LiveShape, ShapeLayer};

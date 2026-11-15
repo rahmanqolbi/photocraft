@@ -1,4 +1,4 @@
-//! The PhotoCraft document model: pure data, no rendering, no UI.
+//! The PhotoSoft document model: pure data, no rendering, no UI.
 //!
 //! Layer order: inside every group (and the root), `children[0]` is the **bottom** layer, matching
 //! compositing order and the PSD file order. UIs display the list reversed.
@@ -877,7 +877,7 @@ pub struct Metadata {
     /// Historical conversion information; never consulted by native rendering or editing.
     /// Shared so document/history clones do not duplicate report entries, strings or retained payloads.
     pub import_conversion: Option<Arc<import_conversion::ImportConversion>>,
-    /// The XMP packet as stored, kept as text so properties PhotoCraft doesn't model survive.
+    /// The XMP packet as stored, kept as text so properties PhotoSoft doesn't model survive.
     /// Shared like the other payloads here: cloning a document or a history state never copies
     /// it (#4535).
     pub xmp: Option<Arc<str>>,
