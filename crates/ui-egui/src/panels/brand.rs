@@ -1,4 +1,4 @@
-//! The PhotoSoft brand mark at the left of the title bar: the app icon (the kitsune,
+//! The PhotoSoft brand mark at the left of the title bar: the app icon (the "PS" monogram,
 //! `assets/app-icon/`, see its README), where Photoshop shows its "Ps" tile. The PNG carries the
 //! icon's rounded corners; it is decoded once per context into a mipmapped texture, so it stays
 //! crisp at the title bar's size on any display scale.

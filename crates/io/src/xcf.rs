@@ -344,9 +344,7 @@ pub(crate) fn import(name: &str, bytes: &[u8], ctl: &Interrupt<'_>) -> Result<Im
         ));
     }
     if !image.precision.linear && mapper.linear_compositing {
-        mapper
-            .warnings
-            .note("GIMP composites this image in linear light; PhotoSoft composites in gamma-encoded RGB, so blends and soft edges differ slightly");
+        mapper.warnings.note("GIMP composites this image in linear light; PhotoSoft composites in gamma-encoded RGB, so blends and soft edges differ slightly");
     }
     if document.layers.is_empty() {
         mapper.warnings.note("the XCF file has no layers");

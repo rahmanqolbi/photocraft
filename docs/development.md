@@ -166,6 +166,21 @@ On Windows and Linux the first PhotoSoft holds an exclusive lock on `instance.lo
 
 ## Graphics startup and device loss
 
+On this laptop (Intel HD Graphics 4600, driver 20.19.15.5171 - the last one Intel released for
+that chip) the OpenGL driver is the only hardware path, and it aborts the process when the
+machine is short of memory: the Windows error reports name `ig75icd64.dll`, the driver's own
+module. The same shortage makes the compiler die with STATUS_IN_PAGE_ERROR, so a build and a GL
+session do not fit together in 16 GB with Chrome and Photoshop open.
+
+What helps, in order:
+
+- Close the memory-heavy apps before a GL session or a full build; a few GB free is enough.
+- Let the app choose the backend instead of forcing one: it writes a marker when a start died
+  inside the graphics driver and the next launch uses the next safer backend (`dx12` here, which
+  is the software WARP renderer - slower, but it does not crash).
+- `WGPU_BACKEND=gl` overrides that safety net, so a forced GL start on a full machine ends in the
+  driver. Unset it and let the app fall back.
+
 `--safe-gpu` starts with the CPU renderer for one launch (no GPU canvas; a software adapter for the window where the platform has one: WARP on Windows, llvmpipe over GL on Linux). Before creating the wgpu device the app writes and locks `gpu-starting.json` in the config directory; it clears it once the first frames have rendered. A launch that finds an unlocked marker knows the previous start died inside the graphics driver (#4) and uses the next safer backend (Windows: Vulkan → DX12 → CPU; Linux: Vulkan → GL → CPU; macOS: Metal → CPU), remembering a working hardware backend in `performance.gpuBackend` (Preferences › Performance › GPU Backend, with **Reset GPU Backend**). CPU recovery is session-only: choosing **Keep Using CPU** in the recovery dialog keeps CPU until the app restarts and stores nothing, so the next launch follows the saved preference (the GPU by default, or CPU if that is what is saved); dismissing the dialog or quitting without a choice also preserves the previous GPU preference (#3483). With `auto`, Intel and Qualcomm (Windows on ARM) adapters on Windows use DX12; when DXGI lists an Intel adapter, the app creates its wgpu instance with DX12 and GL only, so the first start doesn't load the Intel Vulkan driver, and a discrete GPU beside the Intel one also runs on DX12. Help › System Info shows the adapter, backend, driver and fallback state.
 
 On Linux, on a machine with several GPUs (say an eGPU, a discrete laptop GPU and an iGPU), `auto` takes the first discrete adapter the driver lists; choose another in Preferences › Performance › Advanced › GPU adapter (`performance.gpuAdapter`, Linux; a case-insensitive piece of the adapter's name, empty is automatic), or for one launch with `PHOTOCRAFT_GPU_ADAPTER=nvidia`. An adapter that is missing or can't present to the window falls back to the automatic choice, with a note in System Info.
