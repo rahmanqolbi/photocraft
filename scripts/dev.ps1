@@ -35,17 +35,19 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 Push-Location $root
 try {
-    # Keep the build off C:. A full debug build is ~10 GB, and the global kache
-    # wrapper shares one target dir across projects whose cache can be
-    # garbage-collected mid-build ("failed to write ... fingerprint").
-    if (-not $TargetDir) {
-        $TargetDir = if ($env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR }
-            elseif (Test-Path 'H:\cargo\targets') { 'H:\cargo\targets\photosoft' }
-            else { Join-Path $root 'target' }
+    # Where Cargo writes its build output.
+    #
+    # This machine's Cargo (a fork of cargo 1.101) ignores CARGO_TARGET_DIR: it puts
+    # every project in ~/.cargo/targets/<project>-<hash> and compiles the dependencies
+    # once into ~/.cargo/targets/shared-deps. The build tree is therefore moved with a
+    # directory junction, not an environment variable (see docs/photosoft.md).
+    # -TargetDir still works for a throwaway lane, because cargo's --target-dir is
+    # honoured for the crates it compiles itself.
+    if ($TargetDir) {
+        $env:CARGO_TARGET_DIR = $TargetDir
+        Write-Host "target dir: $TargetDir" -ForegroundColor DarkGray
     }
-    $env:CARGO_TARGET_DIR = $TargetDir
     $env:CARGO_TERM_COLOR = 'never'
-    Write-Host "target dir: $env:CARGO_TARGET_DIR" -ForegroundColor DarkGray
 
     switch ($Task) {
         'build' { cargo build -p photocraft @Rest }

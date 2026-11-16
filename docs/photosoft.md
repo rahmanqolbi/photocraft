@@ -64,30 +64,51 @@ prints the path it picked. A full debug build with the test binaries is roughly 
 
 ### Disk layout on this machine
 
-| Path | What | Size |
-|---|---|---|
-| `H:\cargo\targets\photosoft` | this project's build output (`CARGO_TARGET_DIR`) | ~10 GB |
-| `H:\cargo\targets\<project>-<hash>` | the other Rust projects, reached through a **directory junction** at `C:\Users\Qolbi\.cargo\targets\` | ~9 GB |
-| `C:\Users\Qolbi\.cargo\registry` | the crate registry | 2.8 GB |
-| `C:\Users\Qolbi\.cargo\targets\shared-deps` | the shared dependency cache | 12.8 GB |
+C: is an SSD with little room, D: is a fast SSD, H: is a big but slow HDD (measured: D: 864
+MB/s, H: 22 MB/s). The rule that follows:
 
-The junctions are why the projects keep working from their usual paths while the bytes live
-on H:. To move another one:
+| What | Where | Why |
+|---|---|---|
+| **crate registry** (`~/.cargo/registry`, 2.8 GB) | `D:\cargo\registry` (junction) | read hot while compiling |
+| **kache store** (`%LOCALAPPDATA%\kache`, 8.9 GB) | `D:\kache-cache` (junction) | read per crate; same volume as the build tree, so the hardlinks work |
+| **shared dependency cache** (`~/.cargo/targets/shared-deps`, 12.8 GB) | `D:\Project\.cargo-targets\` | where every dependency is compiled: the hot path |
+| **PhotoSoft's own crates** (`~/.cargo/targets/Photosoft-<hash>`) | `H:\cargo\targets\Photosoft-<hash>` (junction) | the build tree of this fork; H: has the room |
+| **the other projects** (`image-studio`, …) | `D:\Project\.cargo-targets\` | the machine's existing setup, left alone |
+
+A **junction** keeps every path working while the bytes live on another drive:
 
 ```powershell
-robocopy "C:\Users\Qolbi\.cargo\targets\<dir>" "H:\cargo\targets\<dir>" /MOVE /E
-cmd /c "mklink /J C:\Users\Qolbi\.cargo\targets\<dir> H:\cargo\targets\<dir>"
+robocopy "C:\Users\Qolbi\.cargo\registry" "D:\cargo\registry" /MOVE /E
+cmd /c "mklink /J C:\Users\Qolbi\.cargo\registry D:\cargo\registry"
 ```
 
-Do it while no build is running: Cargo holds a lock file in the target directory, and a
-half-moved directory is worse than an unmoved one.
+Do it while no build is running: Cargo holds a lock file in the directory, and a half-moved
+directory is worse than an unmoved one. `Remove-Item` on a junction throws a
+`NullReferenceException` in PowerShell — the link is still removed; use `cmd /c rmdir` and
+check with `(Get-Item <path> -Force).LinkType`.
+
+### The cargo fork decides the target directory, not `CARGO_TARGET_DIR`
+
+This machine's Cargo (a fork of cargo 1.101) puts every project's build output in
+`~/.cargo/targets/<project>-<hash>` and compiles all dependencies once into
+`~/.cargo/targets/shared-deps`. **`CARGO_TARGET_DIR` is ignored**, so the only way to move a
+build tree is the junction above:
+
+```powershell
+cmd /c "mklink /J D:\Project\.cargo-targets\Photosoft-c1353e40 H:\cargo\targets\Photosoft-c1353e40"
+```
 
 Two builds in the same target directory block each other on Cargo's build lock. If you need two
-at once (a background build while you iterate), give the second one its own directory:
+at once (a background build while you iterate), build the second one in its own directory
+(`cargo build --target-dir <dir>`).
 
-```powershell
-$env:CARGO_TARGET_DIR = "H:\cargo\targets\photosoft-agent2"
-```
+### The cargo GC can delete a running build's cache
+
+`~/.cargo/config.toml` sets `build.gc.frequency = "always"` with `max-unused = "12 hours"`.
+The collector may remove the shared dependency cache **while a build is using it**, and the
+build dies with `failed to write .../fingerprint/invoked.timestamp`. When that happens, build
+with a private target directory (the project's own `target/`), which the shared-cache collector
+does not touch.
 
 ## Branch model
 
