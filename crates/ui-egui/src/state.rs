@@ -194,6 +194,10 @@ pub struct DocWindow {
     /// A tab dragged off the tab strip opens its window where it was dropped (#3733).
     #[serde(default)]
     pub position: Option<[f32; 2]>,
+    /// The last canvas rect this window rendered, in screen points (`[x0, y0, x1, y1]`). Not persisted;
+    /// used by view commands that need the window's pixel area (Fit Layers, Zoom window resize).
+    #[serde(skip)]
+    pub last_canvas: Option<[f32; 4]>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -384,6 +388,19 @@ pub struct UiState {
     pub views: Vec<View>,
     pub dialogs: Vec<Dialog>,
     pub windows: Vec<DocWindow>,
+    /// Which of the windows owns the focus right now: `None` = the main application window,
+    /// `Some(id)` = the floating window with that id. Set every frame from each viewport's own
+    /// focus; never persisted.
+    #[serde(skip)]
+    pub focused_window: Option<u64>,
+    /// Whether this launch already ran the saved-session restore. Set once per process;
+    /// never persisted.
+    #[serde(skip)]
+    pub session_restored: bool,
+    /// Snapshot of the floating windows used to detect changes cheaply; `String` avoids serde
+    /// requirements on the frame loop. Never persisted.
+    #[serde(skip)]
+    pub session_snapshot: String,
     pub theme: crate::theme::ThemeKind,
     pub workspace: String,
     pub palette_open: bool,
@@ -556,6 +573,9 @@ impl Default for UiState {
             views: Vec::new(),
             dialogs: Vec::new(),
             windows: Vec::new(),
+            focused_window: None,
+            session_restored: false,
+            session_snapshot: String::new(),
             theme: crate::theme::ThemeKind::ProMedium,
             workspace: "Essentials".into(),
             palette_open: false,

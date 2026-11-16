@@ -213,28 +213,28 @@ fn play_owned(app: &mut PhotocraftApp, params: &Value, suspended: Option<Value>)
 /// until canvas layout, so it uses the dimensions after all preceding action steps.
 pub(crate) fn run_view(app: &mut PhotocraftApp, id: &str, params: Value) -> Result<Value, String> {
     app.sync_views();
-    let i = app.session.active_index().ok_or("no document")?;
-    let v = app.ui.views.get_mut(i).ok_or("no document view")?;
+    let rz = app.session.prefs().general.animated_zoom;
+    let v = crate::view_target::view_mut(app).ok_or("no document")?;
     v.fill_pending = false;
     match id {
         "view.fitOnScreen" => {
             v.fit_pending = true;
-            v.request_zoom_animation(app.session.prefs().general.animated_zoom);
+            v.request_zoom_animation(rz);
         }
         "view.zoomIn" => {
             v.fit_pending = false;
             v.zoom = crate::zoom_levels::step(v.zoom, 1, v.doc_size);
-            v.request_zoom_animation(app.session.prefs().general.animated_zoom);
+            v.request_zoom_animation(rz);
         }
         "view.zoomOut" => {
             v.fit_pending = false;
             v.zoom = crate::zoom_levels::step(v.zoom, -1, v.doc_size);
-            v.request_zoom_animation(app.session.prefs().general.animated_zoom);
+            v.request_zoom_animation(rz);
         }
         "view.actualPixels" => {
             v.fit_pending = false;
             v.zoom = 1.0;
-            v.request_zoom_animation(app.session.prefs().general.animated_zoom);
+            v.request_zoom_animation(rz);
         }
         _ => return Err(format!("unsupported view command: {id}")),
     }

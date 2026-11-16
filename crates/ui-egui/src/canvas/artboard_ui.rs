@@ -104,15 +104,15 @@ pub fn draw_frames(app: &PhotocraftApp, painter: &egui::Painter, xf: &ViewXform)
 
 /// View › Fit Artboard on Screen: zoom to the active artboard (or the first one).
 pub fn fit_artboard(app: &mut PhotocraftApp) -> Result<Value, String> {
-    let i = app.session.active_index().ok_or("no document")?;
     let st = app.session.active().ok_or("no document")?;
     let id = st.active_layer.and_then(|l| st.doc.artboard_of(l)).or_else(|| st.doc.artboards().last().map(|b| b.0)).ok_or("the document has no artboards")?;
     let b = st.doc.layer(id).and_then(Layer::artboard).map(|a| a.rect).ok_or("no artboard")?;
     let size = [st.doc.size.width, st.doc.size.height];
-    let area = app.last_canvas_rect.size();
+    let area = crate::view_target::canvas_rect(app).map(|r| r.size()).unwrap_or_else(|| egui::vec2(1200.0, 800.0));
     let area = if area.x > 50.0 { area } else { egui::vec2(1200.0, 800.0) };
     let ppp = app.canvas_ppp();
-    let v = &mut app.ui.views[i];
+    let rz = app.session.prefs().general.animated_zoom;
+    let v = crate::view_target::view_mut(app).ok_or("no document")?;
     // Leave room for the name above the board. The area is in egui points; the stored zoom is
     // device pixels per document pixel.
     v.zoom = ((area.x - 60.0) / b.width().max(1) as f32).min((area.y - 80.0) / b.height().max(1) as f32) * ppp;
@@ -121,7 +121,7 @@ pub fn fit_artboard(app: &mut PhotocraftApp) -> Result<Value, String> {
     // overflows an i32 sum (#981).
     v.center = [((f64::from(b.x0) + f64::from(b.x1)) / 2.0) as f32, ((f64::from(b.y0) + f64::from(b.y1)) / 2.0) as f32];
     v.fit_pending = false;
-    v.request_zoom_animation(app.session.prefs().general.animated_zoom);
+    v.request_zoom_animation(rz);
     v.zoom_anchor = None;
     Ok(json!({"zoom": v.zoom, "artboard": id.0, "bounds": [b.x0, b.y0, b.x1, b.y1]}))
 }

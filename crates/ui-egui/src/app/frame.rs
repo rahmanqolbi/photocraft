@@ -267,6 +267,10 @@ impl PhotocraftApp {
         // The OS title bar (and the taskbar / Alt-Tab entry) follows the active file; with the
         // system title bar this is where the document name lives, as the in-app title is hidden.
         panels::sync_window_title(self, &ctx);
+        // The main application window counts as "no floating window owns the focus".
+        if ctx.input(|i| i.viewport().focused.unwrap_or(false)) {
+            crate::view_target::set_focused(self, None);
+        }
         let chrome = !self.ui.view.hides_chrome();
         if chrome {
             self.ui.panels.full_screen_chrome = false;

@@ -2,7 +2,6 @@ use super::{LAYOUTS, PhotocraftApp, Value, json};
 
 /// View › Fit Layer(s) on Screen: zoom and centre on the selected layers' bounds.
 pub(super) fn fit_layers(app: &mut PhotocraftApp) -> Result<Value, String> {
-    let i = app.session.active_index().ok_or("no document")?;
     let st = app.session.active().ok_or("no document")?;
     let mut b = photocraft_geom::Rect::EMPTY;
     for id in st.selected_layers() {
@@ -14,16 +13,17 @@ pub(super) fn fit_layers(app: &mut PhotocraftApp) -> Result<Value, String> {
         b = st.doc.bounds();
     }
     let size = [st.doc.size.width, st.doc.size.height];
-    let area = app.last_canvas_rect.size();
+    let area = crate::view_target::canvas_rect(app).map(|r| r.size()).unwrap_or_else(|| egui::vec2(1200.0, 800.0));
     let area = if area.x > 50.0 { area } else { egui::vec2(1200.0, 800.0) };
     // The area is in egui points; the stored zoom is device pixels per document pixel.
     let ppp = app.canvas_ppp();
     let points = ((area.x - 40.0) / b.width().max(1) as f32).min((area.y - 40.0) / b.height().max(1) as f32);
-    let v = &mut app.ui.views[i];
+    let rz = app.session.prefs().general.animated_zoom;
+    let v = crate::view_target::view_mut(app).ok_or("no document")?;
     v.zoom = crate::zoom_levels::clamp(points * ppp, size);
     v.center = [(b.x0 + b.x1) as f32 / 2.0, (b.y0 + b.y1) as f32 / 2.0];
     v.fit_pending = false;
-    v.request_zoom_animation(app.session.prefs().general.animated_zoom);
+    v.request_zoom_animation(rz);
     v.zoom_anchor = None;
     Ok(json!({"zoom": v.zoom, "bounds": [b.x0, b.y0, b.x1, b.y1]}))
 }
@@ -44,7 +44,7 @@ pub(crate) fn float_window(app: &mut PhotocraftApp, doc: usize, offset: usize) -
     view.zoom_transition = None;
     view.display_camera = None;
     view.fit_pending = offset > 0 || view.fit_pending;
-    app.ui.windows.push(crate::state::DocWindow { id: wid, document: doc, view, open: true, position: None });
+    app.ui.windows.push(crate::state::DocWindow { id: wid, document: doc, view, open: true, position: None, last_canvas: None });
     wid
 }
 

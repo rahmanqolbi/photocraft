@@ -13,7 +13,7 @@ use serde_json::{Map, Value, json};
 use crate::PhotocraftApp;
 use crate::state::DialogKind;
 
-mod arrange;
+pub(crate) mod arrange;
 mod dialogs;
 mod dispatch;
 mod options;

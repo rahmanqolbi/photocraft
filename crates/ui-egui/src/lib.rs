@@ -40,6 +40,7 @@ pub mod menu_catalog;
 pub mod menus;
 pub mod monitor_status;
 pub mod notices;
+pub(crate) mod view_target;
 pub mod panels;
 pub mod preset_files_ui;
 pub mod proxy;
@@ -64,6 +65,7 @@ use serde_json::{Value, json};
 pub use control::{ControlRequest, ControlResponse};
 pub use file_dialog::{FileDialogAnswer, FileDialogFn, FileDialogReply, FileDialogRequest};
 pub use file_open::OsEvent;
+pub use view_target::restore_session;
 pub use state::{Tool, UiState};
 
 mod app;

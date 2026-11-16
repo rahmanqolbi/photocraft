@@ -714,7 +714,7 @@ fn views_and_windows_stay_with_their_documents() {
         v.zoom = i as f32 + 1.0;
     }
     app.ui.windows =
-        (0..4).map(|document| crate::state::DocWindow { id: document as u64, document, view: Default::default(), open: true, position: None }).collect();
+        (0..4).map(|document| crate::state::DocWindow { id: document as u64, document, view: Default::default(), open: true, position: None, last_canvas: None }).collect();
     let zooms = |app: &PhotocraftApp| app.ui.views.iter().map(|v| v.zoom).collect::<Vec<_>>();
     let windows = |app: &PhotocraftApp| app.ui.windows.iter().map(|w| (w.id, w.document)).collect::<Vec<_>>();
     assert_eq!(app.run("document.move", json!({"document": 0, "to": 3})).unwrap(), json!({"document": 3}));
@@ -1117,4 +1117,43 @@ fn opening_an_open_file_again_shows_its_tab() {
     for d in [dir, dir2, dir3, dir4] {
         let _ = std::fs::remove_dir_all(&d);
     }
+}
+
+#[test]
+fn restore_session_reopens_saved_floating_windows_on_launch() {
+    let (dir, paths) = files("session-restore", &["a.psd", "b.psd"], b"x");
+    let (mut app, _) = app_with(Vec::new());
+    app.session.edit_prefs(|p| {
+        p.file_handling.saved_windows = vec![
+            photocraft_engine::prefs::SavedWindow { path: paths[0].clone(), zoom: 2.0, center: [5.0, 6.0], rotation: 15.0, position: Some([11.0, 22.0]) },
+            photocraft_engine::prefs::SavedWindow { path: paths[1].clone(), zoom: 0.5, center: [42.0, 7.0], rotation: 0.0, position: None },
+        ];
+    });
+    crate::restore_session(&mut app);
+    assert_eq!(app.session.documents().len(), 2, "both files reopen");
+    assert_eq!(app.ui.windows.len(), 2, "both reopen as floating windows");
+    let a = app.ui.windows.iter().find(|w| w.document == 0).unwrap();
+    assert_eq!(a.view.zoom, 2.0);
+    assert_eq!(a.view.center, [5.0, 6.0]);
+    assert_eq!(a.view.rotation, 15.0);
+    assert_eq!(a.position, Some([11.0, 22.0]));
+    let b = app.ui.windows.iter().find(|w| w.document == 1).unwrap();
+    assert_eq!(b.view.zoom, 0.5);
+    assert_eq!(b.view.center, [42.0, 7.0]);
+    assert_eq!(b.position, None);
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn restore_session_does_not_reopen_when_the_command_line_opened_documents() {
+    let (dir, paths) = files("session-restore-cli", &["a.psd"], b"x");
+    let (mut app, _) = app_with(Vec::new());
+    app.open_bytes("cli.psd", b"x").unwrap();
+    app.session.edit_prefs(|p| {
+        p.file_handling.saved_windows = vec![photocraft_engine::prefs::SavedWindow { path: paths[0].clone(), zoom: 2.0, center: [0.0, 0.0], rotation: 0.0, position: None }];
+    });
+    crate::restore_session(&mut app);
+    assert_eq!(app.session.documents().len(), 1, "the command-line document wins; nothing is reopened");
+    assert_eq!(app.ui.windows.len(), 0, "no extra window opened");
+    let _ = std::fs::remove_dir_all(&dir);
 }

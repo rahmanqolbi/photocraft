@@ -378,17 +378,18 @@ fn run(app: &mut PhotocraftApp, ctx: &egui::Context, id: &str, p: &Value) -> Res
             Ok(json!(o.pixel_art_preview))
         }
         "view.twoHundredPercent" | "view.printSize" => {
-            let i = app.session.active_index().ok_or("no document")?;
             // Print Size shows the document at its print size for the screen resolution
-            // (Preferences ▸ Units & Rulers: Screen Resolution, 72 ppi by default).
+            // (Preferences â–¸ Units & Rulers: Screen Resolution, 72 ppi by default).
             let dpi = app.session.active().map_or(72.0, |d| d.doc.resolution_dpi.max(1.0));
             let size = app.session.active().map_or([0, 0], |d| [d.doc.size.width, d.doc.size.height]);
             let screen = app.session.prefs().units_and_rulers.screen_resolution.max(1.0) as f32;
             let z = if id == "view.twoHundredPercent" { 2.0 } else { screen / dpi };
-            app.ui.views[i].zoom = crate::zoom_levels::clamp(z, size);
-            app.ui.views[i].request_zoom_animation(app.session.prefs().general.animated_zoom);
-            app.ui.views[i].zoom_anchor = None;
-            Ok(json!({"zoom": app.ui.views[i].zoom}))
+            let rz = app.session.prefs().general.animated_zoom;
+    let v = crate::view_target::view_mut(app).ok_or("no document view")?;
+            v.zoom = crate::zoom_levels::clamp(z, size);
+            v.request_zoom_animation(rz);
+            v.zoom_anchor = None;
+            Ok(json!({"zoom": v.zoom}))
         }
         "view.fitLayersOnScreen" => fit_layers(app),
         "view.fitArtboardOnScreen" => crate::artboard_ui::fit_artboard(app),

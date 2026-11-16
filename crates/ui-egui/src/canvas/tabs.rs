@@ -701,36 +701,166 @@ pub(super) fn open_on_double_click(app: &mut PhotocraftApp, ui: &egui::Ui, area:
     }
 }
 
+
+
+/// A Photoshop-style title bar for a floating document window: the document name on the left,
+/// window controls on the right. The whole row is the drag handle; the window has no OS frame.
+fn window_chrome(
+    ui: &mut egui::Ui,
+    doc_name: &str,
+    view: &mut crate::state::View,
+    doc_size: [u32; 2],
+    fit_pending: &mut bool,
+) -> bool {
+    let t = crate::theme::Tokens::get(ui.ctx());
+    let bar = egui::Panel::top("docwin-chrome")
+        .exact_size(30.0)
+        .frame(egui::Frame::NONE.fill(t.card).inner_margin(egui::Margin::symmetric(8, 3)));
+    let mut close = false;
+    bar.show(ui, |ui| {
+        ui.horizontal(|ui| {
+            ui.spacing_mut().item_spacing.x = 4.0;
+            // Drag handle: the row's free area. Pressing a button does not drag the window.
+            let handle = ui.scope_id().with("docwin-drag");
+            let resp = ui.interact(ui.available_rect_before_wrap(), handle, egui::Sense::drag());
+            if resp.drag_started() {
+                ui.ctx().send_viewport_cmd(egui::ViewportCommand::StartDrag);
+            }
+            ui.label(egui::RichText::new(doc_name).size(13.0).color(t.text));
+
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                let x = ui.button(egui::RichText::new("×").size(14.0).color(t.text)).on_hover_text("Close");
+                if x.clicked() {
+                    close = true;
+                }
+                let sq = ui.button(egui::RichText::new("❐").size(12.0).color(t.text)).on_hover_text("Maximize");
+                if sq.clicked() {
+                    let maximized = ui.ctx().input(|i| i.viewport().maximized.unwrap_or(false));
+                    ui.ctx().send_viewport_cmd(egui::ViewportCommand::Maximized(!maximized));
+                }
+                let dash = ui.button(egui::RichText::new("–").size(14.0).color(t.text)).on_hover_text("Minimize");
+                if dash.clicked() {
+                    ui.ctx().send_viewport_cmd(egui::ViewportCommand::Minimized(true));
+                }
+                ui.separator();
+                let plus = ui.button(egui::RichText::new("+").size(13.0).color(t.text)).on_hover_text("Zoom In");
+                if plus.clicked() {
+                    view.zoom = crate::zoom_levels::step(view.zoom, 1, doc_size);
+                    view.zoom_anchor = None;
+                }
+                if ui.button("Fit").on_hover_text("Fit on Screen").clicked() {
+                    view.fit_pending = true;
+                    *fit_pending = true;
+                }
+                if ui.button("100%").on_hover_text("Actual Pixels").clicked() {
+                    view.zoom = 1.0;
+                    view.zoom_anchor = None;
+                }
+                let minus = ui.button(egui::RichText::new("−").size(14.0).color(t.text)).on_hover_text("Zoom Out");
+                if minus.clicked() {
+                    view.zoom = crate::zoom_levels::step(view.zoom, -1, doc_size);
+                    view.zoom_anchor = None;
+                }
+                // Zoom readout: Photoshop keeps it in the status bar; the window shows it compactly.
+                let pct = format!("{}%", (view.zoom * 100.0).round() as i32);
+                ui.label(egui::RichText::new(pct).size(11.0).color(t.text_dim));
+            });
+        });
+    });
+    close
+}
+
 /// Extra OS windows showing documents (multi-window / multi-monitor).
+/// A floating window *is* the editor for its document — not a viewer: the shared canvas renders
+/// it with the same tools, rulers, overlays and preview paths as the main document area; the only
+/// difference is its own view (zoom/pan/rotation) and its own chrome.
 pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
     let wins = app.ui.windows.clone();
     for w in wins.into_iter().filter(|w| w.open) {
         let Some(st) = app.session.documents().get(w.document) else { continue };
         let title = format!("{} — window {}", st.doc.name, w.id);
-        let vid = egui::ViewportId::from_hash_of(("docwin", w.id));
-        let mut builder = egui::ViewportBuilder::default().with_title(title).with_inner_size([800.0, 600.0]);
+        let doc_name = st.doc.name.clone();
+        let doc_size = [st.doc.size.width, st.doc.size.height];
+        let doc_idx = w.document;
+        let win_id = w.id;
+        let vid = egui::ViewportId::from_hash_of(("docwin", win_id));
+        let mut builder = egui::ViewportBuilder::default()
+            .with_title(title)
+            .with_inner_size([800.0, 600.0])
+            .with_decorations(false)
+            .with_resizable(true)
+            .with_maximize_button(true);
         if let Some([x, y]) = w.position {
             builder = builder.with_position([x, y]);
         }
+        // Swap in the floating window's view so the shared canvas paths drive this window exactly
+        // like the main document area (tools, rulers, overlays, gestures). The main view is
+        // restored afterwards.
+        let saved_view = app.ui.views.get(doc_idx).cloned();
+        let saved_rect = app.last_canvas_rect;
+        let saved_ppp = app.ppp;
+        if saved_view.is_some() {
+            if let Some(slot) = app.ui.views.get_mut(doc_idx) {
+                *slot = w.view.clone();
+            }
+        }
         let mut view = w.view.clone();
-        let mut close = false;
+        let mut fit_pending = false;
         ctx.show_viewport_immediate(vid, builder, |ui, class| {
             if ui.ctx().input(|i| i.viewport().close_requested()) {
-                close = true;
+                if let Some(win) = app.ui.windows.iter_mut().find(|x| x.id == win_id) {
+                    win.open = false;
+                }
+            }
+            if ui.ctx().input(|i| i.viewport().focused.unwrap_or(false)) {
+                crate::view_target::set_focused(app, Some(win_id));
+            }
+            if let Some(outer) = ui.ctx().input(|i| i.viewport().outer_rect) {
+                let position = [outer.left(), outer.top()];
+                if let Some(win) = app.ui.windows.iter_mut().find(|x| x.id == win_id) {
+                    if win.position != Some(position) {
+                        win.position = Some(position);
+                    }
+                }
+            }
+            let closed = window_chrome(ui, &doc_name, &mut view, doc_size, &mut fit_pending);
+            if closed {
+                if let Some(win) = app.ui.windows.iter_mut().find(|x| x.id == win_id) {
+                    win.open = false;
+                }
             }
             egui::CentralPanel::default().frame(egui::Frame::NONE.fill(crate::theme::Tokens::get(ui.ctx()).canvas)).show(ui, |ui| {
                 let rect = ui.available_rect_before_wrap();
-                view = canvas_view(app, ui, w.document, rect, view.clone(), false);
+                app.last_canvas_rect = rect;
+                view = canvas_view(app, ui, doc_idx, rect, view.clone(), true);
+                if let Some(win) = app.ui.windows.iter_mut().find(|x| x.id == win_id) {
+                    win.last_canvas = Some([rect.left(), rect.top(), rect.right(), rect.bottom()]);
+                }
                 // Preferences › Zoom Resizes Windows: a zoom wraps the window around the image.
                 crate::zoom_window_fit::follow(app, ui.ctx(), class, vid, &w, &mut view, rect);
+                if fit_pending {
+                    if let Some(v) = app.ui.views.get_mut(doc_idx) {
+                        v.fit_pending = true;
+                        v.request_zoom_animation(app.session.prefs().general.animated_zoom);
+                        v.zoom_anchor = None;
+                    }
+                    view.fit_pending = true;
+                    view.request_zoom_animation(app.session.prefs().general.animated_zoom);
+                    view.zoom_anchor = None;
+                }
             });
         });
-        if let Some(win) = app.ui.windows.iter_mut().find(|x| x.id == w.id) {
-            win.view = view;
-            if close {
-                win.open = false;
+        if let Some(saved) = saved_view {
+            if let Some(slot) = app.ui.views.get_mut(doc_idx) {
+                *slot = saved;
             }
+        }
+        app.last_canvas_rect = saved_rect;
+        app.ppp = saved_ppp;
+        if let Some(win) = app.ui.windows.iter_mut().find(|x| x.id == win_id) {
+            win.view = view;
         }
     }
     app.ui.windows.retain(|w| w.open);
+    crate::view_target::sync_session(app);
 }
