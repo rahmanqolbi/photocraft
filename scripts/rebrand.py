@@ -63,7 +63,9 @@ CORE_GLOBS = [
     "xtask/**/*.rs",
     "xtask/**/*.toml",
     "README.md",
-    "NOTICE",
+    # NOTICE is an attribution file, like ATTRIBUTION.md: the upstream attribution lines
+    # (modified version of PhotoCraft, upstream copyright) must stay PhotoCraft, and the
+    # blanket rewrite would bury that. Excluded; it is maintained by hand.
     "docs/user/**/*",
     "docs/releasing.md",
     "docs/mcp.md",
