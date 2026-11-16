@@ -473,7 +473,7 @@ pub fn parse_pattern_block_with(data: &[u8], budget: &mut PatternBudget) -> Resu
 }
 
 /// Whether `Patt` / `Pat2` / `Pat3` block data keeps a pattern's transparency in the user mask
-/// array, as PhotoCraft wrote it before #8054. Photoshop refuses such a file, so a save must
+/// array, as PhotoSoft wrote it before #8054. Photoshop refuses such a file, so a save must
 /// rewrite the block rather than keep it. Unreadable data counts as `false`.
 pub fn block_has_user_mask(data: &[u8]) -> bool {
     let mut r = Rd { b: data, p: 0 };

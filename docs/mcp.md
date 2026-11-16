@@ -47,7 +47,7 @@ not put the CLI on `PATH`.
 
 ## Start a session
 
-PhotoCraft follows the same conventions as FilmCraft #28. Start a headless session:
+PhotoSoft follows the same conventions as FilmCraft #28. Start a headless session:
 
 ```sh
 photocraft-cli mcp --automation-read-root /work/project --automation-write-root /work/project
@@ -60,7 +60,7 @@ described in [development.md](development.md). UI tools require a running deskto
 A client has the full rights of the roots it is given: it can read any file below the read
 root, and `doc_save`, `doc_export` and the export tools can create files anywhere below the
 write root. `doc_save` and `doc_export` replace an existing file only when its extension is an
-image or document format PhotoCraft writes (PNG, JPEG, TIFF, PSD, PSB, .pcraft, OpenRaster,
+image or document format PhotoSoft writes (PNG, JPEG, TIFF, PSD, PSB, .pcraft, OpenRaster,
 PDF, …) or its bytes are an image; anything else (`src/main.rs`, `.env`) is refused and left
 untouched. The multi-file exports (layers, data sets) never replace a file. An agent reads
 text from documents (layer names, metadata) that may try to steer it, so prefer a dedicated

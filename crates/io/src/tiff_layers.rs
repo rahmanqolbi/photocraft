@@ -131,7 +131,7 @@ pub(crate) fn import_layered(name: &str, img: &Image, layers: &[u8]) -> Result<I
     // The same nesting limit as opening a PSD (#2940).
     crate::psd_import::check_group_depth(&file)?;
     // Spot planes are read in Photoshop's polarity (0 = solid ink), as from a PSD. The importer's
-    // rule for PSDs from earlier PhotoCraft versions never applies: those versions stored no
+    // rule for PSDs from earlier PhotoSoft versions never applies: those versions stored no
     // extra samples in a TIFF, and a TIFF with them carries 1053.
     let (mut doc, w) = psd_to_document(&file);
     warnings.extend(w);
@@ -379,7 +379,7 @@ fn tiff_image_source(doc: &Document, file: &photocraft_psd::PsdFile) -> ImageSou
     if let Some(info) = &mut isd.layer_info {
         for layer in &mut info.layers {
             // Photoshop sets flag bit 3 on every record it writes, group dividers included (299 of
-            // the 305 dividers in the corpus's Photoshop files). PhotoCraft's PSDs set it on
+            // the 305 dividers in the corpus's Photoshop files). PhotoSoft's PSDs set it on
             // layers only, unchanged here.
             layer.flags.0 |= photocraft_psd::layer::LayerFlags::BIT4_USEFUL;
             photoshop_layer_blocks(&mut layer.blocks);
@@ -666,7 +666,7 @@ fn matte_and_drop_alpha(img: &mut Image) -> bool {
     let white_byte: u8 = if cmyk { 0 } else { 255 };
     let white_u16: u16 = if cmyk { 0 } else { u16::MAX };
     let white_f: f32 = if cmyk { 0.0 } else { 1.0 };
-    // Lab's white is L* 100 with a* and b* 0, which PhotoCraft holds mid-range (`(0 + 128) / 255`).
+    // Lab's white is L* 100 with a* and b* 0, which PhotoSoft holds mid-range (`(0 + 128) / 255`).
     let lab = img.layout().is_lab();
     let mut out = Vec::with_capacity(img.data().len() / stride * keep);
     for px in img.data().chunks_exact(stride) {

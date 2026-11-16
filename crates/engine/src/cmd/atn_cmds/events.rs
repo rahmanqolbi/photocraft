@@ -181,7 +181,7 @@ macro_rules! clipping_event {
     };
 }
 
-/// Every Photoshop event PhotoCraft maps. The order matters only for the panel label.
+/// Every Photoshop event PhotoSoft maps. The order matters only for the panel label.
 pub(super) const EVENTS: &[Event] = &[
     // Filters.
     ev!("GsnB", "gaussianBlur", "Gaussian Blur", "filter.blur.gaussianBlur", &[F("Rds ", "radius", Kind::Px)]),
@@ -585,7 +585,7 @@ pub(super) const EVENTS: &[Event] = &[
     Event { code: "Stop", name: "stop", label: "Stop", ids: &[STOP_MESSAGE], from: stop_from, to: stop_to },
 ];
 
-/// Four-char codes PhotoCraft once exported for events Photoshop only runs by name (or by
+/// Four-char codes PhotoSoft once exported for events Photoshop only runs by name (or by
 /// another code), with the name they stand for. Measured in Photoshop: `executeAction` with
 /// these codes fails ("the command is not currently available"), and `Fltn` is the
 /// `flatness` property, not the flatten event. Import keeps accepting them so actions saved

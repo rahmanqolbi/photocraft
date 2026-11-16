@@ -19,7 +19,7 @@ use photocraft_codecs::{JpegFormat, TiffCompression};
 use photocraft_io::{DdsCompression, DpxBits, TgaBits};
 use serde_json::Value;
 
-/// photocraft-cli: headless PhotoCraft
+/// photocraft-cli: headless PhotoSoft
 #[derive(Parser)]
 #[command(name = "photocraft-cli", version = photocraft_engine::build_info::long_version_static(), arg_required_else_help = true)]
 pub(crate) struct Cli {
@@ -205,7 +205,7 @@ pub(crate) struct CommandsArgs {
 /// app; root flags are refused. The token flags require --bridge (or PHOTOCRAFT_CONTROL_PORT).
 #[derive(Args)]
 pub(crate) struct McpArgs {
-    /// Bridge to the PhotoCraft app listening here instead of a headless engine; a bare port means
+    /// Bridge to the PhotoSoft app listening here instead of a headless engine; a bare port means
     /// 127.0.0.1:<PORT>
     #[arg(long, value_name = "127.0.0.1:PORT", env = "PHOTOCRAFT_CONTROL_PORT", value_parser = bridge)]
     pub(crate) bridge: Option<Bridge>,

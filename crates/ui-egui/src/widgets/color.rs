@@ -106,7 +106,7 @@ pub fn pick_pos(resp: &Response) -> Option<Pos2> {
     if held || resp.clicked() { resp.interact_pointer_pos() } else { None }
 }
 
-/// A colour swatch that only reports clicks (no popup): for colours edited in PhotoCraft's own
+/// A colour swatch that only reports clicks (no popup): for colours edited in PhotoSoft's own
 /// Color Picker dialog. `label` names it for hover text and accessibility.
 pub fn color_swatch_button(ui: &mut Ui, color: Color32, label: &str) -> Response {
     let t = Tokens::get(ui.ctx());

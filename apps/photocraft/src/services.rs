@@ -14,7 +14,7 @@ use std::sync::Arc;
 #[cfg(test)]
 mod recovery_tests;
 
-/// Everything File › Open reads: PhotoCraft, Photoshop, OpenRaster, Krita and Affinity documents, flat images, and
+/// Everything File › Open reads: PhotoSoft, Photoshop, OpenRaster, Krita and Affinity documents, flat images, and
 /// Photoshop brushes (.abr), gradients (.grd), layer styles (.asl), swatches (.aco, .act, .ase) and keyboard shortcut sets
 /// (.kys), which go to the preset libraries and Edit › Keyboard Shortcuts.
 const OPEN_EXTS: &[&str] = &[
@@ -40,7 +40,7 @@ fn open_filter_extensions(extensions: &[&str]) -> Vec<String> {
 /// [`OPEN_EXTS`]. An explicit SVG filter also keeps vector artwork discoverable when a native
 /// picker defaults to another filter.
 const OPEN_FILTERS: &[(&str, &[&str])] = &[
-    ("PhotoCraft", &["pcraft"]),
+    ("PhotoSoft", &["pcraft"]),
     ("Photoshop", &["psd", "psb", "psdt"]),
     ("Affinity", &["af", "afdesign", "afphoto", "afpub"]),
     ("Krita", &["kra", "krz"]),
@@ -88,14 +88,14 @@ fn open_filters() -> Vec<(&'static str, Vec<String>)> {
 const SAVE_FILTERS: &[(&str, &[&str])] = &[
     ("PSD Document", &["psd", "psb"]),
     ("PDF", &["pdf"]),
-    ("PhotoCraft", &["pcraft"]),
+    ("PhotoSoft", &["pcraft"]),
     ("OpenRaster", &["ora"]),
     ("PNG", &["png"]),
     ("JPEG", &["jpg", "jpeg"]),
     ("WebP", &["webp"]),
     ("TIFF", &["tif", "tiff"]),
     ("Targa", &["tga"]),
-    // Also in Photoshop's Save As list; ICO is PhotoCraft's own (#4357): up to 256×256, with alpha.
+    // Also in Photoshop's Save As list; ICO is PhotoSoft's own (#4357): up to 256×256, with alpha.
     ("BMP", &["bmp", "dib"]),
     ("GIF", &["gif"]),
     ("ICO", &["ico"]),
@@ -153,9 +153,9 @@ fn save_filters(suggested: &str) -> Vec<(String, Vec<String>)> {
 /// dialog left the name alone (#6121): the format follows the extension, and the GTK file chooser
 /// keeps the typed name when another type is picked. Only a name that still has the extension the
 /// dialog opened with (`opened_with`, `Untitled-1.psd` with PNG picked) or none gets the type's
-/// extension, as PolyMeilex/rfd#341 does. An extension the user typed that PhotoCraft saves
+/// extension, as PolyMeilex/rfd#341 does. An extension the user typed that PhotoSoft saves
 /// (`art.png` with the PSD type untouched, the way to save a PNG before this) is theirs and stays,
-/// and so does one of the type's own (`.psb` for PSD). One PhotoCraft doesn't save (`scan.2024`)
+/// and so does one of the type's own (`.psb` for PSD). One PhotoSoft doesn't save (`scan.2024`)
 /// is part of the name, and the type's extension is added after it.
 #[cfg(any(target_os = "linux", test))]
 pub(crate) fn with_chosen_type(path: &Path, opened_with: Option<&str>, chosen: &[String]) -> PathBuf {
@@ -179,7 +179,7 @@ pub(crate) fn with_chosen_type(path: &Path, opened_with: Option<&str>, chosen: &
 /// (`adds_extension`), the dialog gets the stem and the suggested type (listed first by
 /// [`save_filters`]) supplies `.psd`:
 /// - On Windows a visible extension stays put when the user picks another type (with File name
-///   extensions shown, `image.psd` saved as PhotoCraft stayed `image.psd`, #4394).
+///   extensions shown, `image.psd` saved as PhotoSoft stayed `image.psd`, #4394).
 /// - On Linux the portal's dialog keeps the name as typed, and before returning asks whether to
 ///   replace a file of that name, so `test.psd` with PNG picked asked to replace test.psd, which
 ///   the save leaves alone (#6121). From the stem [`with_chosen_type`] gives the picked type's
@@ -329,7 +329,7 @@ pub(crate) fn block_on<T>(future: impl Future<Output = T>) -> T {
     }
 }
 
-/// Per-user settings directory: `PHOTOCRAFT_CONFIG_DIR`, else `<exe dir>/PhotoCraftData` in
+/// Per-user settings directory: `PHOTOCRAFT_CONFIG_DIR`, else `<exe dir>/PhotoSoftData` in
 /// portable mode, else the platform convention. Everything the app persists lives under it
 /// except, on Windows and Linux, crash-recovery autosaves; see [`crate::app_dirs`].
 pub fn config_dir() -> Option<PathBuf> {

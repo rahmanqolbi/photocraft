@@ -30,7 +30,7 @@ fn release_of(found: &photocraft_engine::updates_cmds::Release) -> craft_update:
     craft_update::Release {
         tag: format!("v{}", found.version),
         version: craft_update::parse_version(&found.version),
-        name: format!("PhotoCraft {}", found.version),
+        name: format!("PhotoSoft {}", found.version),
         html_url: found.url.clone(),
         ..Default::default()
     }
@@ -111,7 +111,7 @@ pub(crate) fn show(app: &mut PhotocraftApp, ctx: &egui::Context) {
     let mut open = true;
     let status = app.session.updates.status.clone();
     let mut retry = false;
-    egui::Window::new(tl!("PhotoCraft Updates"))
+    egui::Window::new(tl!("PhotoSoft Updates"))
         .id(egui::Id::unique("photocraft_updates"))
         .open(&mut open)
         .collapsible(false)
@@ -129,7 +129,7 @@ pub(crate) fn show(app: &mut PhotocraftApp, ctx: &egui::Context) {
                     });
                 }
                 Status::Available { release } => {
-                    ui.label(crate::i18n::fmt(crate::i18n::t("PhotoCraft {version} is available."), &[("version", &release.version)]));
+                    ui.label(crate::i18n::fmt(crate::i18n::t("PhotoSoft {version} is available."), &[("version", &release.version)]));
                     #[cfg(not(target_arch = "wasm32"))]
                     {
                         if crate::widgets::primary_button(ui, tl!("Update and Restart"), 180.0).clicked() {
@@ -145,7 +145,7 @@ pub(crate) fn show(app: &mut PhotocraftApp, ctx: &egui::Context) {
                     }
                 }
                 Status::UpToDate => {
-                    ui.label(tl!("PhotoCraft is up to date."));
+                    ui.label(tl!("PhotoSoft is up to date."));
                 }
                 Status::Failed { message } => {
                     ui.colored_label(t.warning, tl!("Could not check for updates."));
@@ -271,7 +271,7 @@ mod tests {
             .unwrap()
             .as_ref()
             .unwrap()
-            .send(Ok(Some(Release { version: "99.0.0".into(), url: "https://github.com/storytold/photocraft/releases/tag/v99.0.0".into() })))
+            .send(Ok(Some(Release { version: "99.0.0".into(), url: "https://github.com/rahmanqolbi/photocraft/releases/tag/v99.0.0".into() })))
             .unwrap();
         app.run("updates.status", serde_json::json!({})).unwrap();
         at(&mut app, &ctx, 1.0);
@@ -292,7 +292,7 @@ mod tests {
             .unwrap()
             .as_ref()
             .unwrap()
-            .send(Ok(Some(Release { version: "99.0.0".into(), url: "https://github.com/storytold/photocraft/releases/tag/v99.0.0".into() })))
+            .send(Ok(Some(Release { version: "99.0.0".into(), url: "https://github.com/rahmanqolbi/photocraft/releases/tag/v99.0.0".into() })))
             .unwrap();
         at(&mut app, &ctx, 1.0);
         assert!(app.updates_rt.updater.prompt_open(), "startup prompt initialized on available release");
