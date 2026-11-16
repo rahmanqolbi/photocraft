@@ -1,11 +1,11 @@
-PhotoSoft
+﻿PhotoSoft
 Copyright (c) 2026 ArtCraft Team and the PhotoSoft contributors.
 Copyright (c) 2026 the PhotoSoft contributors.
 Licensed under the MIT License or the Apache License, Version 2.0, at your option
 (LICENSE-MIT, LICENSE-APACHE).
 
-This product is a modified version of PhotoSoft (https://github.com/storytold/photocraft),
-copyright (c) 2026 ArtCraft Team and the PhotoSoft contributors, licensed under the MIT
+This product is a modified version of PhotoCraft (https://github.com/storytold/photocraft),
+copyright (c) 2026 ArtCraft Team and the PhotoCraft contributors, licensed under the MIT
 License or the Apache License, Version 2.0. It is distributed under the same terms, with the
 following modifications (see the git history for the full list):
 
@@ -25,11 +25,11 @@ Third-party material
 This product bundles third-party material under its own licenses, listed below. The per-file
 list (author, source, license) is in ATTRIBUTION.md.
 
-Inter font (assets/fonts/Inter-*.ttf) �?" SIL Open Font License 1.1. See assets/fonts/OFL-Inter.txt.
-JetBrains Mono font (assets/fonts/JetBrainsMono-Regular.ttf) �?" SIL Open Font License 1.1. See assets/fonts/OFL-JetBrainsMono.txt.
-Lucide icons (assets/icons/*.svg, except slice-knife.svg) �?" ISC; icons derived from Feather also MIT. See assets/icons/LICENSE-lucide.txt.
-SCOWL English word list (assets/dict/en_US-scowl-50.txt.gz) �?" SCOWL license. See assets/dict/LICENSE-SCOWL.txt.
-libfacedetection face detection weights and network (crates/algo/data/libfacedetection.bin, crates/algo/src/faces/cnn.rs) �?" BSD-3-Clause, Copyright (c) 2015-2019, Shiqi Yu, all rights reserved. See crates/algo/data/LICENSE-libfacedetection.txt.
+Inter font (assets/fonts/Inter-*.ttf) ï¿½?" SIL Open Font License 1.1. See assets/fonts/OFL-Inter.txt.
+JetBrains Mono font (assets/fonts/JetBrainsMono-Regular.ttf) ï¿½?" SIL Open Font License 1.1. See assets/fonts/OFL-JetBrainsMono.txt.
+Lucide icons (assets/icons/*.svg, except slice-knife.svg) ï¿½?" ISC; icons derived from Feather also MIT. See assets/icons/LICENSE-lucide.txt.
+SCOWL English word list (assets/dict/en_US-scowl-50.txt.gz) ï¿½?" SCOWL license. See assets/dict/LICENSE-SCOWL.txt.
+libfacedetection face detection weights and network (crates/algo/data/libfacedetection.bin, crates/algo/src/faces/cnn.rs) ï¿½?" BSD-3-Clause, Copyright (c) 2015-2019, Shiqi Yu, all rights reserved. See crates/algo/data/LICENSE-libfacedetection.txt.
 
 Builds made with craft-fonts (CRAFT_FONTS_DIR) also embed the fonts listed in
 https://github.com/storytold/craft-fonts/blob/main/ATTRIBUTION.md (today BIZ UDPGothic, Shippori Mincho and
