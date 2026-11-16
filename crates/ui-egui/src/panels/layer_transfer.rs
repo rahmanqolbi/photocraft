@@ -59,12 +59,29 @@ pub fn begin_from_panel(app: &PhotocraftApp, ctx: &egui::Context, layer: LayerId
     begin(app, ctx, layer, None);
 }
 
-/// A Move-tool drag of whole layers (not a selection or a floating piece) under way.
-fn move_drag(app: &PhotocraftApp) -> Option<[f64; 2]> {
-    let d = app.drag.as_ref().filter(|d| d.tool == Tool::Move && d.sel_move.is_none())?;
+/// What a Move-tool drag carries that can become a transfer to another document.
+enum Dragging {
+    /// Whole layers under the pointer, grabbed at this point of the source document.
+    Layers { grab: [f64; 2] },
+    /// The Background under the pointer: it cannot move inside its own document, but dragging
+    /// it onto another document copies it there, as in Photoshop.
+    Background { layer: LayerId, grab: [f64; 2] },
+}
+
+/// A Move-tool drag of whole layers (not a selection or a floating piece) under way, or a
+/// marquee over the Background: either can become a copy into another document.
+fn move_drag(app: &PhotocraftApp) -> Option<Dragging> {
+    if let Some(d) = app.drag.as_ref().filter(|d| d.tool == Tool::Move && d.sel_move.is_none()) {
+        let st = app.session.active()?;
+        let plain = app.ui.transform.is_none() && app.guide_drag.is_none() && st.doc.selection.is_none() && st.floating.is_none();
+        return plain.then_some(Dragging::Layers { grab: d.start });
+    }
+    // A marquee over the Background: it cannot move, but it can be copied elsewhere.
     let st = app.session.active()?;
-    let plain = app.ui.transform.is_none() && app.guide_drag.is_none() && st.doc.selection.is_none() && st.floating.is_none();
-    plain.then_some(d.start)
+    if app.ui.transform.is_none() && st.doc.selection.is_none() && st.floating.is_none() {
+        return crate::move_box::background_grab(app).map(|(layer, grab)| Dragging::Background { layer, grab });
+    }
+    None
 }
 
 /// The pointer, while layers are dragged (or a Move drag could become a transfer): tabs only
@@ -81,7 +98,7 @@ pub fn pointer_if_armed(app: &PhotocraftApp, ctx: &egui::Context) -> Option<egui
 /// right here drops the layers into it.
 pub fn over_tab(app: &mut PhotocraftApp, ctx: &egui::Context, index: usize) {
     if get(ctx).is_none() {
-        let Some(grab) = move_drag(app) else { return };
+        let Some(dragging) = move_drag(app) else { return };
         let Some(active) = app.session.active().and_then(|st| st.active_layer) else { return };
         if app.session.active_index() == Some(index) {
             return;
@@ -90,8 +107,16 @@ pub fn over_tab(app: &mut PhotocraftApp, ctx: &egui::Context, index: usize) {
         app.drag = None;
         app.move_preview = None;
         crate::move_mods::abandon(app);
-        let active = app.session.active().and_then(|st| st.active_layer).unwrap_or(active);
-        if !begin(app, ctx, active, Some(grab)) {
+        // A marquee over the Background ends with it: the transfer takes over.
+        crate::move_box::cancel(app);
+        let (layer, grab) = match dragging {
+            Dragging::Layers { grab } => {
+                let active = app.session.active().and_then(|st| st.active_layer).unwrap_or(active);
+                (active, grab)
+            }
+            Dragging::Background { layer, grab } => (layer, grab),
+        };
+        if !begin(app, ctx, layer, Some(grab)) {
             return;
         }
     }
