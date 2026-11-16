@@ -83,6 +83,11 @@ too_many_arguments = "deny"
 wildcard_imports = "deny"
 dbg_macro = "warn"
 todo = "warn"
+# Clippy 1.98 added this lint; upstream's `thread_local!` already uses a `const { }`
+# initializer (crates/cms), so it fires on code the lint cannot improve. Allow it until
+# upstream revisits it. (Warning level, not deny, upstream catches it in CI on their
+# pinned toolchain.)
+missing_const_for_thread_local = "allow"
 
 # Dependencies carry no debug info: their frames in a backtrace lose file:line, and the target dir
 # and link times shrink. The test profile inherits both settings.
