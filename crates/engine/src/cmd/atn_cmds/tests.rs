@@ -70,7 +70,7 @@ fn b64(bytes: &[u8]) -> String {
 }
 
 /// A set with a mapped filter, an adjustment layer, selection steps, a layer by name, a Stop,
-/// a Play, a tool selection (no document effect) and an event PhotoCraft has no command for.
+/// a Play, a tool selection (no document effect) and an event PhotoSoft has no command for.
 fn sample() -> AtnFile {
     let levels = desc("Lvls").with(
         "Adjs",
@@ -1337,7 +1337,7 @@ fn retouching_set_events_map_to_their_commands() {
     // event stay unsupported rather than play with other values.
     let unsupported: Vec<(&str, usize)> = imp.unsupported.iter().map(|u| (u.event.as_str(), u.step)).collect();
     assert_eq!(unsupported, [("colorRange", 4), ("colorRange", 5), ("set", 8), ("someFutureEvent", 12)]);
-    // A legacy PhotoCraft export's `Yllw` yellows still read.
+    // A legacy PhotoSoft export's `Yllw` yellows still read.
     let legacy = desc("null").with("ClrC", D::List(vec![D::Descriptor(desc("ClrC").with("Clrs", enm("Clrs", "Yllw")).with("Cyn ", pct(5.0)))]));
     assert_eq!(selective_from(&legacy), Some(json!({"yellows": [5.0, 0.0, 0.0, 0.0]})));
     // The mask of a named layer is not the target layer's mask: it stays unsupported.
@@ -2044,7 +2044,7 @@ fn events_photoshop_only_runs_by_name_export_by_name_and_old_codes_still_import(
         }
     }
 
-    // A whole set of Photoshop-shaped steps (names, FltI) and old PhotoCraft-shaped ones
+    // A whole set of Photoshop-shaped steps (names, FltI) and old PhotoSoft-shaped ones
     // (legacy codes) loads to the same commands.
     let blur = |event: &str| item(event, "Box Blur", Some(desc("null").with("Rds ", px(3.0))));
     let surface = |event: &str| item(event, "Surface Blur", Some(desc("null").with("Rds ", px(5.0)).with("Thsh", long(15.0))));
@@ -2103,7 +2103,7 @@ fn photo_filter_saves_under_the_name_photoshop_runs() {
         assert!(d.get(key).is_some(), "the descriptor keeps {key}: {d:?}");
     }
 
-    // A Photoshop-authored step (by name) and an old PhotoCraft one (`PhtF`) both load to the
+    // A Photoshop-authored step (by name) and an old PhotoSoft one (`PhtF`) both load to the
     // command, and saving them again writes the name.
     let data =
         set_of("S", vec![("Photoshop", vec![item("photoFilter", "Photo Filter", Some(d.clone()))]), ("Legacy", vec![item("PhtF", "Photo Filter", Some(d))])]);
@@ -2148,7 +2148,7 @@ fn photo_filter_saves_under_the_name_photoshop_runs() {
 
 /// A Black & White adjustment layer saves with Photoshop's `BanW` class (#8481): measured in
 /// Photoshop, a Make whose type is `BlnW` is refused. Photoshop's own `BanW` Make loads, and so
-/// does the `BlnW` one PhotoCraft wrote before.
+/// does the `BlnW` one PhotoSoft wrote before.
 #[test]
 fn black_white_adjustment_layer_saves_as_photoshops_class_and_old_class_still_imports() {
     let id = "layer.newAdjustmentLayer.blackWhite";
@@ -2167,7 +2167,7 @@ fn black_white_adjustment_layer_saves_as_photoshops_class_and_old_class_still_im
     assert_eq!(r["unsupported"], json!([]), "{r}");
     assert_eq!(t.actions.list[0].steps, vec![(id.to_string(), params)]);
 
-    // Photoshop's minimal Make (no settings) and an old PhotoCraft Make with a setting both load,
+    // Photoshop's minimal Make (no settings) and an old PhotoSoft Make with a setting both load,
     // the setting kept; near misses stay Photoshop steps.
     let make = |class: &str| {
         let kind = if class == "BlnW" { desc(class).with("Rd  ", long(17.0)) } else { desc(class) };
@@ -2205,7 +2205,7 @@ fn smart_blur_quality_uses_photoshop_codes() {
     }
 
     // Photoshop-shaped steps (each quality and mode, as Photoshop stores them) and the codes
-    // PhotoCraft wrote before this fix read as the right quality.
+    // PhotoSoft wrote before this fix read as the right quality.
     let cases = [
         ("SBQH", "SBMN", "high", "normal"),
         ("SBQM", "SBMO", "medium", "overlayEdge"),
@@ -2755,7 +2755,7 @@ fn emboss_saves_as_photoshops_event_and_loads_back() {
 }
 
 /// A filter recorded against a layer mask must not export as a plain filter that edits the
-/// layer's pixels on replay: Photoshop's descriptor has no field for PhotoCraft's `target`.
+/// layer's pixels on replay: Photoshop's descriptor has no field for PhotoSoft's `target`.
 #[test]
 fn add_noise_with_mask_target_is_not_exported_as_pixel_filter() {
     let masked = Action {
@@ -2907,7 +2907,7 @@ fn apply_image_numeric_source_selectors_are_refused() {
     assert!(export("S", &[&a], &[], false).is_err());
 }
 
-/// A param a PhotoCraft step leaves out exports as PhotoCraft's default wherever Photoshop plays
+/// A param a PhotoSoft step leaves out exports as PhotoSoft's default wherever Photoshop plays
 /// the missing key differently (checked against Photoshop): Canvas Size anchors top left,
 /// Apply Image blends Normal, Color Balance turns preserve luminosity off, and a Paint Bucket
 /// step without a tolerance doesn't play at all.
@@ -2952,8 +2952,8 @@ fn levels_and_curves_name_the_composite_channel_as_photoshop_records_it() {
 }
 
 /// A Lab document's Lightness channel is `Chnl.Lght` (#9384): Photoshop plays a Levels or Apply
-/// Image step naming it and rejects `Chnl.Lmnc` ("luminance"), which PhotoCraft wrote before.
-/// Steps PhotoCraft saved with `Lmnc` still load.
+/// Image step naming it and rejects `Chnl.Lmnc` ("luminance"), which PhotoSoft wrote before.
+/// Steps PhotoSoft saved with `Lmnc` still load.
 #[test]
 fn lab_lightness_channel_is_written_and_read_as_photoshop_names_it() {
     let exported = |id: &str, p: Value| export_item(id, &p, "S").and_then(|i| i.descriptor).unwrap_or_else(|| panic!("{id} does not export"));
@@ -2978,7 +2978,7 @@ fn lab_lightness_channel_is_written_and_read_as_photoshop_names_it() {
     let source = get_ref(get_obj(&apply, "With").unwrap(), "T   ").unwrap();
     assert!(matches!(&source[0], ReferenceItem::Enumerated { value, .. } if trimmed(value) == "Lght"), "{source:?}");
 
-    // What Photoshop records, and what PhotoCraft wrote before, both read as Lightness.
+    // What Photoshop records, and what PhotoSoft wrote before, both read as Lightness.
     let chnl = |c: &str| D::Reference(vec![ReferenceItem::Enumerated { class: class("Chnl"), type_id: code("Chnl"), value: code(c) }]);
     for c in ["Lght", "Lmnc"] {
         let lvls = desc("Lvls").with("Adjs", D::List(vec![D::Descriptor(desc("LvlA").with("Chnl", chnl(c)).with("Gmm ", D::Double(1.5)))]));
@@ -3046,7 +3046,7 @@ fn adjustment_layer_set_accepts_the_vibrance_string_class() {
 }
 
 /// A Vibrance Set and Make as Photoshop records them (class `vibrance`) save back with that
-/// class, not the `Vbrn` code Photoshop refuses (#8383); old PhotoCraft files with `Vbrn` still
+/// class, not the `Vbrn` code Photoshop refuses (#8383); old PhotoSoft files with `Vbrn` still
 /// load and now save with `vibrance` too.
 #[test]
 fn vibrance_adjustment_layer_steps_save_with_the_string_class() {
@@ -3414,7 +3414,7 @@ fn image_size_resample_none_keeps_ignoring_its_size_through_atn_export() {
 
 /// #8302, #8308: Hue/Saturation's hue is `H   ` in Photoshop's `Hst2`, both ways. It was written
 /// and read as `Hue `: exported actions failed in Photoshop, and Photoshop-recorded ones lost
-/// their hue on import with no warning. PhotoCraft's own older files (`Hue `) still read.
+/// their hue on import with no warning. PhotoSoft's own older files (`Hue `) still read.
 #[test]
 fn hue_saturation_uses_photoshops_hue_key() {
     let params = json!({"colorize": false, "hue": 30, "saturation": 20, "lightness": -7, "greens": {"hue": -12, "saturation": 0, "lightness": 0, "range": [75, 105, 135, 165]}});
@@ -3430,7 +3430,7 @@ fn hue_saturation_uses_photoshops_hue_key() {
     assert_eq!(get_num(&entries[1], "H   "), Some(-12.0), "a range's hue under H");
     assert!(entries.iter().all(|e| get_num(e, "Hue ").is_none()), "no Hue key");
 
-    // A Photoshop-recorded step (H) and an older PhotoCraft one (Hue ) both import with the hue.
+    // A Photoshop-recorded step (H) and an older PhotoSoft one (Hue ) both import with the hue.
     let step = |key: &str| {
         desc("null")
             .with("presetKind", enm("presetKindType", "presetKindCustom"))
@@ -3577,7 +3577,7 @@ fn camera_raw_filter_steps_import_as_filter_camera_raw() {
 }
 
 /// Review of #8714: a Camera Raw Filter step that was loaded saves back as the recorded step,
-/// byte for byte, as it did while it was a kept Photoshop step; once edited (or when PhotoCraft
+/// byte for byte, as it did while it was a kept Photoshop step; once edited (or when PhotoSoft
 /// recorded it) Save Actions refuses it as before. The loaded step plays.
 #[test]
 fn loaded_camera_raw_filter_steps_save_back_unchanged() {
@@ -3616,7 +3616,7 @@ fn loaded_camera_raw_filter_steps_save_back_unchanged() {
     s.actions.list[0].steps[0].1["exposure"] = json!(1.5);
     let e = s.execute("actions.save", json!({"action": "A"})).unwrap_err().to_string();
     assert!(e.contains("filter.cameraRaw"), "{e}");
-    // Recorded by PhotoCraft: no descriptor to write back.
+    // Recorded by PhotoSoft: no descriptor to write back.
     s.actions.list[0].steps[0].1 = original;
     s.actions.list[0].steps[0].1.as_object_mut().unwrap().remove("__atnDescriptor");
     let r = s.execute("actions.save", json!({"action": "A", "skipUnsupported": true})).unwrap();
@@ -3694,7 +3694,7 @@ fn save_as_that_cannot_be_mapped_stops_playback_instead_of_saving_over_the_file(
     // action was played on.
     let file = one_action(vec![
         item("save", "Save", Some(save_as("PNGF", "/out/folder"))),
-        // Save a Copy into a folder under the document's own name has no PhotoCraft step.
+        // Save a Copy into a folder under the document's own name has no PhotoSoft step.
         item("save", "Save", Some(save_as("PNGF", "/out").with("DIDr", D::Boolean(true)).with("Cpy ", D::Boolean(true)))),
         item("save", "Save", Some(save_as("Not a format", "/out").with("DIDr", D::Boolean(true)))),
         item("save", "Save", Some(save_as("PNGF", "/out/result.webp"))),
@@ -3774,7 +3774,7 @@ fn saves_round_trip_through_photoshop_events() {
     assert_eq!(get_obj(items[1].descriptor.as_ref().unwrap(), "As  ").map(|f| trimmed(&f.class_id)).as_deref(), Some("WebPFormat"));
     assert_eq!(import(&bytes).unwrap().actions[0].steps, steps);
 
-    // A Save As PhotoCraft can't express in Photoshop's terms is skipped, never exported as a
+    // A Save As PhotoSoft can't express in Photoshop's terms is skipped, never exported as a
     // plain Save.
     let odd = Action::new("B", vec![("file.saveAs".to_string(), json!({"path": "/out/result.xcf"}))]);
     assert!(export("Saves", &[&odd], &[], false).is_err());
@@ -3943,7 +3943,7 @@ fn gallery_effect_enumerations_save_with_photoshops_type_ids() {
 }
 
 /// Neon Glow recorded without `Clr ` glows in Photoshop's default colour, blue (0, 0, 255) per
-/// the event reference, not PhotoCraft's own default: the step loads with that colour and saves
+/// the event reference, not PhotoSoft's own default: the step loads with that colour and saves
 /// it back, loading again as the same step (#10592).
 #[test]
 fn gallery_neon_glow_without_a_colour_loads_photoshops_blue() {
@@ -4011,7 +4011,7 @@ fn gallery_effect_steps_save_back_as_the_event_they_were_recorded_as() {
     let want: Vec<_> = source.iter().map(|i| (i.event.clone(), i.dictionary.clone(), i.descriptor.clone())).collect();
     assert_eq!(got, want);
 
-    // A step made in PhotoCraft keeps saving as `GEfc`, and so does a forged event param.
+    // A step made in PhotoSoft keeps saving as `GEfc`, and so does a forged event param.
     assert_eq!(export_item("filter.gallery.cutout", &json!({}), "S").unwrap().event, AtnEvent::Code(*b"GEfc"));
     let forged = json!({"_atnEvent": {"event": "GsnB", "eventKind": "code", "name": "Gaussian Blur"}});
     assert_eq!(export_item("filter.gallery.cutout", &forged, "S").unwrap().event, AtnEvent::Code(*b"GEfc"));
@@ -4137,7 +4137,7 @@ fn trap_wider_than_photoshop_takes_is_refused() {
     assert_eq!(d.items, desc("null").with("Wdth", px(32767.0)).items);
 }
 
-/// The channel or colour step `d` of the Photoshop event `name`, as PhotoCraft loads it.
+/// The channel or colour step `d` of the Photoshop event `name`, as PhotoSoft loads it.
 fn channel_step(name: &str, d: Descriptor) -> Mapped {
     let event = if name.len() == 4 { AtnEvent::Code(name.as_bytes().try_into().unwrap()) } else { AtnEvent::name(name) };
     (events::event_for(&event).unwrap_or_else(|| panic!("{name} is unknown")).from)(&d)
@@ -4204,7 +4204,7 @@ fn match_color_setting_that_cannot_be_saved_back_is_kept() {
 }
 
 /// Photoshop's narrowest Trap width wasn't measured, so a recorded width below the command's
-/// 1 px isn't clamped up to it: the step stays a Photoshop step, and a PhotoCraft step that
+/// 1 px isn't clamped up to it: the step stays a Photoshop step, and a PhotoSoft step that
 /// narrow is refused on export instead of written as a width the command doesn't trap (#10609).
 #[test]
 fn trap_width_below_one_pixel_is_kept() {
@@ -4220,7 +4220,7 @@ fn trap_width_below_one_pixel_is_kept() {
 
 /// Match Color's Luminance and Color Intensity take 1..200 and Fade 0..100, and Photoshop's
 /// handling of a recorded value outside them wasn't measured: such a step stays a Photoshop
-/// step rather than being clamped, and a PhotoCraft step outside them is refused on export
+/// step rather than being clamped, and a PhotoSoft step outside them is refused on export
 /// instead of written as a value the command plays clamped (#10609).
 #[test]
 fn match_color_setting_outside_its_range_is_kept() {
@@ -5199,7 +5199,7 @@ fn oil_paint_outside_the_commands_ranges_is_clamped_on_import_and_refused_on_exp
     }
 }
 
-/// The step `d` of the Photoshop event `code` (a four-character code), as PhotoCraft loads it.
+/// The step `d` of the Photoshop event `code` (a four-character code), as PhotoSoft loads it.
 fn other_step(code: &str, d: Descriptor) -> Mapped {
     let event = AtnEvent::Code(code.as_bytes().try_into().unwrap());
     (events::event_for(&event).unwrap_or_else(|| panic!("{code} is unknown")).from)(&d)
@@ -5395,7 +5395,7 @@ fn custom_outside_the_commands_range_is_kept_and_refused() {
     }
 }
 
-/// The step `d` of Photoshop event `code`, as PhotoCraft loads it.
+/// The step `d` of Photoshop event `code`, as PhotoSoft loads it.
 fn distort(code: &str, d: Descriptor) -> Mapped {
     let event = AtnEvent::Code(code.as_bytes().try_into().unwrap());
     (events::event_for(&event).unwrap_or_else(|| panic!("{code} is unknown")).from)(&d)
@@ -5467,7 +5467,7 @@ fn distort_filter_steps_load_clamp_play_and_save_back() {
     assert_eq!(one_step(distort("Wave", desc("null").with("NmbG", D::Integer(0)))).1["generators"], 1);
 }
 
-/// PhotoCraft's renderer draws at most `MAX_WAVE_GENERATORS` (64) generators, so a Wave step
+/// PhotoSoft's renderer draws at most `MAX_WAVE_GENERATORS` (64) generators, so a Wave step
 /// recorded with more keeps the Photoshop step on import and is refused on export, as the PSD
 /// smart-filter mapper does, rather than mapping a step that plays differently (#10605).
 #[test]
@@ -5845,7 +5845,7 @@ fn an_empty_new_set_saves_and_loads_back() {
 }
 
 /// A set from Chinese Photoshop: UTF-16 set and action names, a step name in GBK (可选颜色,
-/// the bytes from #6743) on an event PhotoCraft has no command for, with no descriptor.
+/// the bytes from #6743) on an event PhotoSoft has no command for, with no descriptor.
 fn gbk_set() -> Vec<u8> {
     let step = AtnItem { dictionary: b"\xbf\xc9\xd1\xa1\xd1\xd5\xc9\xab".to_vec(), ..item("syntheticFill", "", None) };
     let file = AtnFile {

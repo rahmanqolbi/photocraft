@@ -509,7 +509,7 @@ fn step_label(id: &str, params: &Value) -> String {
     } else if id == photocraft_engine::atn_cmds::STOP_MESSAGE {
         format!("{}: {}", label_of(id), params.get("message").and_then(Value::as_str).unwrap_or_default())
     } else if id == photocraft_engine::atn_cmds::PHOTOSHOP_STEP {
-        // A step from a .atn file PhotoCraft can't play yet: its Photoshop name, marked.
+        // A step from a .atn file PhotoSoft can't play yet: its Photoshop name, marked.
         let name = params.get("name").and_then(Value::as_str).filter(|n| !n.is_empty()).unwrap_or("?");
         crate::i18n::fmt(tl!("{name} (Photoshop)"), &[("name", name)])
     } else {

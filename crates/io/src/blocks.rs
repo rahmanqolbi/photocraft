@@ -101,7 +101,7 @@ pub fn ranges_from_blend_if(b: &BlendIf, channels: usize) -> BlendingRanges {
 
 /// `lspf` bits (Adobe spec: bit 0 transparency, 1 composite, 2 position).
 /// Artboard (bit 3, `0x08`, as reference files write it) and "all" (bit 31) are undocumented.
-/// Older PhotoCraft builds wrote the artboard lock at bit 4 (`0x10`); that value is still
+/// Older PhotoSoft builds wrote the artboard lock at bit 4 (`0x10`); that value is still
 /// accepted on read so those files keep their lock, and is rewritten at `0x08`.
 pub fn locks_from_lspf(v: u32) -> Locks {
     Locks { transparency: v & 1 != 0, pixels: v & 2 != 0, position: v & 4 != 0, artboard: v & 0x08 != 0 || v & 0x10 != 0, all: v & 0x8000_0000 != 0 }
@@ -185,7 +185,7 @@ pub fn color_from_desc(d: &Descriptor) -> Option<Color> {
     .map(|c| with_pc_alpha(c, d))
 }
 
-/// PSD colour descriptors have no alpha. PhotoCraft writes `pcAl` (0..1) so shape fill
+/// PSD colour descriptors have no alpha. PhotoSoft writes `pcAl` (0..1) so shape fill
 /// opacity round-trips (#6180). Photoshop ignores the key.
 fn with_pc_alpha(mut c: Color, d: &Descriptor) -> Color {
     // A hostile file's NaN or infinity would survive the clamp: keep the colour opaque instead.

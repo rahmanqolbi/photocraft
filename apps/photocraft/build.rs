@@ -23,8 +23,8 @@ fn main() {
     res.set_icon("../../assets/app-icon/photocraft.ico")
         .set("ProductName", "PhotoSoft")
         .set("FileDescription", "PhotoSoft image editor")
-        .set("CompanyName", "Learning Machines LLC")
-        .set("LegalCopyright", "Copyright (c) the PhotoCraft authors. MIT OR Apache-2.0.")
+        .set("CompanyName", "PhotoSoft")
+        .set("LegalCopyright", "Copyright (c) the PhotoSoft authors. MIT OR Apache-2.0.")
         .set("OriginalFilename", "photocraft.exe")
         .set("InternalName", "photocraft");
     if let Err(e) = res.compile() {

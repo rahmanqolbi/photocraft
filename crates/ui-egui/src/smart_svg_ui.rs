@@ -93,7 +93,7 @@ pub(crate) fn intercept(app: &mut PhotocraftApp, id: &str, params: &Value) -> Op
         return None;
     }
     let doc = st.doc.id;
-    // Contents already open in PhotoCraft's own editor: the engine switches to that document.
+    // Contents already open in PhotoSoft's own editor: the engine switches to that document.
     if app.session.smart_links.iter().any(|link| link.parent == doc && link.contents_id == smart.contents_id) {
         return None;
     }

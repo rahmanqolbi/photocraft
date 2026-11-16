@@ -1,7 +1,7 @@
 //! Telling the user why a launch failed when there is no window to say it in (#7643).
 //!
 //! A desktop launch has no console — release builds are GUI-subsystem apps on Windows — so the
-//! `Err` that ends `main` used to vanish and PhotoCraft "just closed". This shows one native
+//! `Err` that ends `main` used to vanish and PhotoSoft "just closed". This shows one native
 //! dialog with the error, the renderer that was tried and the log file to attach. The text is
 //! English diagnostics, like Help › System Info, so a bug report reads the same in every language.
 //!

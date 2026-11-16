@@ -76,10 +76,10 @@ fn the_picked_file_type_gives_the_name_its_extension() {
         ("/pics/Untitled-1.psd", opened, &png, "/pics/Untitled-1.png"),
         ("/pics/art.psd", opened, &png, "/pics/art.png"),
         ("/pics/ART.PSD", opened, &png, "/pics/ART.png"),
-        // No extension: the type's. One PhotoCraft doesn't save is part of the name.
+        // No extension: the type's. One PhotoSoft doesn't save is part of the name.
         ("/pics/art", opened, &png, "/pics/art.png"),
         ("/pics/scan.2024", opened, &png, "/pics/scan.2024.png"),
-        // Typed, an extension PhotoCraft saves is the user's: kept, whatever the type says
+        // Typed, an extension PhotoSoft saves is the user's: kept, whatever the type says
         // (the PSD type untouched, or PNG picked and .jpg typed).
         ("/pics/art.png", opened, &psd, "/pics/art.png"),
         ("/pics/art.jpg", opened, &png, "/pics/art.jpg"),
@@ -224,8 +224,8 @@ fn native_services_provide_update_transport() {
 #[test]
 fn xwayland_command_matches_how_photocraft_was_installed() {
     // Flatpak: WAYLAND_DISPLAY doesn't reach the sandbox's socket choice; flatpak's flags do.
-    let flatpak = xwayland_command(Some("ai.storyteller.photocraft"), None, false);
-    assert_eq!(flatpak.as_deref(), Some("flatpak run --nosocket=wayland --socket=x11 ai.storyteller.photocraft"));
+    let flatpak = xwayland_command(Some("com.photosoft.photosoft"), None, false);
+    assert_eq!(flatpak.as_deref(), Some("flatpak run --nosocket=wayland --socket=x11 com.photosoft.photosoft"));
     // AppImage: its own path, quoted for the shell (spaces, quotes).
     let appimage = xwayland_command(None, Some("/home/me/My Apps/it's.AppImage"), true);
     assert_eq!(appimage.as_deref(), Some(r"WAYLAND_DISPLAY= '/home/me/My Apps/it'\''s.AppImage'"));
@@ -317,7 +317,7 @@ fn every_save_dialog_leads_with_its_own_extension() {
     assert_eq!(save_filters("Untitled")[0].0, "PSD Document", "no extension keeps the default");
 }
 
-/// Every flat format Save As offers is one PhotoCraft writes, and ICO is among them (#4357).
+/// Every flat format Save As offers is one PhotoSoft writes, and ICO is among them (#4357).
 #[test]
 fn save_as_offers_only_writable_formats_including_ico() {
     // Layered formats, and PDF, are written by `photocraft-io`, not a codec.
@@ -380,7 +380,7 @@ fn save_as_offers_only_writable_formats_including_ico() {
 }
 
 /// #4394: with File name extensions shown, Windows kept `image.psd` when the type was changed to
-/// PhotoCraft. Given the bare `image`, it adds the extension of whichever type is picked
+/// PhotoSoft. Given the bare `image`, it adds the extension of whichever type is picked
 /// (checked by hand with rfd 0.17.2 on Windows 11), defaulting to the first type's.
 #[test]
 fn the_windows_save_dialog_gets_a_bare_name_so_the_type_picks_the_extension() {

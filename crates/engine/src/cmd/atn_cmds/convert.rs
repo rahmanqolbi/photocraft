@@ -5,7 +5,7 @@ use super::{Action, AtnAction, AtnEvent, AtnFile, AtnItem, D, DEFAULT_SET, Descr
 
 // ------------------------------------------------------------------ import
 
-/// A step with no PhotoCraft equivalent.
+/// A step with no PhotoSoft equivalent.
 #[derive(Clone, Debug, PartialEq, serde::Serialize)]
 pub struct Unsupported {
     pub action: String,
@@ -140,7 +140,7 @@ pub(super) fn export_item(id: &str, params: &Value, set: &str) -> Option<AtnItem
             Some(Value::String(kind)) if kind == "code" => AtnEvent::Code(event.as_bytes().try_into().ok()?),
             Some(Value::String(kind)) if kind == "name" => AtnEvent::name(event),
             Some(_) => return None,
-            // Older PhotoCraft action data did not retain the event kind. Keep its previous
+            // Older PhotoSoft action data did not retain the event kind. Keep its previous
             // best-effort export behavior for compatibility.
             None => match event.as_bytes() {
                 [a, b, c, d] => AtnEvent::Code([*a, *b, *c, *d]),

@@ -2,7 +2,7 @@
 //! and Script Events Manager, plus the session state the File-menu commands share
 //! ([`FileMenuState`]).
 //!
-//! "Scripts" are PhotoCraft action scripts: JSON (`[[id, params], …]`, `{"steps": …}` or a
+//! "Scripts" are PhotoSoft action scripts: JSON (`[[id, params], …]`, `{"steps": …}` or a
 //! droplet) or a plain-text list with one `command.id {json params}` per line (`#` comments).
 //! Droplets are JSON files (`.pcdroplet`) holding an action plus batch options; `photocraft-cli
 //! droplet <file> <inputs…>` runs one, and on Unix a `.command` shim makes it
@@ -24,7 +24,7 @@ fn bad(cmd: &str, msg: impl Into<String>) -> EngineError {
     EngineError::BadParams { cmd: cmd.into(), msg: msg.into() }
 }
 
-/// Photoshop ExtendScript / UXP script suffixes — not PhotoCraft JSON or command lists.
+/// Photoshop ExtendScript / UXP script suffixes — not PhotoSoft JSON or command lists.
 fn extendscript_ext(path: &str) -> Option<&str> {
     let name = path.rsplit(['/', '\\']).next().unwrap_or(path);
     let dot = name.rfind('.')?;
@@ -380,13 +380,13 @@ fn write_shim(droplet: &str) -> Result<String> {
     let quoted_abs = format!("'{}'", abs.replace('\'', "'\\''"));
     let body = format!(
         r#"#!/bin/sh
-# PhotoCraft droplet: runs the action on the files given (or dropped).
+# PhotoSoft droplet: runs the action on the files given (or dropped).
 if [ -n "${{PHOTOCRAFT_CLI:-}}" ]; then
   cli="$PHOTOCRAFT_CLI"
-elif [ -x /Applications/PhotoCraft.app/Contents/MacOS/photocraft-cli ]; then
-  cli=/Applications/PhotoCraft.app/Contents/MacOS/photocraft-cli
-elif [ -x "$HOME/Applications/PhotoCraft.app/Contents/MacOS/photocraft-cli" ]; then
-  cli="$HOME/Applications/PhotoCraft.app/Contents/MacOS/photocraft-cli"
+elif [ -x /Applications/PhotoSoft.app/Contents/MacOS/photocraft-cli ]; then
+  cli=/Applications/PhotoSoft.app/Contents/MacOS/photocraft-cli
+elif [ -x "$HOME/Applications/PhotoSoft.app/Contents/MacOS/photocraft-cli" ]; then
+  cli="$HOME/Applications/PhotoSoft.app/Contents/MacOS/photocraft-cli"
 else
   cli=photocraft-cli
 fi

@@ -115,7 +115,7 @@ pub(crate) fn batch(a: &BatchArgs, out: &mut dyn Write, err: &mut dyn Write) -> 
     for (input, target) in inputs.iter().zip(targets) {
         let input = Path::new(&input.path);
         // The selected format encodes the bytes, whatever extension `--naming` gives the file.
-        // Without --format, a file PhotoCraft only opens (.kra, raw, …) is saved as PSD, the
+        // Without --format, a file PhotoSoft only opens (.kra, raw, …) is saved as PSD, the
         // same format `--naming`'s {ext} plans.
         let ext = format.map_or_else(|| photocraft_engine::file_cmds::batch_same_format(&input.to_string_lossy()), str::to_owned);
         let mut h = Headless::trusted_local();

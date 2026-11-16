@@ -51,7 +51,7 @@ fn moved_items_leave_their_old_menus() {
     assert_eq!(titles, ["PhotoSoft", "File", "Edit", "Image", "Layer", "Type", "Select", "Filter", "View", "Window", "Help"]);
 }
 
-/// PhotoCraft keeps Photoshop's ⌘H, ⌘M, ⌘W and ⌘, (Hide Layers): the system items give way.
+/// PhotoSoft keeps Photoshop's ⌘H, ⌘M, ⌘W and ⌘, (Hide Layers): the system items give way.
 #[test]
 fn clashes_are_resolved_in_photocrafts_favour() {
     let l = layout(true);
@@ -222,7 +222,7 @@ impl Backend for Fake {
     }
 }
 
-/// A key equivalent reaches PhotoCraft's own key handling as the key press it was, so the
+/// A key equivalent reaches PhotoSoft's own key handling as the key press it was, so the
 /// shortcut runs once, through the same rules as without a native menu.
 #[test]
 fn key_equivalents_run_through_the_normal_shortcut_path() {

@@ -580,7 +580,7 @@ fn set_row(
     // The engine decides what a set holds and when it is modified (not the actions' F-keys).
     let now = ShortcutSet::from_bindings(overrides, alternates);
     let modified = shortcut_sets::differs(&sets, &active, overrides, alternates);
-    let defaults = tl!("PhotoCraft Defaults").to_string();
+    let defaults = tl!("PhotoSoft Defaults").to_string();
     let shown = |name: &str| -> String {
         let base = if name.is_empty() { defaults.clone() } else { name.to_string() };
         if name == active && modified { crate::i18n::fmt(tl!("{set} (modified)"), &[("set", &base)]) } else { base }

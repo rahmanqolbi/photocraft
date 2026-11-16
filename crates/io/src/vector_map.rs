@@ -260,7 +260,7 @@ pub fn parse_vstk(data: &[u8], dpi: f32) -> Option<VstkInfo> {
     let paint = get_desc(&d, "strokeStyleContent").and_then(content_fill).unwrap_or(Fill::Solid(photocraft_color::Color::BLACK));
     let mut opacity = num(d.get("strokeStyleOpacity")).map_or(1.0, |v| v as f32 / 100.0);
     // Write folds colour alpha into strokeStyleOpacity for Photoshop. Restore both Appearance
-    // fields when pcAl is present so PhotoCraft does not show a maxed colour alpha (#6180).
+    // fields when pcAl is present so PhotoSoft does not show a maxed colour alpha (#6180).
     if let Fill::Solid(c) = &paint
         && c.alpha.is_finite()
         && c.alpha > 1e-6

@@ -50,7 +50,7 @@ fn no_marker_uses_the_platform_dir() {
 fn either_marker_keeps_everything_beside_the_exe() {
     for marker in PORTABLE_MARKERS {
         let root = temp("portable");
-        let exe = root.join("PhotoCraft");
+        let exe = root.join("PhotoSoft");
         std::fs::create_dir_all(&exe).unwrap();
         std::fs::write(exe.join(marker), b"").unwrap();
         let d = resolve(fake_home(&root), Some(&exe));
@@ -353,7 +353,7 @@ fn a_launch_that_times_out_never_writes_where_a_move_removes() {
     let _ = std::fs::remove_dir_all(&root);
 }
 
-/// A writer that still uses the old path while it is being copied (an older PhotoCraft)
+/// A writer that still uses the old path while it is being copied (an older PhotoSoft)
 /// starts a new folder there; the move removes only the original it held aside.
 #[test]
 fn a_write_to_the_old_path_during_a_copy_is_not_removed() {

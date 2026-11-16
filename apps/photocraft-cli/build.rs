@@ -27,8 +27,8 @@ fn main() -> std::io::Result<()> {
     res.set_icon("../../assets/app-icon/photocraft.ico")
         .set("ProductName", "PhotoSoft")
         .set("FileDescription", "PhotoSoft command-line interface")
-        .set("CompanyName", "Learning Machines LLC")
-        .set("LegalCopyright", "Copyright (c) the PhotoCraft authors. MIT OR Apache-2.0.")
+        .set("CompanyName", "PhotoSoft")
+        .set("LegalCopyright", "Copyright (c) the PhotoSoft authors. MIT OR Apache-2.0.")
         .set("OriginalFilename", "photocraft-cli.exe")
         .set("InternalName", "photocraft-cli");
     if let Err(err) = res.compile() {

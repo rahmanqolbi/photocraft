@@ -10,7 +10,7 @@
 //! profile), the embedded ICC profile, resolution, guides, the comment, extra channels and the
 //! saved selection; indexed images open as RGB. Text, vector and link layers open as their pixels;
 //! non-destructive layer effects, paths and floating selections are reported, not applied.
-//! Write: not supported (GIMP's own format; `.pcraft` keeps everything PhotoCraft holds).
+//! Write: not supported (GIMP's own format; `.pcraft` keeps everything PhotoSoft holds).
 //!
 //! The reader is written from the specification and from files GIMP 3.2 writes; no GIMP code.
 
@@ -837,7 +837,7 @@ pub(crate) fn import(name: &str, bytes: &[u8], ctl: &Interrupt<'_>) -> Result<Im
 
 fn add_document_warnings(image: &mut Image<'_>, document: &Document, precision: Precision, linear_compositing: bool) {
     // GIMP clips a layer in any mode but Normal to the layers beneath it, so it shows nothing where
-    // they are transparent; PhotoCraft (like Photoshop) shows it there. Only tell when there is
+    // they are transparent; PhotoSoft (like Photoshop) shows it there. Only tell when there is
     // transparency to show through: a bottom layer that is not opaque.
     if image.clipped_to_backdrop > 0 && document.layers.first().is_some_and(|l| !l.locks.transparency || l.is_group()) {
         image.warnings.note(&format!(
@@ -845,7 +845,7 @@ fn add_document_warnings(image: &mut Image<'_>, document: &Document, precision: 
             image.clipped_to_backdrop
         ));
     }
-    // GIMP blends and composites in linear light by default (since 2.10); PhotoCraft, like
+    // GIMP blends and composites in linear light by default (since 2.10); PhotoSoft, like
     // Photoshop, in the document's own encoding, so semi-transparent edges and most blend modes
     // render a little differently. Layers set to a perceptual space in GIMP match.
     if !precision.linear && linear_compositing {

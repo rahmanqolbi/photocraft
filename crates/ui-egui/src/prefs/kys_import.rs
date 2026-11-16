@@ -33,7 +33,7 @@ pub fn plan(app: &PhotocraftApp, set: &KysSet) -> Plan {
 }
 
 /// The set's tool keys matched to our tools by name (Photoshop's names are ours): tool
-/// shortcut id (`tools.select.move`) → letter, and the tools PhotoCraft doesn't have.
+/// shortcut id (`tools.select.move`) → letter, and the tools PhotoSoft doesn't have.
 pub fn plan_tools(set: &KysSet) -> (BTreeMap<String, String>, Vec<String>) {
     photocraft_engine::kys::plan_tools(photocraft_engine::shell_commands::TOOLS.iter().map(|t| (t.0, t.1)), set)
 }

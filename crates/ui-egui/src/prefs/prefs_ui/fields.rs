@@ -465,7 +465,7 @@ fn field_rows(ui: &mut egui::Ui, section: &str, obj: &mut Map<String, Value>, ke
                 let c = prefs::parse_hex(s).unwrap_or([128, 128, 128]);
                 let mut rgb = c;
                 ui.horizontal(|ui| {
-                    // PhotoCraft's Color Picker, as everywhere else (#2144).
+                    // PhotoSoft's Color Picker, as everywhere else (#2144).
                     if crate::widgets::color_swatch_button(ui, egui::Color32::from_rgb(rgb[0], rgb[1], rgb[2]), &label).clicked() {
                         ui.ctx().data_mut(|d| d.insert_temp(egui::Id::unique(PICK_ID), (path.clone(), label.clone())));
                     }

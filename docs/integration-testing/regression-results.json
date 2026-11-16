@@ -8436,7 +8436,7 @@
           "path": "apps/photocraft/src/app_icon.rs",
           "package": "photocraft",
           "command": "cargo test -p photocraft --locked windows_and_linux_icons_keep_the_round_corners -- --nocapture",
-          "fixture_and_action_excerpt": "        // rx=112 of 512 leaves (10, 10) of a 256 px render transparent; the old crop filled it (#4478).\n        let png = include_bytes!(\"../../../assets/app-icon/hicolor/256x256/apps/ai.storyteller.photocraft.png\");\n        let icon = eframe::icon_data::from_png_bytes(png).unwrap();\n        assert_eq!(icon.width, 256);\n        assert_eq!(icon.rgba[(10 * 256 + 10) * 4 + 3], 0, \"corner is transparent\");\n        assert_eq!(icon.rgba[(128 * 256 + 2) * 4 + 3], 255, \"the tile is full bleed\");\n    }",
+          "fixture_and_action_excerpt": "        // rx=112 of 512 leaves (10, 10) of a 256 px render transparent; the old crop filled it (#4478).\n        let png = include_bytes!(\"../../../assets/app-icon/hicolor/256x256/apps/com.photosoft.photosoft.png\");\n        let icon = eframe::icon_data::from_png_bytes(png).unwrap();\n        assert_eq!(icon.width, 256);\n        assert_eq!(icon.rgba[(10 * 256 + 10) * 4 + 3], 0, \"corner is transparent\");\n        assert_eq!(icon.rgba[(128 * 256 + 2) * 4 + 3], 255, \"the tile is full bleed\");\n    }",
           "expected_assertions": [
             "        assert_eq!(icon.width, 256);\n        assert_eq!(icon.rgba[(10 * 256 + 10) * 4 + 3], 0, \"corner is transparent\");\n        assert_eq!(icon.rgba[(128 * 256 + 2) * 4 + 3], 255, \"the tile is full bleed\");\n    }"
           ],

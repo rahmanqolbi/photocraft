@@ -212,7 +212,7 @@ fn dust(radius: i32, threshold: i32) -> Descriptor {
     Descriptor::new("DstS").with("Rds ", Value::Integer(radius)).with("Thsh", Value::Integer(threshold))
 }
 
-/// The `Fltr` descriptor PhotoCraft writes for `f`, after a byte round trip.
+/// The `Fltr` descriptor PhotoSoft writes for `f`, after a byte round trip.
 fn written_fltr(f: &SmartFilter) -> Descriptor {
     let d = Descriptor::from_bytes(&item_for_filter(f).unwrap().to_bytes()).unwrap();
     get_desc(&d, "Fltr").unwrap().clone()
@@ -251,12 +251,12 @@ fn smart_sharpen_photoshop_entry_opens_and_writes_back() {
         assert_eq!(written_fltr(&f), smart_sharpen(200.0, 1.0, 10.0, "GsnB"));
     }
 
-    // Without options PhotoCraft writes the engine's defaults, Gaussian Blur.
+    // Without options PhotoSoft writes the engine's defaults, Gaussian Blur.
     assert_eq!(written_fltr(&sf("filter.sharpen.smartSharpen", json!({}))), smart_sharpen(100.0, 1.0, 10.0, "GsnB"));
 }
 
 /// Lens Blur (Photoshop's default), Motion Blur and legacy mode render differently from
-/// PhotoCraft's Smart Sharpen, so those entries stay verbatim.
+/// PhotoSoft's Smart Sharpen, so those entries stay verbatim.
 #[test]
 fn smart_sharpen_settings_we_dont_render_stay_verbatim() {
     let mut default_entry = Descriptor::new("smartSharpen").with("presetKind", enumv("presetKindType", "presetKindDefault"));
@@ -459,7 +459,7 @@ fn measured_item(fltr: Descriptor, fg: f64, bg: f64) -> Descriptor {
 }
 
 /// The `Fltr` descriptors Photoshop 27 wrote for these filters (one smart object each, saved as
-/// PSD and read back), with the settings PhotoCraft reads from them.
+/// PSD and read back), with the settings PhotoSoft reads from them.
 const PHOTOSHOP_FLTR: [(&str, &str, &str); 6] = [
     ("filter.distort.pinch", r#"{"amount":-28}"#, "0000000600500069006e00630068000000000000506e63680000000100000000416d6e746c6f6e67ffffffe4"),
     ("filter.distort.twirl", r#"{"angle":-355}"#, "000000060054007700690072006c0000000000005477726c0000000100000000416e676c6c6f6e67fffffe9d"),
@@ -485,7 +485,7 @@ const PHOTOSHOP_FLTR: [(&str, &str, &str); 6] = [
     ),
 ];
 
-/// Photoshop's Wave with Scale 100% / 28%: PhotoCraft's Wave has no Scale.
+/// Photoshop's Wave with Scale 100% / 28%: PhotoSoft's Wave has no Scale.
 const PHOTOSHOP_WAVE: &str = "000000050057006100760065000000000000576176650000000a0000000057767470656e756d00000000577674700000000057765472000000004e6d62476c6f6e670000014c00000000574c4d6e6c6f6e67000000d500000000574c4d786c6f6e67000000d600000000416d4d6e6c6f6e67000000f000000000416d4d786c6f6e67000000f10000000053636c486c6f6e67000000640000000053636c566c6f6e670000001c00000000556e6441656e756d00000000556e6441000000005772704100000000526e64536c6f6e670013624a";
 
 /// A `filterFX` list item as Photoshop writes it (enabled, Normal at 100%, with options), wrapping the `Fltr` descriptor `fltr`.
@@ -888,7 +888,7 @@ fn mezzotint_round_trips_every_type_and_reads_photoshops_shape() {
         assert_eq!((f.command.as_str(), &f.params), ("filter.pixelate.mezzotint", &json!({"type": ty})));
     }
     // No type or an unknown type is Fine Dots, like the engine; the seed
-    // (PhotoCraft only) is not saved.
+    // (PhotoSoft only) is not saved.
     for p in [json!({}), json!({"type": "sparkles"}), json!({"type": "fineDots", "seed": 77})] {
         let d = item_for_filter(&sf("filter.pixelate.mezzotint", p)).unwrap();
         let fltr = get_desc(&d, "Fltr").unwrap();
@@ -977,8 +977,8 @@ fn malformed_pixelate_filters_stay_verbatim() {
     assert_eq!(filter_from_item(&bare).command, UNSUPPORTED_FILTER);
 }
 
-/// Distort smart filters from a Photoshop file open as their PhotoCraft filters, and the ones
-/// PhotoCraft writes carry the same settings, keys and order as Photoshop's.
+/// Distort smart filters from a Photoshop file open as their PhotoSoft filters, and the ones
+/// PhotoSoft writes carry the same settings, keys and order as Photoshop's.
 #[test]
 fn photoshop_distort_filters_read_and_write_like_photoshop() {
     for (command, params, hex) in PHOTOSHOP_FLTR {
@@ -1009,7 +1009,7 @@ fn photoshop_distort_filters_read_and_write_like_photoshop() {
     assert_eq!(f.command, UNSUPPORTED_FILTER);
     assert_eq!(item_for_filter(&f).unwrap().get("Fltr"), item.get("Fltr"));
 
-    // An extra or repeated setting PhotoCraft doesn't model keeps the filter Photoshop's, unchanged.
+    // An extra or repeated setting PhotoSoft doesn't model keeps the filter Photoshop's, unchanged.
     let mut fltrs: Vec<Descriptor> = PHOTOSHOP_FLTR.iter().map(|(_, _, hex)| Descriptor::from_bytes(&from_hex(hex).unwrap()).unwrap()).collect();
     let mut wave = unscaled_wave();
     set(&mut wave, "NmbG", Value::Integer(5));
@@ -1035,7 +1035,7 @@ fn unscaled_wave() -> Descriptor {
     wave
 }
 
-/// An unscaled Wave opens as PhotoCraft's Wave (Triangle, the other settings as stored) up to
+/// An unscaled Wave opens as PhotoSoft's Wave (Triangle, the other settings as stored) up to
 /// the generators the renderer models; one more and it stays Photoshop's, unchanged.
 #[test]
 fn wave_maps_up_to_the_generators_the_renderer_models() {
@@ -1068,7 +1068,7 @@ fn wave_maps_up_to_the_generators_the_renderer_models() {
     }
 }
 
-/// PhotoCraft draws at most `MAX_WAVE_GENERATORS` generators, so a Wave edited past that exports
+/// PhotoSoft draws at most `MAX_WAVE_GENERATORS` generators, so a Wave edited past that exports
 /// the 64 it rendered, and a count below 1 exports 1, instead of Photoshop drawing more.
 #[test]
 fn wave_export_writes_only_the_generators_the_renderer_draws() {
@@ -1130,7 +1130,7 @@ fn invert_smart_filter_reads_and_writes_like_photoshop() {
     assert_eq!(back.get("Nm  "), Some(&Value::Text(UnicodeString::new_nul("Invert"))));
 }
 
-/// A filter PhotoCraft doesn't model, or a known one with settings it doesn't, is kept verbatim; only its visibility and blend change.
+/// A filter PhotoSoft doesn't model, or a known one with settings it doesn't, is kept verbatim; only its visibility and blend change.
 #[test]
 fn photoshop_sharpen_without_fltr_imports_as_sharpen() {
     // #6267: Photoshop's Sharpen item holds only its name, blending and `filterID`.

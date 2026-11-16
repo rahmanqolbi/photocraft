@@ -98,7 +98,7 @@ impl AuthorizedWorkspace {
         let root = self.write.as_ref().ok_or_else(|| AutomationError::BadRequest(format!("{DENIED}: write authority is absent")))?;
         let leaf = relative.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
         // The bytes are an image or document whatever the name says (`format` picks them), so
-        // only a file of a kind PhotoCraft writes is replaced: never source, settings or notes
+        // only a file of a kind PhotoSoft writes is replaced: never source, settings or notes
         // that share the root (`src/main.rs`, `.env`; #9439). A new file may have any name, and
         // an image saved under one (`out` with `format: png`) can be saved over again.
         let exists = root.dir.symlink_metadata(&relative).is_ok();
@@ -171,14 +171,14 @@ impl Drop for TempRemoval<'_> {
     }
 }
 
-/// Whether `name`'s extension is one of the formats PhotoCraft saves or exports.
+/// Whether `name`'s extension is one of the formats PhotoSoft saves or exports.
 fn written_kind(name: &str) -> bool {
     let Some((_, ext)) = name.rsplit_once('.') else { return false };
     let ext = ext.to_ascii_lowercase();
     ["psd", "psb", "ora", "pdf", photocraft_format::EXTENSION].contains(&ext.as_str()) || photocraft_codecs::from_extension(&ext).is_some()
 }
 
-/// Whether the file at `relative` starts like an image PhotoCraft reads (PSD/PSB or a codec's
+/// Whether the file at `relative` starts like an image PhotoSoft reads (PSD/PSB or a codec's
 /// magic). Containers that also hold other things (zip, PDF) are judged by name only.
 fn holds_image(dir: &Dir, relative: &Path) -> bool {
     let mut head = [0u8; 64];

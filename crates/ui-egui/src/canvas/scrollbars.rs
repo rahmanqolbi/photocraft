@@ -77,7 +77,7 @@ impl Span {
 ///
 /// #1718 measured Photoshop 25.4 leaving a smaller image where zooming put it. Two reports of
 /// Photoshop itself say it stays centred with Overscroll off, which is what turning Overscroll off
-/// is asked for, so PhotoCraft centres it; Overscroll on keeps the free view.
+/// is asked for, so PhotoSoft centres it; Overscroll on keeps the free view.
 pub fn clamp_axis(center: f32, len: f32, size: f32, zoom: f32) -> f32 {
     if !(zoom.is_finite() && zoom > 0.0 && len.is_finite() && len > 0.0 && size.is_finite() && size > 0.0) {
         return center;

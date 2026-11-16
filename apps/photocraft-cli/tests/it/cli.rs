@@ -556,7 +556,7 @@ fn batch_naming_keeps_the_tree_order_and_the_selected_encoder() {
     std::fs::remove_dir_all(root).unwrap();
 }
 
-/// Without --format, a file PhotoCraft only opens is saved as PSD, with or without --naming:
+/// Without --format, a file PhotoSoft only opens is saved as PSD, with or without --naming:
 /// the encoder gets the format the planned name uses, not the input's import-only extension.
 #[test]
 fn batch_saves_import_only_inputs_as_psd() {
@@ -1240,7 +1240,7 @@ fn a_non_unicode_path_is_taken_and_non_unicode_text_is_a_usage_error() {
 }
 
 /// `batch --actions set.atn`: a Photoshop Actions file plays like an Actions set, and its steps
-/// PhotoCraft can't play are warned about up front.
+/// PhotoSoft can't play are warned about up front.
 #[test]
 fn batch_plays_a_photoshop_actions_file() {
     use photocraft_engine::actions_cmds::Action;

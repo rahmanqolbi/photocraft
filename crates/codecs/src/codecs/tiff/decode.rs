@@ -687,7 +687,7 @@ fn prepare(f: &File<'_>, dir: &Ifd, limits: &Limits, whole: bool) -> Result<Prep
     let invert = photometric == 0;
     let palette = if photometric == 3 { Some(read_palette(f, dir, spp, bits, src)?) } else { None };
     // CIE L*a*b*: CIELab (8; a* and b* signed) and ICCLab (9; a* and b* offset) are handed to the
-    // `tiff` crate as RGB, then labelled Lab with a* and b* in PhotoCraft's encoding
+    // `tiff` crate as RGB, then labelled Lab with a* and b* in PhotoSoft's encoding
     // (`convert_ab`).
     let lab = matches!(photometric, 8 | 9);
     // YCbCr (6), as scanners and cameras write it (usually JPEG-compressed with subsampled

@@ -1,4 +1,4 @@
-# PhotoCraft app icon
+# PhotoSoft app icon
 
 A **nine-tailed kitsune with a brow diamond**: an engraving portrait, seated, looking back at the
 viewer, in the Crafting Apps' owl-template framing (full-bleed field, head and body filling the
@@ -12,7 +12,7 @@ Exactly three colours:
 |---|---|---|
 | Ink | `#0b0b0c` | line work and contours |
 | Paper | `#efe9dc` | the figure |
-| PhotoCraft blue (app colour) | `#2f7bf5` | the full-bleed field |
+| PhotoSoft blue (app colour) | `#2f7bf5` | the full-bleed field |
 
 ## Geometry
 
@@ -32,7 +32,7 @@ vectorised. License: see `LICENSE.txt`.
 - `photocraft-1024.png`: 1024 px render on the macOS grid.
 - `photocraft.icns`: macOS bundle icon (`CFBundleIconFile`).
 - `photocraft.ico`: Windows icon, 16–256 px, embedded in the `.exe` by `apps/photocraft/build.rs`.
-- `hicolor/<size>/apps/ai.storyteller.photocraft.png` (16–512) and `hicolor/scalable/...svg`:
+- `hicolor/<size>/apps/com.photosoft.photosoft.png` (16–512) and `hicolor/scalable/...svg`:
   Linux icon theme.
 
 The app also sets the window icon and Wayland app ID at runtime (`apps/photocraft/src/app_icon.rs`,

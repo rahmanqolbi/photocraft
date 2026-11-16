@@ -315,7 +315,7 @@ fn capture(_wayland: bool, _scale: f32, stop: &std::sync::atomic::AtomicBool, pl
             return Ok(Capture::Color(None));
         }
         // Capture a composed monitor at native resolution through safe bindings. Keeping the
-        // CoreGraphics seam preserves PhotoCraft's existing macOS 11 deployment target.
+        // CoreGraphics seam preserves PhotoSoft's existing macOS 11 deployment target.
         let bounds = display.bounds();
         let image = window::new_image(
             bounds,

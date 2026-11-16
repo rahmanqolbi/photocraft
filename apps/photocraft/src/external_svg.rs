@@ -1,6 +1,6 @@
 //! Explicit desktop SVG editing. Clipboard/source data never supplies a command or program path.
 //!
-//! The owned temporary SVG is watched off the UI thread. Closing the PhotoCraft session stops
+//! The owned temporary SVG is watched off the UI thread. Closing the PhotoSoft session stops
 //! watching and removes its temporary directory; it does not terminate the external editor.
 
 use photocraft_ui_egui::{ExternalSvgEditor, ExternalSvgSession, ExternalVectorSave};

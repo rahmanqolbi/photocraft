@@ -1,5 +1,5 @@
 //! Launch a sandboxed editor through the desktop, exporting only the writable working SVG.
-//! Never execute another Flatpak's payload inside PhotoCraft or grant access to its home.
+//! Never execute another Flatpak's payload inside PhotoSoft or grant access to its home.
 
 use super::native::OwnedSvg;
 use std::collections::HashMap;
@@ -22,7 +22,7 @@ pub(super) fn open(owned: &OwnedSvg, stop: &Receiver<()>) -> Result<(), String> 
 fn open_on(connection: &Connection, owned: &OwnedSvg, stop: &Receiver<()>) -> Result<(), String> {
     use futures_lite::StreamExt;
     // Retain the checked handle for the portal call. Writable document-portal access also
-    // supports atomic saves. The watcher keeps using PhotoCraft's original owned pathname.
+    // supports atomic saves. The watcher keeps using PhotoSoft's original owned pathname.
     let file = owned.share_handle()?;
     let unique = connection.unique_name().ok_or("No desktop connection name")?.as_str().trim_start_matches(':').replace('.', "_");
     static NEXT: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);

@@ -1,4 +1,4 @@
-//! Native embedded files stay native while PhotoCraft retains a source-bound display preview.
+//! Native embedded files stay native while PhotoSoft retains a source-bound display preview.
 
 use std::sync::Arc;
 

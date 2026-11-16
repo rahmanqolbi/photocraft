@@ -112,10 +112,10 @@ fn main() {
     assert_eq!(tops, ["PhotoSoft", "File", "Edit", "Image", "Layer", "Type", "Select", "Filter", "View", "Window", "Help"]);
     let app_menu = submenu(&bar, "PhotoSoft");
     let names = titles(&app_menu);
-    for want in ["About PhotoCraft", "Settings", "Language", "Appearance", "Hide PhotoCraft", "Quit PhotoCraft"] {
+    for want in ["About PhotoSoft", "Settings", "Language", "Appearance", "Hide PhotoSoft", "Quit PhotoSoft"] {
         assert!(names.iter().any(|n| n == want), "{want} missing from the app menu: {names:?}");
     }
-    let quit = app_menu.itemAtIndex(index(&app_menu, "Quit PhotoCraft")).expect("Quit");
+    let quit = app_menu.itemAtIndex(index(&app_menu, "Quit PhotoSoft")).expect("Quit");
     assert_eq!(quit.keyEquivalent().to_string(), "q");
     assert_eq!(quit.keyEquivalentModifierMask(), NSEventModifierFlags::Command);
     assert!(!titles(&submenu(&bar, "File")).iter().any(|n| n == "Exit"), "Exit moved to the app menu as Quit");

@@ -1,6 +1,6 @@
 # Summary
 
-[PhotoCraft Documentation](README.md)
+[PhotoSoft Documentation](README.md)
 
 # Getting started
 

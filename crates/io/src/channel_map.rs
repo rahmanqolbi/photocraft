@@ -91,7 +91,7 @@ pub(crate) fn spot_flags(data: &[u8], versioned: bool, skip: usize) -> Vec<bool>
 }
 
 /// Whether a DisplayInfo resource 1077 marks any channel as a spot (kind 2), in 13-byte records
-/// (Photoshop's, and PhotoCraft's since 0.8.2) or in the 14-byte padded records PhotoCraft wrote
+/// (Photoshop's, and PhotoSoft's since 0.8.2) or in the 14-byte padded records PhotoSoft wrote
 /// up to 0.7.0.
 pub(crate) fn display_info_marks_spot(data: &[u8]) -> bool {
     let body = data.get(4..).unwrap_or_default();
@@ -253,7 +253,7 @@ mod tests {
         assert_eq!(alpha_identifiers(false, 2), [0, 0, 0, 3, 0, 0, 0, 4]);
     }
 
-    /// PhotoCraft 0.1.0 to 0.7.0 padded each 1077 record to 14 bytes, so a spot after the first
+    /// PhotoSoft 0.1.0 to 0.7.0 padded each 1077 record to 14 bytes, so a spot after the first
     /// record sits where a 13-byte reader finds no kind 2; it is still recognised.
     #[test]
     fn a_spot_is_found_in_padded_records() {

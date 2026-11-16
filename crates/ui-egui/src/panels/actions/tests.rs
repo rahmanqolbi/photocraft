@@ -264,7 +264,7 @@ fn bulk_load_keeps_selection_order_and_earlier_warnings_and_errors() {
     {
         assert!(app.ui.status.contains(part), "{part}: {}", app.ui.status);
     }
-    assert!(!app.ui.status.contains("PhotoCraft equivalent"), "{}", app.ui.status);
+    assert!(!app.ui.status.contains("PhotoSoft equivalent"), "{}", app.ui.status);
 }
 
 /// Load `files` (name, bytes) in one Load Actions… selection and return the status bar text.
