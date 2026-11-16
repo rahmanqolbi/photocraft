@@ -4,6 +4,7 @@ use serde_json::json;
 
 thread_local! {
     /// How often this thread built a preview copy (`display_doc` runs the command).
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     pub(super) static BUILDS: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
 }
 

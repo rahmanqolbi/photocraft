@@ -806,7 +806,10 @@ mod action_history_tests {
         undo_name: String,
     }
 
-    thread_local! { static OBSERVED: RefCell<Vec<Observed>> = const { RefCell::new(Vec::new()) }; }
+    thread_local! {
+        #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
+        static OBSERVED: RefCell<Vec<Observed>> = const { RefCell::new(Vec::new()) };
+    }
 
     /// Inspect the real scratch boundary without retaining or changing the scratch session.
     fn observe(s: &Session) {
@@ -982,7 +985,10 @@ mod action_history_tests {
         }
     }
 
-    thread_local! { static CANCEL_CONTEXT: RefCell<Option<crate::jobs::JobCtx>> = const { RefCell::new(None) }; }
+    thread_local! {
+        #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
+        static CANCEL_CONTEXT: RefCell<Option<crate::jobs::JobCtx>> = const { RefCell::new(None) };
+    }
 
     fn cancel_after_prefix(id: &str, params: &Value) -> Result<()> {
         if id == "layer.renameLayer" && params["name"] == "Cancel here" {

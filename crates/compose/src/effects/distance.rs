@@ -57,6 +57,7 @@ const PAR_THREADS: usize = 16;
 #[cfg(test)]
 thread_local! {
     /// Test hook: the thread count [`par_threads`] gives on this thread, whatever the work.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     pub(super) static THREADS: std::cell::Cell<Option<usize>> = const { std::cell::Cell::new(None) };
 }
 

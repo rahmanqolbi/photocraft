@@ -31,7 +31,9 @@ fn get_gate() -> &'static (Mutex<GateState>, Condvar) {
 }
 
 thread_local! {
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static NESTED_DEPTH: Cell<usize> = const { Cell::new(0) };
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static ATTEMPT_ALLOWANCE: Cell<Option<u64>> = const { Cell::new(None) };
 }
 

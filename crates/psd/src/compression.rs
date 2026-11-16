@@ -300,6 +300,7 @@ pub(crate) fn validate_planes(compression: Compression, data: &[u8], layout: &Pl
 #[cfg(test)]
 thread_local! {
     /// ZIP streams inflated on this thread (tests count passes over the merged image).
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     pub(crate) static INFLATES: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
 }
 

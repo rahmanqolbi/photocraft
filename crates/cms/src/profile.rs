@@ -592,6 +592,7 @@ const MAX_CURVE_SAMPLES: usize = 16 << 20;
 
 thread_local! {
     /// What is left of [`MAX_CURVE_SAMPLES`] for the profile being parsed on this thread.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static CURVE_SAMPLES_LEFT: std::cell::Cell<usize> = const { std::cell::Cell::new(MAX_CURVE_SAMPLES) };
 }
 

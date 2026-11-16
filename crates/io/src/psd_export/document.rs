@@ -46,6 +46,7 @@ pub(super) fn document_to_psd_sized(doc: &Document, opts: &PsdExportOptions, dep
     export_supported_document(doc, opts, depth, ctl, fmt, size_limit)
 }
 
+#[allow(clippy::drop_non_drop)] // drops a guard to end a borrow, which is the point (clippy 1.98)
 fn export_supported_document(
     doc: &Document,
     opts: &PsdExportOptions,

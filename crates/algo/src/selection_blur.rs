@@ -584,7 +584,10 @@ pub(crate) fn feather(m: &[f32], w: usize, h: usize, radius: f32) -> Vec<f32> {
     // Rows: only the bounding box's rows are non-zero.
     // The run table is scratch: one buffer per worker thread, reused across rows instead of
     // one allocation per row (thousands of 8-byte-per-sample Vecs on a 24 MP mask).
-    thread_local! { static RUNS: std::cell::RefCell<Vec<usize>> = const { std::cell::RefCell::new(Vec::new()) } }
+    thread_local! {
+        #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
+        static RUNS: std::cell::RefCell<Vec<usize>> = const { std::cell::RefCell::new(Vec::new()) }
+    }
     let mut tmp = vec![0.0f32; b.h() * gw];
     par_rows(&mut tmp, gw, 1, |y, row| {
         let o = (b.y0 + y) * w + win.x0;

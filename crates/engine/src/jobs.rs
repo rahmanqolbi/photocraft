@@ -39,6 +39,7 @@ type Authorization = fn(&str, &Value) -> Result<()>;
 thread_local! {
     // Smart-filter rendering has no Session argument. Carry the requesting session's gate
     // through synchronous rendering and explicitly reinstall it on background workers.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static RENDER_AUTHORIZATION: std::cell::Cell<Option<Authorization>> = const { std::cell::Cell::new(None) };
 }
 

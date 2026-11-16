@@ -19,7 +19,10 @@ pub(super) fn contents_uuid(contents_id: SmartContentsId, bytes: &[u8]) -> Strin
 type OwnedSourceHash = (std::sync::Arc<Vec<u8>>, [u8; 32]);
 
 #[cfg(test)]
-thread_local! { pub(crate) static EMBED_HASHED_SOURCE_BYTES: std::cell::Cell<usize> = const { std::cell::Cell::new(0) }; }
+thread_local! {
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
+    pub(crate) static EMBED_HASHED_SOURCE_BYTES: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+}
 
 /// The actual payload digest used by the source-conversion cache, separate from preview checks.
 pub(super) fn embed_source_hash(bytes: &[u8]) -> [u8; 32] {

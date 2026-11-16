@@ -4,7 +4,9 @@ use crate::{EngineError, Result};
 
 #[cfg(test)]
 thread_local! {
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static FAIL_NEXT: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static FAIL_AFTER: std::cell::Cell<Option<usize>> = const { std::cell::Cell::new(None) };
 }
 

@@ -85,12 +85,15 @@ pub struct MemorySnapshot {
 
 #[cfg(any(test, feature = "testgen"))]
 thread_local! {
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static MOCK_SNAPSHOT: std::cell::RefCell<Option<MemorySnapshot>> = const { std::cell::RefCell::new(None) };
     /// A per-attempt provider consulted on every query, unlike the fixed [`MOCK_SNAPSHOT`].
     /// Tests use it to change the measured capacity between admission checks from another
     /// thread; it is thread-local, so it never affects unrelated parallel tests.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static MOCK_PROVIDER: std::cell::RefCell<Option<std::rc::Rc<dyn Fn() -> MemorySnapshot>>> = const { std::cell::RefCell::new(None) };
     /// Mocked [`scratch_capacity`]: `Some(None)` = spilling off, `Some(Some(n))` = `n` bytes.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static MOCK_SCRATCH: std::cell::Cell<Option<Option<u64>>> = const { std::cell::Cell::new(None) };
 }
 

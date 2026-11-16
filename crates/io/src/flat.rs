@@ -18,6 +18,7 @@ const BAND_BYTES: usize = 32 << 20;
 thread_local! {
     /// Called on this thread just before a layered TIFF's composite is decoded. A test proves
     /// that admission refused a file without ever reaching that decode.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static TEST_BEFORE_COMPOSITE_DECODE: std::cell::RefCell<Option<std::rc::Rc<dyn Fn()>>> = const { std::cell::RefCell::new(None) };
 }
 

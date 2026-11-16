@@ -296,6 +296,7 @@ mod limits {
     }
 
     thread_local! {
+        #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
         static CURRENT: Cell<Overrides> = const { Cell::new(Overrides { psd_max_pixel_bytes: None, max_footage_bytes: None }) };
     }
 

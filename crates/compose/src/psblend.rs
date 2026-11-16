@@ -75,10 +75,12 @@ thread_local! {
     /// Set while rendering a Lab document: Normal blending mixes backdrop and source in CIELAB
     /// (Photoshop composites Lab documents in Lab; an anti-aliased edge between two colours
     /// differs by up to 14 / 255 from an sRGB mix: psd-tools stroke-color-descriptors-lab).
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     pub static LAB_MIX: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
     /// Set while rendering a 32-bit float document: Linear Dodge (Add) and Divide don't clip at 1,
     /// and Hue, Saturation, Color and Luminosity keep values above 1 ([`generic::blend_rgb_hdr`]),
     /// as in Photoshop's 32-bit mode; integer depths clip.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: already const
     pub static HDR: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
 }
 

@@ -199,7 +199,10 @@ pub(super) fn place(name: &str, bytes: &[u8], doc: &Document, sm: &SmartObject) 
 }
 
 #[cfg(test)]
-thread_local! { pub(crate) static DISPLAY_NATIVE_HASH_BYTES: std::cell::Cell<usize> = const { std::cell::Cell::new(0) }; }
+thread_local! {
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
+    pub(crate) static DISPLAY_NATIVE_HASH_BYTES: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+}
 
 /// BLAKE3 digests of native vector sources, remembered per source allocation so explicit
 /// refreshes and warp source frames of shared contents hash a (up to 16 MiB) source once.

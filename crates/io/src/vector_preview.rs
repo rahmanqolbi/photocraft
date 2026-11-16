@@ -20,7 +20,10 @@ pub fn is_native_source(source: &[u8]) -> bool {
 }
 
 #[cfg(test)]
-thread_local! { static HASHED_SOURCE_BYTES: std::cell::Cell<usize> = const { std::cell::Cell::new(0) }; }
+thread_local! {
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
+    static HASHED_SOURCE_BYTES: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+}
 
 /// Hash only a supported, bounded source. PSD import caches this result per source UUID.
 pub(crate) fn source_hash(source: &[u8]) -> Option<[u8; 32]> {
@@ -99,7 +102,10 @@ fn display_document(svg: &[u8]) -> Option<photocraft_doc::Document> {
 }
 
 #[cfg(test)]
-thread_local! { static RENDERED_PREVIEWS: std::cell::Cell<usize> = const { std::cell::Cell::new(0) }; }
+thread_local! {
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
+    static RENDERED_PREVIEWS: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+}
 
 /// Keep callers that need only a display document separate from aggregate-work accounting.
 fn display_document_with_budget(svg: &[u8], max_pixels: u64) -> Option<photocraft_doc::Document> {

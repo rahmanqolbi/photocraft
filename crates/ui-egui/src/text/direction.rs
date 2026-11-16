@@ -23,6 +23,7 @@ pub use crate::i18n::Dir;
 
 thread_local! {
     // Like the drawing language, per thread: test harnesses run side by side.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static FORCED: Cell<Option<Dir>> = const { Cell::new(None) };
 }
 

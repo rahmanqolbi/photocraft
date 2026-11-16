@@ -14,6 +14,7 @@ use std::path::{Path, PathBuf};
 pub use photocraft_io::doc_path::NotFollowed;
 
 thread_local! {
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static DOCUMENT: RefCell<Option<PathBuf>> = const { RefCell::new(None) };
 }
 

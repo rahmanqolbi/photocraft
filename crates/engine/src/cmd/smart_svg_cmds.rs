@@ -82,7 +82,10 @@ fn source_size(sm: &SmartObject) -> Option<(f64, f64)> {
 }
 
 #[cfg(test)]
-thread_local! { static PREVIEW_FRAME_CHECKS: std::cell::Cell<usize> = const { std::cell::Cell::new(0) }; }
+thread_local! {
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
+    static PREVIEW_FRAME_CHECKS: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+}
 
 /// Reading source geometry never rasterizes an old preview or decodes its embedded images.
 fn preview_frame(preview: &photocraft_doc::VectorPreview, source: &[u8]) -> Option<(f64, f64)> {

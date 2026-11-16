@@ -96,6 +96,7 @@ pub fn with_spooler<T>(f: impl FnOnce() -> T) -> T {
 
 thread_local! {
     /// Whether this thread holds `SPOOLER`.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static HOLDING: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
 }
 

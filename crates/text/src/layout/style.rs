@@ -43,6 +43,7 @@ pub(super) fn probe_smcp(fonts: &mut FontDb, style: &CharStyle) -> bool {
 
 #[cfg(test)]
 thread_local! {
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     pub(super) static SMCP_PROBES: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
 }
 

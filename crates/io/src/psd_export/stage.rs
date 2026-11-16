@@ -24,6 +24,7 @@ pub(crate) const STAGE_DOCUMENTS_FROM: u64 = 1 << 30;
 #[cfg(test)]
 thread_local! {
     /// Where this thread's exports stage, instead of the process-wide scratch directory.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     pub(crate) static DIR_FOR_TESTS: std::cell::RefCell<Option<std::path::PathBuf>> = const { std::cell::RefCell::new(None) };
 }
 

@@ -33,8 +33,10 @@ const BAND_BYTES: usize = 64 << 20;
 #[cfg(test)]
 thread_local! {
     /// `(BANDED_FROM, BAND_BYTES)` for this thread's exports, so tests band small layers.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     pub(crate) static BANDS_FOR_TESTS: std::cell::Cell<Option<(u64, usize)>> = const { std::cell::Cell::new(None) };
     /// Bands this thread has gathered and encoded.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     pub(crate) static BANDS_DONE: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
 }
 

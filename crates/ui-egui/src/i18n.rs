@@ -402,6 +402,7 @@ pub fn lang_from_tag(tag: &str) -> Option<Lang> {
 
 thread_local! {
     // Independent app/test threads must not change each other's drawing language.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static CURRENT: Cell<Lang> = const { Cell::new(Lang::EN) };
 }
 

@@ -60,6 +60,7 @@ impl CmykSpace {
 }
 
 thread_local! {
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static ACTIVE_CMYK: RefCell<Option<Arc<CmykSpace>>> = const { RefCell::new(None) };
 }
 

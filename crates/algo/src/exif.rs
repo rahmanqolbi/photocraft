@@ -100,7 +100,10 @@ impl Tiff<'_> {
 }
 
 #[cfg(test)]
-thread_local!(static TEXT_DECODES: std::cell::Cell<usize> = const { std::cell::Cell::new(0) });
+thread_local! {
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
+    static TEXT_DECODES: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+}
 
 /// Reads [`CameraInfo`] from a TIFF-structured EXIF payload (an `Exif\0\0` prefix is skipped).
 pub fn read(exif: &[u8]) -> CameraInfo {

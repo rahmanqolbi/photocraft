@@ -201,6 +201,7 @@ const MAX_BLEND_IF_GROUP_DEPTH: u32 = 2;
 
 thread_local! {
     /// Blend If groups being rendered for their own colour on this thread.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static BLEND_IF_GROUPS: std::cell::Cell<u32> = const { std::cell::Cell::new(0) };
 }
 

@@ -42,8 +42,10 @@ struct ImportBudget {
 #[cfg(any(test, feature = "testgen"))]
 thread_local! {
     /// Extra bytes added to every estimate on this thread by [`with_test_estimate_charge`].
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static TEST_ESTIMATE_CHARGE: std::cell::Cell<u64> = const { std::cell::Cell::new(0) };
     /// Extra tile-pixel bytes added by [`with_test_tile_charge`].
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static TEST_TILE_CHARGE: std::cell::Cell<u64> = const { std::cell::Cell::new(0) };
 }
 

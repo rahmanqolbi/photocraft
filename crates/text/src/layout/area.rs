@@ -18,6 +18,7 @@ const MAX_AREA_ROWS: usize = 4096;
 #[cfg(test)]
 thread_local! {
     /// Area line-breaking passes made on this thread, for tests.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     pub(crate) static AREA_PASSES: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
 }
 

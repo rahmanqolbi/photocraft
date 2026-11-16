@@ -104,6 +104,7 @@ fn detect_decimal_separator() -> Option<char> {
 thread_local! {
     // Tests take both separators unless they choose one (`with_decimal_separator`), whatever the
     // developer's own number format is.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static TEST_DECIMAL: std::cell::Cell<Option<char>> = const { std::cell::Cell::new(None) };
 }
 
@@ -124,6 +125,7 @@ pub(crate) fn with_decimal_separator<R>(sep: Option<char>, run: impl FnOnce() ->
 thread_local! {
     // Keep ordinary tests independent of the developer's locale, without mutating OS or
     // process-global preferences. Startup tests supply the OS result on their own thread.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static TEST_SYSTEM_TAGS: std::cell::RefCell<Vec<String>> = const { std::cell::RefCell::new(Vec::new()) };
 }
 

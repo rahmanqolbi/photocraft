@@ -128,6 +128,7 @@ fn dissolve_matches(doc: &photocraft_doc::Document, ours: &[[f32; 4]], ps: &[[f3
 
 thread_local! {
     /// Files whose export has tagged blocks that fail `common::strict_block_errors`.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static BLOCK_ERRORS: std::cell::RefCell<Vec<String>> = const { std::cell::RefCell::new(Vec::new()) };
 }
 

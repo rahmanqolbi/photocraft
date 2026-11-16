@@ -826,8 +826,10 @@ fn confirm_flushed(dir: &Path, written: &Path) -> Result<()> {
 #[cfg(all(test, not(windows)))]
 thread_local! {
     /// Tests: the bundle file, or folder, whose next folder flush fails, once, on this thread.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static FAIL_DIR_FLUSH: std::cell::Cell<Option<&'static str>> = const { std::cell::Cell::new(None) };
     /// Tests: the folders flushed on this thread, in order.
+    #[allow(clippy::missing_const_for_thread_local)] // clippy 1.98 false positive: the initializer is already `const`
     static FLUSHED: std::cell::RefCell<Vec<PathBuf>> = const { std::cell::RefCell::new(Vec::new()) };
 }
 
