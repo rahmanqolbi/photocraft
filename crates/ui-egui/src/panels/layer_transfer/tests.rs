@@ -130,3 +130,43 @@ fn dropping_back_on_the_source_copies_nothing() {
     assert_eq!((docs[0].doc.layers.len(), docs[1].doc.layers.len()), (2, 1));
     assert_eq!(h.state().session.active_index(), Some(0));
 }
+
+/// A document with only a Background: the Background cannot move inside its own document, but
+/// dragging it onto another document copies it there, as in Photoshop. The source keeps it.
+#[test]
+fn a_move_tool_drag_from_the_background_copies_it_into_the_other_document() {
+    let mut s = photocraft_engine::Session::new();
+    s.execute("file.new", json!({"width": 40, "height": 30, "name": "source-doc"})).unwrap();
+    s.execute("file.new", json!({"width": 60, "height": 50, "name": "dest-doc"})).unwrap();
+    s.set_active(0);
+    let mut h = Harness::builder().with_size(vec2(1440.0, 900.0)).with_max_steps(64).build_eframe(move |cc| {
+        PhotocraftApp::setup_context(&cc.egui_ctx, Default::default());
+        PhotocraftApp::new(s, crate::Services::default())
+    });
+    h.run_steps(8);
+    h.state_mut().ui.tool = Tool::Move;
+    h.state_mut().ui.tool_options.move_auto_select = true;
+    h.run_steps(2);
+
+    let source = &h.state().session.documents()[0].doc;
+    let background = source.background().expect("the source has a Background").id;
+    assert!(source.is_background(background), "the source's bottom layer is a Background");
+
+    // A drag on the Background, over the other document's tab, released on its canvas.
+    let grab = ViewXform::active(h.state()).unwrap().to_screen(20.0, 15.0);
+    let over_tab = tab(&h, "dest-doc");
+    let drop = h.state().last_canvas_rect.center();
+    drag_along(&mut h, &[grab, over_tab, drop], Modifiers::NONE);
+
+    // The destination has its own Background plus the copy.
+    let dest = &h.state().session.documents()[1].doc;
+    assert_eq!(dest.layers.len(), 2, "the Background was copied into the other document");
+    let copied = dest.layers.iter().find(|l| l.id != dest.background().unwrap().id).expect("the copy");
+    assert!(!dest.is_background(copied.id), "the copy is an ordinary layer, not a Background");
+    assert!(!copied.locks.all && !copied.locks.position && !copied.locks.transparency, "the copy is unlocked");
+
+    // The source still has its Background, and it did not move.
+    let source = &h.state().session.documents()[0].doc;
+    assert_eq!(source.layers.len(), 1, "the source keeps its Background");
+    assert!(source.is_background(background));
+}

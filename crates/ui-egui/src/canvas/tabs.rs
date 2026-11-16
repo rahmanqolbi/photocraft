@@ -147,6 +147,10 @@ fn documents(app: &mut PhotocraftApp, ui: &mut egui::Ui) {
 
 /// The tab strip; returns where its document tabs are.
 pub(super) fn tabs(app: &mut PhotocraftApp, ui: &mut egui::Ui) -> TabStrip {
+    // Keep the remembered floating-window layout up to date with what is on screen, and
+    // float any restored files whose background opens finished. Cheap no-ops in steady state.
+    crate::view_target::sync_session(app);
+    crate::view_target::restore_tick(app);
     let t = crate::theme::Tokens::get(ui.ctx());
     if t.pro {
         return pro_tabs(app, ui);

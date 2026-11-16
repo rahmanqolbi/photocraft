@@ -62,8 +62,11 @@ CORE_GLOBS = [
     "assets/app-icon/LICENSE.txt",
     "xtask/**/*.rs",
     "xtask/**/*.toml",
-    "README.md",
-    "NOTICE",
+    # README.md is the fork's own document: it says PhotoSoft is a fork of PhotoCraft
+    # by design. Excluded; maintained by hand.
+    # NOTICE is an attribution file, like ATTRIBUTION.md: the upstream attribution lines
+    # (modified version of PhotoCraft, upstream copyright) must stay PhotoCraft, and the
+    # blanket rewrite would bury that. Excluded; it is maintained by hand.
     "docs/user/**/*",
     "docs/releasing.md",
     "docs/mcp.md",

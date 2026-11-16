@@ -674,6 +674,9 @@ fn main() -> eframe::Result {
             app.services.right_button_down = tablet::right_button_service();
             // Paths on the command line (Linux/Windows file associations, `photocraft a.psd`).
             app.open_paths(&files);
+            // Reopen the floating windows saved at the last quit; files that open in the
+            // background are linked in as they land.
+            photocraft_ui_egui::restore_session(&mut app);
             if !unreadable_paths.is_empty() {
                 use photocraft_ui_egui::i18n;
                 let line = i18n::t("{path}: the path is not valid Unicode; rename the file and open it again.");

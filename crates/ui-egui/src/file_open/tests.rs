@@ -1130,3 +1130,79 @@ fn opening_an_open_file_again_shows_its_tab() {
         let _ = std::fs::remove_dir_all(&d);
     }
 }
+
+/// Saved floating windows reopen on launch with their view and geometry (Preferences > File
+/// Handling > saved_windows); files that are not open yet open in the background.
+#[test]
+fn restore_session_reopens_saved_floating_windows_on_launch() {
+    let (dir, paths) = files("session-restore", &["a.psd", "b.psd"], b"x");
+    let (mut app, _) = app_with(Vec::new());
+    app.session.edit_prefs(|p| {
+        p.file_handling.saved_windows = vec![
+            photocraft_engine::prefs::SavedWindow {
+                path: paths[0].clone(),
+                zoom: 2.0,
+                center: [5.0, 6.0],
+                rotation: 15.0,
+                position: Some([11.0, 22.0]),
+                rect: Some([10.0, 20.0, 300.0, 240.0]),
+                maximized: false,
+                minimized: false,
+            },
+            photocraft_engine::prefs::SavedWindow {
+                path: paths[1].clone(),
+                zoom: 0.5,
+                center: [42.0, 7.0],
+                rotation: 0.0,
+                position: None,
+                rect: None,
+                maximized: true,
+                minimized: false,
+            },
+        ];
+    });
+    crate::restore_session(&mut app);
+    assert_eq!(app.session.documents().len(), 2, "both files reopen");
+    assert_eq!(app.ui.windows.len(), 2, "both reopen as floating windows");
+    let a = app.ui.windows.iter().find(|w| w.document == 0).unwrap();
+    assert_eq!(a.view.zoom, 2.0);
+    assert_eq!(a.view.center, [5.0, 6.0]);
+    assert_eq!(a.view.rotation, 15.0);
+    assert_eq!(a.position, Some([11.0, 22.0]));
+    assert_eq!(a.rect, Some([10.0, 20.0, 300.0, 240.0]));
+    let b = app.ui.windows.iter().find(|w| w.document == 1).unwrap();
+    assert_eq!(b.view.zoom, 0.5);
+    assert_eq!(b.view.center, [42.0, 7.0]);
+    assert_eq!(b.position, None);
+    assert!(b.maximized);
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+/// A file that is already open (command line, or opened before the restore runs) is reused, not
+/// opened twice; it is linked into the saved layout instead.
+#[test]
+fn restore_session_reuses_an_already_open_file_instead_of_opening_it_again() {
+    let (dir, paths) = files("session-restore-reuse", &["a.psd"], b"x");
+    let (mut app, _) = app_with(Vec::new());
+    app.open_path(&paths[0]).unwrap();
+    assert_eq!(app.session.documents().len(), 1);
+    app.session.edit_prefs(|p| {
+        p.file_handling.saved_windows = vec![photocraft_engine::prefs::SavedWindow {
+            path: paths[0].clone(),
+            zoom: 3.0,
+            center: [1.0, 2.0],
+            rotation: 0.0,
+            position: None,
+            rect: Some([30.0, 40.0, 200.0, 180.0]),
+            maximized: false,
+            minimized: false,
+        }];
+    });
+    crate::restore_session(&mut app);
+    assert_eq!(app.session.documents().len(), 1, "the file is not opened twice");
+    assert_eq!(app.ui.windows.len(), 1, "it is linked into the saved layout");
+    let w = app.ui.windows.iter().find(|w| w.document == 0).unwrap();
+    assert_eq!(w.view.zoom, 3.0);
+    assert_eq!(w.rect, Some([30.0, 40.0, 200.0, 180.0]));
+    let _ = std::fs::remove_dir_all(&dir);
+}

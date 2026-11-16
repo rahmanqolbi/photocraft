@@ -120,7 +120,7 @@ fn status_info_text_with_units(doc: &Document, key: &str, tool: &str, profile: &
     }
 }
 
-fn profile_name(doc: &Document) -> String {
+pub(crate) fn profile_name(doc: &Document) -> String {
     let mode = crate::canvas::mode_label(doc);
     let Some(bytes) = doc.icc_profile.as_ref() else {
         return crate::i18n::fmt(tl!("Untagged {mode}"), &[("mode", tl!(mode))]);
@@ -142,7 +142,7 @@ fn profile_name(doc: &Document) -> String {
 /// Status bar body (Pro): zoom %, the chosen info field and its ">" menu, then status messages.
 pub fn status_bar_pro(app: &mut PhotocraftApp, ui: &mut egui::Ui) {
     let t = Tokens::get(ui.ctx());
-    let (Some(st), Some(i)) = (app.session.active(), app.session.active_index()) else {
+    let (Some(st), Some(_i)) = (app.session.active(), app.session.active_index()) else {
         ui.label(RichText::new(tl!("No document")).color(t.text_dim));
         // A command run with no document open still reports here (#1567: File › Automate › Batch).
         status_message(app, ui, &t);
@@ -155,13 +155,22 @@ pub fn status_bar_pro(app: &mut PhotocraftApp, ui: &mut egui::Ui) {
         &profile_name(&st.doc),
         &app.session.prefs().units_and_rulers,
     );
-    let mut pct = app.ui.views[i].zoom * 100.0;
+    // A floating document window owns its view; the status bar edits that one.
+    let mut pct = crate::view_target::view_ref(app).map_or(100.0, |v| v.zoom * 100.0);
     let control_h = crate::panels::status_bar_heights(&t).1;
-    let field = widgets::compact_wrapping_value_field(ui, &mut pct, crate::zoom_levels::percent_range(&app.ui.views[i]), "%", vec2(64.0, control_h))
-        .accessible_name(tl!("Zoom"));
+    let field = widgets::compact_wrapping_value_field(
+        ui,
+        &mut pct,
+        crate::view_target::view_ref(app).map_or(100.0..=1600.0, crate::zoom_levels::percent_range),
+        "%",
+        vec2(64.0, control_h),
+    )
+    .accessible_name(tl!("Zoom"));
     if field.changed() {
         let animated = app.session.prefs().general.animated_zoom;
-        crate::zoom_levels::set_from_field(&mut app.ui.views[i], field.dragged() || field.drag_started(), pct, animated);
+        if let Some(v) = crate::view_target::view_mut(app) {
+            crate::zoom_levels::set_from_field(v, field.dragged() || field.drag_started(), pct, animated);
+        }
     }
     ui.add_space(12.0);
     ui.label(RichText::new(tl!(&text)).color(t.text_dim).size(12.0));

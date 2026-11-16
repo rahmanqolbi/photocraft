@@ -497,6 +497,30 @@ impl Default for HistoryLog {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
+pub struct SavedWindow {
+    /// The file the window shows.
+    pub path: String,
+    pub zoom: f32,
+    pub center: [f32; 2],
+    pub rotation: f32,
+    /// OS window position (`Os` floating style only, in screen points).
+    pub position: Option<[f32; 2]>,
+    /// Workspace window rectangle (`x, y, w, h`, in points). `None` cascades the window.
+    pub rect: Option<[f32; 4]>,
+    /// The window covers the workspace.
+    pub maximized: bool,
+    /// The window is collapsed to the dock.
+    pub minimized: bool,
+}
+
+impl Default for SavedWindow {
+    fn default() -> Self {
+        Self { path: String::new(), zoom: 1.0, center: [0.0, 0.0], rotation: 0.0, position: None, rect: None, maximized: false, minimized: false }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
 pub struct FileHandling {
     pub image_previews: Ask,
     pub lowercase_extension: bool,
@@ -526,6 +550,12 @@ pub struct FileHandling {
     pub recent_file_count: u32,
     /// Most recently opened files, newest first (File › Open Recent).
     pub recent_files: Vec<String>,
+    /// Layout of a floating document window at quit, keyed to the file it shows: zoom, centre,
+    /// rotation and the window's screen position. Restored the next time the file opens, so a
+    /// session comes back as it was left. Application quit is the simplest trigger; Photoshop
+    /// restores the same way.
+    #[serde(default)]
+    pub saved_windows: Vec<SavedWindow>,
     /// A folder whose `.cube`, `.3dl` and `.look` files Color Lookup lists under its built-in
     /// looks (native only, #6558). Empty lists none.
     pub lut_folder: String,
@@ -557,6 +587,7 @@ impl Default for FileHandling {
             rasterize_svg_groups_deeper_than: photocraft_doc::MAX_GROUP_DEPTH as u32,
             recent_file_count: 20,
             recent_files: Vec::new(),
+            saved_windows: Vec::new(),
             lut_folder: String::new(),
         }
     }

@@ -10,6 +10,8 @@ use crate::theme::Tokens;
 
 /// Title bar height in points (Photoshop's document title bar is about this tall).
 const TITLE_H: f32 = 24.0;
+/// Status bar height in points: zoom field on the left, document info beside it.
+const STATUS_H: f32 = 20.0;
 /// Never shrink a window below this, so its title bar and buttons stay usable.
 const MIN_W: f32 = 240.0;
 const MIN_H: f32 = 140.0;
@@ -36,7 +38,7 @@ enum Edge {
 /// same size, so it previews the window that will appear on drop.
 pub(super) fn default_size(area: Rect, doc_px: [f32; 2], zoom_pt: f32) -> egui::Vec2 {
     let want_w = (doc_px[0] * zoom_pt + 2.0).max(MIN_W);
-    let want_h = (doc_px[1] * zoom_pt + TITLE_H + 2.0).max(MIN_H);
+    let want_h = (doc_px[1] * zoom_pt + TITLE_H + STATUS_H + 2.0).max(MIN_H);
     let w = want_w.min((area.width() * 0.94).max(1.0)).min(area.width().max(1.0));
     let h = want_h.min((area.height() * 0.94).max(1.0)).min(area.height().max(1.0));
     egui::vec2(w, h)
@@ -318,9 +320,40 @@ fn paint_window(app: &mut PhotocraftApp, ui: &mut egui::Ui, area: Rect, wid: u64
             }
         }
     }
+    // The status bar along the bottom: Photoshop shows the zoom percent and the document info.
+    // The zoom edits this window's view (a document that floats never touches the docked view).
+    if !minimized {
+        let status = Rect::from_min_max(pos2(shown.left() + 1.0, shown.bottom() - STATUS_H), pos2(shown.right() - 1.0, shown.bottom() - 1.0));
+        ui.painter().rect_filled(status, 0.0, t.card);
+        ui.painter().hline(status.x_range(), status.top(), Stroke::new(1.0, t.card_border));
+        let bar = egui::UiBuilder::new().max_rect(status.shrink2(egui::vec2(6.0, 2.0)));
+        let mut bar_ui = ui.new_child(bar);
+        bar_ui.horizontal(|ui| {
+            let mut view = app.ui.windows[i].view.clone();
+            let mut pct = view.zoom * 100.0;
+            let field = crate::widgets::compact_wrapping_value_field(ui, &mut pct, crate::zoom_levels::percent_range(&view), "%", egui::vec2(52.0, STATUS_H - 6.0)).accessible_name("Zoom");
+            if field.changed() {
+                let animated = app.session.prefs().general.animated_zoom;
+                crate::zoom_levels::set_from_field(&mut view, field.dragged() || field.drag_started(), pct, animated);
+            }
+            if view.zoom != app.ui.windows[i].view.zoom
+                && let Some(w) = app.ui.windows.iter_mut().find(|w| w.id == wid)
+            {
+                w.view.zoom = view.zoom;
+                w.view.center = view.center;
+                w.view.fit_pending = view.fit_pending;
+                w.view.zoom_anchor = view.zoom_anchor;
+            }
+            ui.add_space(10.0);
+            if let Some(st) = app.session.documents().get(doc) {
+                let text = crate::panels::chrome_ui::status_info_text(&st.doc, &app.ui.chrome.status_info, tl!(app.ui.tool.label()), &crate::panels::chrome_ui::profile_name(&st.doc));
+                ui.label(egui::RichText::new(text).color(t.text_dim).size(11.0));
+            }
+        });
+    }
     // The document itself.
     if !minimized {
-        let client = Rect::from_min_max(pos2(shown.left() + 1.0, shown.top() + TITLE_H), pos2(shown.right() - 1.0, shown.bottom() - 1.0));
+        let client = Rect::from_min_max(pos2(shown.left() + 1.0, shown.top() + TITLE_H), pos2(shown.right() - 1.0, shown.bottom() - STATUS_H));
         if client.width() > 2.0 && client.height() > 2.0 {
             if ui.input(|i| i.pointer.primary_pressed() && i.pointer.interact_pos().is_some_and(|p| client.contains(p))) {
                 *front = Some(wid);
@@ -360,7 +393,7 @@ mod tests {
         // Like Photoshop, the window is the document at its zoom (plus title bar), not a fixed
         // fraction of the workspace…
         assert!((first.width() - 402.0).abs() < 0.01, "{first:?}");
-        assert!((first.height() - (300.0 + TITLE_H + 2.0)).abs() < 0.01, "{first:?}");
+        assert!((first.height() - (300.0 + TITLE_H + STATUS_H + 2.0)).abs() < 0.01, "{first:?}");
         // …and a document too big for the workspace is capped instead of overflowing it.
         let huge = default_rect(a, 0, [20000.0, 20000.0], 1.0);
         assert!(a.contains_rect(huge), "{huge:?} escapes {a:?}");

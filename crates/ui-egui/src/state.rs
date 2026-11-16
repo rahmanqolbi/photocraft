@@ -241,9 +241,21 @@ pub struct UiState {
     /// Font for subsequent typing at this caret, separate from existing character runs.
     #[serde(default)]
     pub type_insertion_style: Option<TypeInsertionStyle>,
-    /// Clock time in seconds when type cursor blink was last reset (e.g. on keypress/caret move).
+    /// Floating windows still waiting for their documents to finish opening in the background;
+    /// matched by path and restored when each lands. `None` once the layout is fully applied.
+    #[serde(skip)]
+    pub session_restore: Option<Vec<photocraft_engine::prefs::SavedWindow>>,
+        /// Clock time in seconds when type cursor blink was last reset (e.g. on keypress/caret move).
     #[serde(skip)]
     pub caret_blink_time: f64,
+    /// Whether this launch already ran the saved-session restore. Set once per process;
+    /// never persisted.
+    #[serde(skip)]
+    pub session_restored: bool,
+    /// Snapshot of the floating windows used to detect changes cheaply; String avoids serde
+    /// requirements on the frame loop. Never persisted.
+    #[serde(skip)]
+    pub session_snapshot: String,
     /// Tool to restore when an inline type edit session commits or cancels (e.g. Move tool, #1132).
     #[serde(skip)]
     pub text_edit_return_tool: Option<Tool>,
@@ -550,6 +562,9 @@ impl Default for UiState {
             type_box_overflow: false,
             type_insertion_style: None,
             caret_blink_time: 0.0,
+            session_restore: None,
+            session_restored: false,
+            session_snapshot: String::new(),
             text_edit_return_tool: None,
             type_transform: None,
             type_transform_pivot: None,

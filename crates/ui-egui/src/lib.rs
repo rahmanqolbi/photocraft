@@ -38,6 +38,7 @@ mod icon_data;
 pub mod icons;
 pub mod jobs_ui;
 pub(crate) mod last_brush;
+pub(crate) mod view_target;
 pub mod links;
 pub mod menu_catalog;
 pub mod menus;
@@ -68,6 +69,7 @@ use serde_json::{Value, json};
 pub use control::{ControlRequest, ControlResponse};
 pub use file_dialog::{FileDialogAnswer, FileDialogFn, FileDialogReply, FileDialogRequest};
 pub use file_open::OsEvent;
+pub use view_target::restore_session;
 pub use state::{Tool, UiState};
 
 mod app;

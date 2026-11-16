@@ -3,8 +3,14 @@
 //! outside the canvas) draws a box instead of moving anything. Releasing selects every layer whose
 //! content touches the box (`layer.selectInRect`; Auto-Select: Group selects their outermost
 //! groups), ⇧ adds them to the layers already selected. A click there selects nothing.
+//!
+//! A marquee that starts on the locked Background keeps the Background: it cannot move inside its
+//! own document, but dragging it onto another document copies it there, as in Photoshop
+//! (`layer_transfer`).
 
 use serde_json::json;
+
+use photocraft_doc::LayerId;
 
 use crate::PhotocraftApp;
 use crate::canvas::{ToolEvent, ViewXform};
@@ -16,15 +22,33 @@ pub(crate) struct LayerBox {
     end: [f64; 2],
     /// ⇧ at the press: add to the layer selection.
     add: bool,
+    /// The Background the marquee started on, when it did: it cannot move, but it can be copied
+    /// into another document by dragging it there (`layer_transfer`).
+    background: Option<LayerId>,
 }
 
 /// A Move-tool press that Auto-Select found nothing under: start the marquee at `p`. The press
 /// started a Move gesture's snapping and ⇧/⌥ handling, which a marquee has none of.
-pub(crate) fn begin(app: &mut PhotocraftApp, p: [f64; 2], add: bool) {
-    app.layer_box = Some(LayerBox { start: p, end: p, add });
+///
+/// `background` is the Background layer under the press, when the press landed on it: the
+/// marquee then carries it, so dragging it onto another document copies it there.
+pub(crate) fn begin(app: &mut PhotocraftApp, p: [f64; 2], add: bool, background: Option<LayerId>) {
+    app.layer_box = Some(LayerBox { start: p, end: p, add, background });
     app.prefs_rt.snap = None;
     app.prefs_rt.snap_lines.clear();
     app.move_mods = Default::default();
+}
+
+/// The Background a marquee is carrying and the point it was grabbed at, when it carries one:
+/// the drag can become a copy into another document (`layer_transfer`).
+pub(crate) fn background_grab(app: &PhotocraftApp) -> Option<(LayerId, [f64; 2])> {
+    let b = app.layer_box?;
+    Some((b.background?, b.start))
+}
+
+/// End a marquee without committing it (a drag that became a transfer to another document).
+pub(crate) fn cancel(app: &mut PhotocraftApp) {
+    app.layer_box = None;
 }
 
 /// No visible layer has pixels at document point `p` (locked ones included).
