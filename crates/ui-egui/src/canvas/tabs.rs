@@ -703,8 +703,9 @@ pub(super) fn open_on_double_click(app: &mut PhotocraftApp, ui: &egui::Ui, area:
 
 
 
-/// A Photoshop-style title bar for a floating document window: the document name on the left,
-/// window controls on the right. The whole row is the drag handle; the window has no OS frame.
+/// A Photoshop-style title bar for a floating document window: the document name and the zoom
+/// controls on the left, the window controls on the right; the bar in between drags the
+/// window around. No OS frame (`decorations(false)`), like Photoshop's own document windows.
 fn window_chrome(
     ui: &mut egui::Ui,
     doc_name: &str,
@@ -715,56 +716,63 @@ fn window_chrome(
     let t = crate::theme::Tokens::get(ui.ctx());
     let bar = egui::Panel::top("docwin-chrome")
         .exact_size(30.0)
-        .frame(egui::Frame::NONE.fill(t.card).inner_margin(egui::Margin::symmetric(8, 3)));
+        .frame(egui::Frame::NONE.fill(t.card).inner_margin(egui::Margin::symmetric(6, 2)));
     let mut close = false;
     bar.show(ui, |ui| {
         ui.horizontal(|ui| {
-            ui.spacing_mut().item_spacing.x = 4.0;
-            // Drag handle: the row's free area. Pressing a button does not drag the window.
-            let handle = ui.scope_id().with("docwin-drag");
-            let resp = ui.interact(ui.available_rect_before_wrap(), handle, egui::Sense::drag());
+            ui.spacing_mut().item_spacing.x = 2.0;
+            ui.add_space(6.0);
+            ui.label(egui::RichText::new(doc_name).size(13.0).color(t.text));
+            // Zoom controls next to the name. Zoom In/Out, then Fit and 100%, then the readout.
+            let (rect, resp) = ui.allocate_exact_size(egui::vec2(26.0, 24.0), egui::Sense::click());
+            crate::icons::paint(ui, rect, "minus", 12.0, if resp.hovered() { t.text } else { t.text_faint });
+            if resp.on_hover_text("Zoom Out").clicked() {
+                view.zoom = crate::zoom_levels::step(view.zoom, -1, doc_size);
+                view.zoom_anchor = None;
+            }
+            let (rect, resp) = ui.allocate_exact_size(egui::vec2(26.0, 24.0), egui::Sense::click());
+            crate::icons::paint(ui, rect, "plus", 12.0, if resp.hovered() { t.text } else { t.text_faint });
+            if resp.on_hover_text("Zoom In").clicked() {
+                view.zoom = crate::zoom_levels::step(view.zoom, 1, doc_size);
+                view.zoom_anchor = None;
+            }
+            if ui.button("Fit").on_hover_text("Fit on Screen").clicked() {
+                view.fit_pending = true;
+                *fit_pending = true;
+            }
+            if ui.button("100%").on_hover_text("Actual Pixels").clicked() {
+                view.zoom = 1.0;
+                view.zoom_anchor = None;
+            }
+            let pct = format!("{}%", (view.zoom * 100.0).round() as i32);
+            ui.label(egui::RichText::new(pct).size(11.0).color(t.text_dim));
+            // Window controls, anchored to the right edge of the row.
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                // Close (furthest right, like the OS close button).
+                let (rect, resp) = ui.allocate_exact_size(egui::vec2(26.0, 24.0), egui::Sense::click());
+                crate::icons::paint(ui, rect, "x", 13.0, if resp.hovered() { t.text } else { t.text_faint });
+                if resp.on_hover_text("Close").clicked() {
+                    close = true;
+                }
+                // Maximize / restore.
+                let maximized = ui.ctx().input(|i| i.viewport().maximized.unwrap_or(false));
+                let (rect, resp) = ui.allocate_exact_size(egui::vec2(26.0, 24.0), egui::Sense::click());
+                crate::icons::paint(ui, rect, "maximize-2", 12.0, if resp.hovered() { t.text } else { t.text_faint });
+                if resp.on_hover_text(if maximized { "Restore" } else { "Maximize" }).clicked() {
+                    ui.ctx().send_viewport_cmd(egui::ViewportCommand::Maximized(!maximized));
+                }
+                // Minimize.
+                let (rect, resp) = ui.allocate_exact_size(egui::vec2(26.0, 24.0), egui::Sense::click());
+                crate::icons::paint(ui, rect, "minus", 12.0, if resp.hovered() { t.text } else { t.text_faint });
+                if resp.on_hover_text("Minimize").clicked() {
+                    ui.ctx().send_viewport_cmd(egui::ViewportCommand::Minimized(true));
+                }
+            });
+            // The free area between the name and the controls drags the window.
+            let resp = ui.interact(ui.available_rect_before_wrap(), ui.scope_id().with("docwin-drag"), egui::Sense::drag());
             if resp.drag_started() {
                 ui.ctx().send_viewport_cmd(egui::ViewportCommand::StartDrag);
             }
-            ui.label(egui::RichText::new(doc_name).size(13.0).color(t.text));
-
-            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                let x = ui.button(egui::RichText::new("×").size(14.0).color(t.text)).on_hover_text("Close");
-                if x.clicked() {
-                    close = true;
-                }
-                let sq = ui.button(egui::RichText::new("❐").size(12.0).color(t.text)).on_hover_text("Maximize");
-                if sq.clicked() {
-                    let maximized = ui.ctx().input(|i| i.viewport().maximized.unwrap_or(false));
-                    ui.ctx().send_viewport_cmd(egui::ViewportCommand::Maximized(!maximized));
-                }
-                let dash = ui.button(egui::RichText::new("–").size(14.0).color(t.text)).on_hover_text("Minimize");
-                if dash.clicked() {
-                    ui.ctx().send_viewport_cmd(egui::ViewportCommand::Minimized(true));
-                }
-                ui.separator();
-                let plus = ui.button(egui::RichText::new("+").size(13.0).color(t.text)).on_hover_text("Zoom In");
-                if plus.clicked() {
-                    view.zoom = crate::zoom_levels::step(view.zoom, 1, doc_size);
-                    view.zoom_anchor = None;
-                }
-                if ui.button("Fit").on_hover_text("Fit on Screen").clicked() {
-                    view.fit_pending = true;
-                    *fit_pending = true;
-                }
-                if ui.button("100%").on_hover_text("Actual Pixels").clicked() {
-                    view.zoom = 1.0;
-                    view.zoom_anchor = None;
-                }
-                let minus = ui.button(egui::RichText::new("−").size(14.0).color(t.text)).on_hover_text("Zoom Out");
-                if minus.clicked() {
-                    view.zoom = crate::zoom_levels::step(view.zoom, -1, doc_size);
-                    view.zoom_anchor = None;
-                }
-                // Zoom readout: Photoshop keeps it in the status bar; the window shows it compactly.
-                let pct = format!("{}%", (view.zoom * 100.0).round() as i32);
-                ui.label(egui::RichText::new(pct).size(11.0).color(t.text_dim));
-            });
         });
     });
     close
@@ -778,7 +786,7 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
     let wins = app.ui.windows.clone();
     for w in wins.into_iter().filter(|w| w.open) {
         let Some(st) = app.session.documents().get(w.document) else { continue };
-        let title = format!("{} — window {}", st.doc.name, w.id);
+        let title = st.doc.name.clone();
         let doc_name = st.doc.name.clone();
         let doc_size = [st.doc.size.width, st.doc.size.height];
         let doc_idx = w.document;
