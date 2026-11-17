@@ -831,9 +831,23 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
         return;
     }
     let custom = app.custom_titlebar;
-    let wins = app.ui.windows.clone();
+    let wins: Vec<_> = app.ui.windows.iter().filter(|w| w.open).cloned().collect();
+    // A document window belongs to the application: minimizing the application minimizes its
+    // documents, and restoring it brings them back. They stay separate taskbar entries (same app
+    // id) rather than owned tool windows, so the taskbar list still shows each image.
+    let main_min = ctx.input(|i| i.viewport().minimized.unwrap_or(false));
+    let min_sync = egui::Id::unique(("docwin", "main-minimized"));
+    let was_min = ctx.data(|d| d.get_temp::<bool>(min_sync)).unwrap_or(false);
+    if main_min != was_min {
+        for w in &wins {
+            ctx.send_viewport_cmd_to(egui::ViewportId::from_hash_of(("docwin", w.id)), egui::ViewportCommand::Minimized(main_min));
+        }
+        ctx.data_mut(|d| d.insert_temp(min_sync, main_min));
+    }
+    let main_rect = ctx.input(|i| i.viewport().outer_rect).unwrap_or_else(|| egui::Rect::from_min_size(egui::pos2(0.0, 0.0), egui::vec2(1280.0, 800.0)));
+    let doc_size = egui::vec2((main_rect.width() * 0.62).clamp(480.0, 900.0), (main_rect.height() * 0.62).clamp(360.0, 700.0));
     let mut close_docs = Vec::new();
-    for w in wins.into_iter().filter(|w| w.open) {
+    for (slot, w) in wins.into_iter().enumerate() {
         if app.session.documents().get(w.document).is_none() {
             // Its document is gone (closed elsewhere): close the OS window for good.
             ctx.send_viewport_cmd_to(egui::ViewportId::from_hash_of(("docwin", w.id)), egui::ViewportCommand::Close);
@@ -841,10 +855,11 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
         }
         let title = tab_title_at(app, w.document, w.view.zoom * 100.0);
         let vid = egui::ViewportId::from_hash_of(("docwin", w.id));
-        let mut builder = crate::os_window::builder().with_title(title.clone()).with_inner_size([800.0, 600.0]);
-        if let Some([x, y]) = w.position {
-            builder = builder.with_position([x, y]);
-        }
+        // Offset and size the window so the application frame behind it stays visible; a
+        // document window is not meant to replace PhotoSoft on the desktop.
+        let cascade = slot as f32 * 36.0;
+        let pos = w.position.unwrap_or([main_rect.left() + 120.0 + cascade, main_rect.top() + 100.0 + cascade]);
+        let mut builder = crate::os_window::builder().with_title(title.clone()).with_inner_size(doc_size).with_position(pos);
         if custom {
             // No OS frame: the window paints the same chrome and caption buttons as the app. Winit
             // keeps a resizable thick frame, so the edges still resize natively.
@@ -866,6 +881,9 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
                 // opening or returning to it brings the main PhotoSoft window (tools, panels,
                 // status bar) up with it, then the document window on top. Windows keeps both in
                 // the same taskbar group because they share the app id.
+                if main_min && !ui.ctx().input(|i| i.viewport().minimized.unwrap_or(false)) {
+                    ctx.send_viewport_cmd_to(egui::ViewportId::ROOT, egui::ViewportCommand::Minimized(false));
+                }
                 ctx.send_viewport_cmd_to(egui::ViewportId::ROOT, egui::ViewportCommand::Focus);
                 ctx.send_viewport_cmd_to(vid, egui::ViewportCommand::Focus);
             }
