@@ -836,7 +836,7 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
     // documents, and restoring it brings them back. They stay separate taskbar entries (same app
     // id) rather than owned tool windows, so the taskbar list still shows each image.
     let main_min = ctx.input(|i| i.viewport().minimized.unwrap_or(false));
-    let min_sync = egui::Id::unique(("docwin", "main-minimized"));
+    let min_sync = egui::Id::new(("docwin", "main-minimized"));
     let was_min = ctx.data(|d| d.get_temp::<bool>(min_sync)).unwrap_or(false);
     if main_min != was_min {
         for w in &wins {
