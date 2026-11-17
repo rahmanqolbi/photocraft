@@ -5,7 +5,10 @@
 //! Preferences › Workspace › Floating windows picks between this (`Workspace`) and one operating
 //! system window per document (`Os`, see [`super::tabs::extra_windows`]).
 
+use egui::Color32;
+
 use super::{PhotocraftApp, Rect, Sense, Stroke, canvas_view, pos2};
+use crate::panels::titlebar::{self, Caption};
 use crate::theme::Tokens;
 
 /// Title bar height in points (Photoshop's document title bar is about this tall).
@@ -65,19 +68,19 @@ fn default_rect(area: Rect, slot: usize, doc_px: [f32; 2], zoom_pt: f32) -> Rect
 /// tooltip layer the frame is drawn on, so they'd be invisible).
 pub(super) fn draw_placeholder(ui: &egui::Ui, t: &Tokens, rect: Rect, title: &str) {
     let painter = ui.ctx().layer_painter(egui::LayerId::new(egui::Order::Tooltip, ui.scope_id().with("tab-tear-off-preview")));
-    painter.rect_filled(rect.translate(egui::vec2(0.0, 3.0)).expand(2.0), t.radius_sm, t.shadow);
-    painter.rect_filled(rect, t.radius_sm, t.card);
-    painter.rect_stroke(rect, t.radius_sm, Stroke::new(1.5, t.accent), egui::StrokeKind::Inside);
+    let radius = egui::CornerRadius::same(corner_radius());
+    painter.rect_filled(rect.translate(egui::vec2(0.0, 3.0)).expand(2.0), radius, t.shadow);
+    painter.rect_filled(rect, radius, t.chrome);
+    painter.rect_stroke(rect, radius, Stroke::new(1.5, t.accent), egui::StrokeKind::Inside);
     let bar = Rect::from_min_size(rect.min, egui::vec2(rect.width(), TITLE_H));
-    painter.rect_filled(bar.shrink(1.0), t.radius_sm, t.hover);
+    painter.rect_filled(bar.shrink(1.0), radius, t.chrome);
     let galley = crate::tab_strip::elided(ui, title, crate::theme::medium(12.0), t.text, (bar.width() - 56.0).max(8.0));
     painter.galley(pos2(bar.left() + 8.0, bar.center().y - galley.size().y / 2.0), galley, t.text);
-    // The window's own buttons, right to left (close, maximize, minimize): strokes in 16 pt
-    // boxes, mirroring the real title bar layout.
-    let mut bx = rect.right() - 6.0;
+    // Three native-width caption slots at the right end, mirrored from the real title bar.
+    let mut bx = rect.right();
     for i in 0..3 {
-        bx -= 16.0;
-        let c = pos2(bx, bar.center().y);
+        bx -= titlebar::BUTTON_WIDTH;
+        let c = pos2(bx + titlebar::BUTTON_WIDTH / 2.0, bar.center().y);
         let s = Stroke::new(1.25, t.text_dim);
         let d = egui::vec2(3.5, 3.5);
         match i {
@@ -86,13 +89,71 @@ pub(super) fn draw_placeholder(ui: &egui::Ui, t: &Tokens, rect: Rect, title: &st
                 painter.line_segment([c - egui::vec2(3.5, -3.5), c + egui::vec2(-3.5, 3.5)], s);
             }
             1 => {
-                painter.rect_stroke(Rect::from_center_size(c, egui::vec2(7.5, 7.5)), 1.0, s, egui::StrokeKind::Inside);
+                painter.rect_stroke(Rect::from_center_size(c, egui::vec2(9.0, 9.0)), 1.0, s, egui::StrokeKind::Inside);
             }
             _ => {
                 painter.line_segment([c - egui::vec2(4.0, 0.0), c + egui::vec2(4.0, 0.0)], s);
             }
         }
     }
+}
+
+/// The title bar's colour and text ink, taken from whichever chrome the application window uses:
+/// its own `chrome` token in custom-title-bar mode, or the system title bar's light/dark colours
+/// when the OS draws it (always the case on macOS). A document window then reads as a smaller copy
+/// of the application window, on both platforms and in both appearances.
+fn chrome_colours(app: &PhotocraftApp, ctx: &egui::Context, t: &Tokens) -> (Color32, Color32) {
+    if !cfg!(target_os = "macos") && !crate::panels::system_title_bar(app) {
+        return (t.chrome, t.text);
+    }
+    match ctx.system_theme().unwrap_or(egui::Theme::Dark) {
+        egui::Theme::Light => (Color32::from_rgb(240, 240, 240), Color32::from_rgb(28, 28, 28)),
+        egui::Theme::Dark => (Color32::from_rgb(46, 46, 46), Color32::from_rgb(236, 236, 236)),
+    }
+}
+
+/// The window corner radius, in points. Native document windows use the same rounded corners as
+/// the application window rather than the theme's small widget radius.
+fn corner_radius() -> u8 {
+    if cfg!(target_os = "macos") { 10 } else { 8 }
+}
+
+/// macOS traffic lights (close, minimize, zoom) on a document window's left, in the system's own
+/// colours and order, so the window matches a native macOS document window beside the app's.
+/// Returns the button that was clicked, if any.
+fn traffic_lights(ui: &mut egui::Ui, id: egui::Id, title: Rect) -> Option<Caption> {
+    let lights = [
+        (Caption::Close, Color32::from_rgb(255, 95, 87)),
+        (Caption::Minimize, Color32::from_rgb(254, 188, 46)),
+        (Caption::Maximize, Color32::from_rgb(40, 200, 64)),
+    ];
+    let mut clicked = None;
+    for (n, (c, colour)) in lights.into_iter().enumerate() {
+        let centre = pos2(title.left() + 14.0 + n as f32 * 22.0, title.center().y);
+        let resp = ui.interact(Rect::from_center_size(centre, egui::vec2(16.0, 16.0)), id.with(("light", c as u8)), Sense::click());
+        ui.painter().circle_filled(centre, 6.0, if resp.hovered() { colour } else { colour.gamma_multiply(0.88) });
+        if resp.hovered() {
+            let ink = Stroke::new(1.0, Color32::from_rgba_premultiplied(0, 0, 0, 190));
+            match c {
+                Caption::Close => {
+                    let d = egui::vec2(2.5, 2.5);
+                    ui.painter().line_segment([centre - d, centre + d], ink);
+                    ui.painter().line_segment([centre - egui::vec2(2.5, -2.5), centre + egui::vec2(-2.5, 2.5)], ink);
+                }
+                Caption::Minimize => {
+                    ui.painter().line_segment([centre - egui::vec2(2.5, 0.0), centre + egui::vec2(2.5, 0.0)], ink);
+                }
+                Caption::Maximize => {
+                    let r = Rect::from_center_size(centre, egui::vec2(7.0, 7.0));
+                    ui.painter().rect_stroke(r, 0.0, ink, egui::StrokeKind::Middle);
+                }
+            }
+        }
+        if resp.on_hover_text(match c { Caption::Close => tl!("Close"), Caption::Minimize => tl!("Minimize"), Caption::Maximize => tl!("Zoom") }).clicked() {
+            clicked = Some(c);
+        }
+    }
+    clicked
 }
 
 /// Keep a rectangle inside `area` (a window can never be dragged out of reach).
@@ -250,20 +311,33 @@ fn paint_window(app: &mut PhotocraftApp, ui: &mut egui::Ui, area: Rect, wid: u64
     let shown = if minimized { Rect::from_min_size(rect.min, egui::vec2(rect.width(), TITLE_H)) } else { rect };
     let focused = active == Some(doc);
     let id = ui.scope_id().with(("docwin", wid));
-    // Drop shadow, body and border.
-    ui.painter().rect_filled(shown.translate(egui::vec2(0.0, 3.0)).expand(2.0), t.radius_sm, t.shadow);
-    ui.painter().rect_filled(shown, t.radius_sm, t.card);
+    let (chrome, chrome_text) = chrome_colours(app, ui.ctx(), t);
+    let rounding = egui::CornerRadius::same(corner_radius());
+    let top_rounding = egui::CornerRadius { nw: corner_radius(), ne: corner_radius(), sw: 0, se: 0 };
+    // Native-style frame: rounded like the application window, filled with the same chrome and
+    // carrying the same caption buttons. The focus outline is the only mark of the active document.
+    ui.painter().rect_filled(shown.translate(egui::vec2(0.0, 3.0)).expand(2.0), rounding, t.shadow);
+    ui.painter().rect_filled(shown, rounding, chrome);
     let border = if focused { t.accent } else { t.card_border };
-    ui.painter().rect_stroke(shown, t.radius_sm, Stroke::new(if focused { 1.5 } else { 1.0 }, border), egui::StrokeKind::Inside);
+    ui.painter().rect_stroke(shown, rounding, Stroke::new(if focused { 1.5 } else { 1.0 }, border), egui::StrokeKind::Inside);
     let title = Rect::from_min_size(shown.min, egui::vec2(shown.width(), TITLE_H));
-    ui.painter().rect_filled(title.shrink(1.0), t.radius_sm, if focused { t.hover } else { t.card });
+    ui.painter().rect_filled(title, top_rounding, chrome);
     // The Photoshop title: "name @ 66.7% (Layer 1, RGB/8)".
     let zoom = app.ui.windows[i].view.zoom * 100.0;
     let text = super::tabs::tab_title_at(app, doc, zoom);
-    let galley = crate::tab_strip::elided(ui, &text, crate::theme::medium(12.0), t.text, (title.width() - 76.0).max(8.0));
-    ui.painter().galley(pos2(title.left() + 8.0, title.center().y - galley.size().y / 2.0), galley, t.text);
-    // Drag the title bar, double-click it to maximize, click it to raise and activate.
-    let drag = ui.interact(title, id.with("title"), Sense::click_and_drag());
+    let mac = cfg!(target_os = "macos");
+    let captions = if mac { 72.0 } else { titlebar::caption_width(app, ui.ctx()) };
+    let galley = crate::tab_strip::elided(ui, &text, crate::theme::medium(12.0), chrome_text, (title.width() - captions - 24.0).max(8.0));
+    let title_x = if mac { title.center().x - galley.size().x / 2.0 } else { title.left() + 12.0 };
+    ui.painter().galley(pos2(title_x, title.center().y - galley.size().y / 2.0), galley, chrome_text);
+    // Drag the free part of the title bar (the caption buttons own their ends), double-click it to
+    // maximize, click it to raise and activate the document.
+    let drag_rect = if mac {
+        Rect::from_min_max(pos2(title.left() + captions, title.top()), title.max)
+    } else {
+        Rect::from_min_max(title.min, pos2(title.right() - captions, title.bottom()))
+    };
+    let drag = ui.interact(drag_rect, id.with("title"), Sense::click_and_drag());
     if drag.clicked() || drag.drag_started() {
         *front = Some(wid);
         if app.session.active_index() != Some(doc) {
@@ -276,31 +350,31 @@ fn paint_window(app: &mut PhotocraftApp, ui: &mut egui::Ui, area: Rect, wid: u64
     if drag.dragged() && !maximized {
         rect = clamp_to(area, Rect::from_min_size(rect.min + drag.drag_delta(), rect.size()));
     }
-    // Title buttons, right to left: close, maximize (restore), minimize.
-    let mut bx = shown.right() - 6.0;
-    let mut button = |ui: &mut egui::Ui, icon: &str, hint: &str| -> bool {
-        bx -= 16.0;
-        let r = Rect::from_center_size(pos2(bx, title.center().y), egui::vec2(16.0, 16.0));
-        let resp = ui.interact(r, id.with(("btn", bx as i32)), Sense::click());
-        if resp.hovered() {
-            ui.painter().rect_filled(r, 3.0, t.hover);
-        }
-        crate::icons::paint(ui, r, icon, 11.0, if resp.hovered() { t.text } else { t.text_dim });
-        resp.on_hover_text(hint).clicked()
+    // The app's own caption buttons, in the desktop's style: same glyphs, same hover colours.
+    // An inner document window cannot send OS viewport commands, so their clicks are applied to
+    // this window's state instead (and Close closes the document, as before).
+    let clicked = if mac {
+        traffic_lights(ui, id, title)
+    } else {
+        titlebar::document_captions(app, ui, title, id.with("caption"), maximized || minimized, chrome_text)
     };
     let mut close = false;
-    if button(ui, "x", "Close") {
-        // Close the document (guarded `file.close` prompts to save first), not back into docking.
-        close = true;
-        *front = Some(wid);
-    }
-    if button(ui, if maximized { "copy" } else { "square" }, if maximized { "Restore" } else { "Maximize" }) {
-        maximized = !maximized;
-        *front = Some(wid);
-    }
-    if button(ui, "minus", if minimized { "Expand" } else { "Minimize" }) {
-        minimized = !minimized;
-        *front = Some(wid);
+    match clicked {
+        Some(Caption::Close) => {
+            // Close the document (guarded `file.close` prompts to save first), not back into docking.
+            close = true;
+            *front = Some(wid);
+        }
+        Some(Caption::Maximize) => {
+            maximized = !maximized;
+            minimized = false;
+            *front = Some(wid);
+        }
+        Some(Caption::Minimize) => {
+            minimized = !minimized;
+            *front = Some(wid);
+        }
+        None => {}
     }
     // Resize handles (a maximized window has none, and the title bar owns the top edge).
     if !maximized && !minimized {
@@ -452,6 +526,30 @@ mod tests {
         for edge in [Edge::Left, Edge::Right, Edge::Bottom, Edge::TopLeft, Edge::TopRight, Edge::BottomLeft, Edge::BottomRight] {
             assert!(edges.iter().any(|(e, _)| *e == edge), "missing {edge:?}");
         }
+    }
+
+    #[test]
+    fn document_window_chrome_follows_the_application_window() {
+        let app = app_with_a_floating_window();
+        let ctx = egui::Context::default();
+        let t = Tokens::for_kind(crate::theme::ThemeKind::Pro);
+        let (chrome, ink) = chrome_colours(&app, &ctx, &t);
+        assert_eq!(chrome, t.chrome, "custom title bar: the document window uses the app's chrome");
+        assert_eq!(ink, t.text);
+        assert_eq!(corner_radius(), if cfg!(target_os = "macos") { 10 } else { 8 });
+        assert!(titlebar::caption_width(&app, &ctx) > 0.0, "its caption buttons use the app's desktop style");
+
+        // With the system title bar the app's caption belongs to the OS, so the document window
+        // follows the system appearance instead of the (dark) Pro token.
+        let mut sys = app_with_a_floating_window();
+        sys.session.edit_prefs(|p| p.interface.system_title_bar = true);
+        sys.custom_titlebar = false;
+        ctx.run_ui(egui::RawInput { system_theme: Some(egui::Theme::Light), ..Default::default() }, |_| {}).textures_delta.clear();
+        let (light, light_ink) = chrome_colours(&sys, &ctx, &t);
+        assert!(light.r() > 200 && light_ink.r() < 100, "light system title bar: {light:?}, {light_ink:?}");
+        ctx.run_ui(egui::RawInput { system_theme: Some(egui::Theme::Dark), ..Default::default() }, |_| {}).textures_delta.clear();
+        let (dark, dark_ink) = chrome_colours(&sys, &ctx, &t);
+        assert!(dark.r() < 100 && dark_ink.r() > 200, "dark system title bar: {dark:?}, {dark_ink:?}");
     }
 
     fn app_with_a_floating_window() -> PhotocraftApp {

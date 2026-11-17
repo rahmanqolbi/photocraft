@@ -264,34 +264,11 @@ pub fn caption_buttons(app: &mut PhotocraftApp, ui: &mut Ui, bar: Rect) {
     let windows = s.family == CaptionFamily::Windows;
     let mut clicked = None;
     for (c, r, centre) in layout(&s, bar, bar.left().max(content.left()), bar.right().min(content.right())) {
-        let resp = ui.interact(r, caption_id(c), if windows { Sense::click() } else { Sense::click_and_drag() });
-        if resp.drag_started_by(PointerButton::Primary) {
+        let resp = paint_caption(ui, &t, &s, c, max, r, centre, caption_id(c), t.icon);
+        if !windows && resp.drag_started_by(PointerButton::Primary) {
             start_os_move(ui.ctx());
         }
-        let pressed = resp.is_pointer_button_down_on() && resp.hovered();
-        if windows {
-            let close = c == Caption::Close;
-            let fill = match (resp.is_pointer_button_down_on(), resp.hovered()) {
-                (true, _) if close => t.caption_close.gamma_multiply(0.8),
-                (_, true) if close => t.caption_close,
-                (true, _) => t.pressed,
-                (_, true) => t.hover,
-                _ => Color32::TRANSPARENT,
-            };
-            ui.painter().rect_filled(r, 0.0, fill);
-            let ink = if close && resp.hovered() { t.caption_close_text } else { t.icon };
-            paint_windows_glyph(ui, c, max, r.center(), Stroke::new(1.0, ink));
-        } else {
-            paint_round(ui, &t, &s, c, max, centre, resp.hovered(), pressed);
-        }
-        let tip = match c {
-            Caption::Minimize => tl!("Minimize"),
-            Caption::Maximize if max => tl!("Restore"),
-            Caption::Maximize => tl!("Maximize"),
-            Caption::Close => tl!("Close"),
-        };
-        resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, tip));
-        if resp.on_hover_text(tip).clicked() {
+        if resp.clicked() {
             clicked = Some(c);
         }
     }
@@ -304,6 +281,61 @@ pub fn caption_buttons(app: &mut PhotocraftApp, ui: &mut Ui, bar: Rect) {
         }
         None => {}
     }
+}
+
+/// Draw one caption button in the desktop's style and return its button response.
+#[allow(clippy::too_many_arguments)] // one glyph renderer shared by the app's and document windows
+fn paint_caption(ui: &mut Ui, t: &Tokens, s: &CaptionStyle, c: Caption, max: bool, r: Rect, centre: Pos2, id: Id, ink: Color32) -> egui::Response {
+    let resp = ui.interact(r, id, if s.family == CaptionFamily::Windows { Sense::click() } else { Sense::click_and_drag() });
+    let pressed = resp.is_pointer_button_down_on() && resp.hovered();
+    if s.family == CaptionFamily::Windows {
+        let close = c == Caption::Close;
+        let fill = match (resp.is_pointer_button_down_on(), resp.hovered()) {
+            (true, _) if close => t.caption_close.gamma_multiply(0.8),
+            (_, true) if close => t.caption_close,
+            (true, _) => t.pressed,
+            (_, true) => t.hover,
+            _ => Color32::TRANSPARENT,
+        };
+        ui.painter().rect_filled(r, 0.0, fill);
+        let ink = if close && resp.hovered() { t.caption_close_text } else { ink };
+        paint_windows_glyph(ui, c, max, r.center(), Stroke::new(1.0, ink));
+    } else {
+        paint_round(ui, t, s, c, max, centre, resp.hovered(), pressed);
+    }
+    let tip = match c {
+        Caption::Minimize => tl!("Minimize"),
+        Caption::Maximize if max => tl!("Restore"),
+        Caption::Maximize => tl!("Maximize"),
+        Caption::Close => tl!("Close"),
+    };
+    resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, tip));
+    resp.on_hover_text(tip)
+}
+
+/// The width the caption buttons take at one end of a title bar. Unlike [`reserved`], this also
+/// reports it in system-title-bar mode: floating document windows draw their own caption buttons
+/// even when the application window leaves its own to the OS.
+pub(crate) fn caption_width(app: &PhotocraftApp, ctx: &egui::Context) -> f32 {
+    let s = style(app, ctx);
+    let width = |side: &[Caption]| slots(s.family, side, 0.0, false).last().map_or(0.0, |(_, r, _)| r.1);
+    width(&s.right).max(width(&s.left))
+}
+
+/// Caption buttons for a floating document window, drawn in the same desktop style as the app's
+/// own at `bar`'s right end. They act on the document window's state, so unlike [`caption_buttons`]
+/// this only reports which button was clicked; no OS viewport command is sent. `id` must be unique
+/// to the window, so its buttons cannot collide with the app title bar's.
+pub(crate) fn document_captions(app: &mut PhotocraftApp, ui: &mut Ui, bar: Rect, id: Id, max: bool, ink: Color32) -> Option<Caption> {
+    let t = Tokens::get(ui.ctx());
+    let s = style(app, ui.ctx());
+    let mut clicked = None;
+    for (c, r, centre) in layout(&s, bar, bar.left(), bar.right()) {
+        if paint_caption(ui, &t, &s, c, max, r, centre, id.with(c as u8), ink).clicked() {
+            clicked = Some(c);
+        }
+    }
+    clicked
 }
 
 /// The 10 pt line glyphs of the Windows caption buttons.
