@@ -247,7 +247,7 @@ impl Default for General {
             zoom_resizes_windows: false,
             use_legacy_free_transform: false,
             auto_show_home_screen: true,
-            automatically_check_updates: true,
+            automatically_check_updates: false,
         }
     }
 }
