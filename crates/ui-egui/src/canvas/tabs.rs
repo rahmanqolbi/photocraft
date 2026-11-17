@@ -818,12 +818,19 @@ pub(super) fn open_on_double_click(app: &mut PhotocraftApp, ui: &egui::Ui, area:
 /// thumbnails), and the window's title is the document's Photoshop title, so window pickers
 /// show "name @ zoom% (RGB/8)" instead of a raw identifier. Closing it closes the document
 /// (the guarded `file.close` raises the save dialog if dirty); it never docks back.
+/// Open documents in their own operating system windows (Preferences › Workspace › Floating
+/// windows: `Os`). Each window shares the application's app id, so Windows groups them under one
+/// taskbar button with a hover preview per document, as a browser does for its tabs. They are
+/// viewports of this same process: closing one closes the document, not the app; tools, panels and
+/// the command stream stay shared. With the app's custom title bar, each document window draws the
+/// same chrome and caption buttons as the main window instead of an OS frame.
 pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
     if app.session.prefs().workspace.floating_style == photocraft_engine::prefs::FloatingStyle::Workspace {
-        // Preferences › Workspace › Floating windows: these windows live inside the workspace by
+        // Preferences > Workspace > Floating windows: these windows live inside the workspace by
         // default (`canvas::floating::show`), so no operating system viewport is opened.
         return;
     }
+    let custom = app.custom_titlebar;
     let wins = app.ui.windows.clone();
     let mut close_docs = Vec::new();
     for w in wins.into_iter().filter(|w| w.open) {
@@ -834,9 +841,14 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
         }
         let title = tab_title_at(app, w.document, w.view.zoom * 100.0);
         let vid = egui::ViewportId::from_hash_of(("docwin", w.id));
-        let mut builder = crate::os_window::builder().with_title(title).with_inner_size([800.0, 600.0]);
+        let mut builder = crate::os_window::builder().with_title(title.clone()).with_inner_size([800.0, 600.0]);
         if let Some([x, y]) = w.position {
             builder = builder.with_position([x, y]);
+        }
+        if custom {
+            // No OS frame: the window paints the same chrome and caption buttons as the app. Winit
+            // keeps a resizable thick frame, so the edges still resize natively.
+            builder = builder.with_decorations(false).with_resizable(true).with_maximize_button(true);
         }
         let mut view = w.view.clone();
         let mut close = false;
@@ -849,10 +861,28 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
             if focused && !w.focused && app.session.active_index() != Some(w.document) {
                 app.session.set_active(w.document);
             }
+            if let Some(outer) = ui.ctx().input(|i| i.viewport().outer_rect)
+                && let Some(win) = app.ui.windows.iter_mut().find(|x| x.id == w.id)
+            {
+                let position = [outer.left(), outer.top()];
+                if win.position != Some(position) {
+                    win.position = Some(position);
+                }
+            }
+            if custom {
+                let max = ui.ctx().input(|i| i.viewport().maximized.unwrap_or(false));
+                let clicked = super::floating::os_title_bar(app, ui, &title, ui.scope_id().with(("docwin", w.id)), max);
+                match clicked {
+                    Some(crate::panels::titlebar::Caption::Minimize) => ui.ctx().send_viewport_cmd(egui::ViewportCommand::Minimized(true)),
+                    Some(crate::panels::titlebar::Caption::Maximize) => ui.ctx().send_viewport_cmd(egui::ViewportCommand::Maximized(!max)),
+                    Some(crate::panels::titlebar::Caption::Close) => close = true,
+                    None => {}
+                }
+            }
             egui::CentralPanel::default().frame(egui::Frame::NONE.fill(crate::theme::Tokens::get(ui.ctx()).canvas)).show(ui, |ui| {
                 let rect = ui.available_rect_before_wrap();
                 view = canvas_view(app, ui, w.document, rect, view.clone(), focused);
-                // Preferences › Zoom Resizes Windows: a zoom wraps the window around the image.
+                // Preferences > Zoom Resizes Windows: a zoom wraps the window around the image.
                 crate::zoom_window_fit::follow(app, ui.ctx(), class, vid, &w, &mut view, rect);
             });
         });
@@ -864,7 +894,7 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
             }
         }
     }
-    // Photoshop closes the *document* (save prompt on dirty docs); it does not dock back.
+// Photoshop closes the *document* (save prompt on dirty docs); it does not dock back.
     for doc in close_docs {
         if let Err(e) = crate::menus::invoke(app, ctx, "file.close", json!({"document": doc})) {
             app.ui.status = e;

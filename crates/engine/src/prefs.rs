@@ -381,10 +381,10 @@ impl Default for Workspace {
         Self {
             auto_collapse_icon_panels: false,
             auto_show_hidden_panels: true,
-            open_documents_as_tabs: true,
+            open_documents_as_tabs: false,
             enable_floating_document_window_docking: true,
             large_tabs: false,
-            floating_style: FloatingStyle::Workspace,
+            floating_style: FloatingStyle::Os,
             enable_narrow_options_bar: false,
             remember_workspace_changes: true,
         }

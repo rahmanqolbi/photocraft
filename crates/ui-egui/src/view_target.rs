@@ -108,11 +108,16 @@ fn apply_ready(app: &mut PhotocraftApp) {
 
 /// Float document `idx` with the saved view and window geometry.
 fn float_restored(app: &mut PhotocraftApp, idx: usize, saved: &SavedWindow) {
-    // Skip if the document already floats (e.g. the user floated it before the open landed).
-    if app.ui.windows.iter().any(|w| w.open && w.floating && w.document == idx) {
-        return;
-    }
-    let wid = crate::view_cmds::float_window(app, idx, 0, true);
+    // A document can already float when it lands: "Open documents as tabs" may be off, or the
+    // user floated it before the background open finished. Apply the remembered geometry to that
+    // window rather than skipping and leaving it at its default zoom and position.
+    let wid = app
+        .ui
+        .windows
+        .iter()
+        .find(|w| w.open && w.floating && w.document == idx)
+        .map(|w| w.id)
+        .unwrap_or_else(|| crate::view_cmds::float_window(app, idx, 0, true));
     if let Some(w) = app.ui.windows.iter_mut().find(|w| w.id == wid) {
         w.view.zoom = saved.zoom;
         w.view.center = saved.center;

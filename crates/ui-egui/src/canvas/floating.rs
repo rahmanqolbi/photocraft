@@ -102,7 +102,7 @@ pub(super) fn draw_placeholder(ui: &egui::Ui, t: &Tokens, rect: Rect, title: &st
 /// its own `chrome` token in custom-title-bar mode, or the system title bar's light/dark colours
 /// when the OS draws it (always the case on macOS). A document window then reads as a smaller copy
 /// of the application window, on both platforms and in both appearances.
-fn chrome_colours(app: &PhotocraftApp, ctx: &egui::Context, t: &Tokens) -> (Color32, Color32) {
+pub(super) fn chrome_colours(app: &PhotocraftApp, ctx: &egui::Context, t: &Tokens) -> (Color32, Color32) {
     if !cfg!(target_os = "macos") && !crate::panels::system_title_bar(app) {
         return (t.chrome, t.text);
     }
@@ -114,8 +114,43 @@ fn chrome_colours(app: &PhotocraftApp, ctx: &egui::Context, t: &Tokens) -> (Colo
 
 /// The window corner radius, in points. Native document windows use the same rounded corners as
 /// the application window rather than the theme's small widget radius.
-fn corner_radius() -> u8 {
+pub(super) fn corner_radius() -> u8 {
     if cfg!(target_os = "macos") { 10 } else { 8 }
+}
+
+/// The custom title bar drawn inside an *operating system* document window when the
+/// application window draws its own title bar too. Same chrome colour and caption buttons as the
+/// app (`chrome_colours`, [`titlebar::document_captions`]), so the extra window reads as part of
+/// the same application. The bar's free space starts an OS drag; the caption buttons act on this
+/// viewport (the caller applies the click). Returns the caption that was clicked.
+pub(super) fn os_title_bar(app: &mut PhotocraftApp, ui: &mut egui::Ui, title: &str, id: egui::Id, maximized: bool) -> Option<Caption> {
+    let t = Tokens::get(ui.ctx());
+    let (chrome, ink) = chrome_colours(app, ui.ctx(), &t);
+    let h = crate::titlebar::bar_height(app, ui.ctx(), 32.0);
+    let mut clicked = None;
+    // A top panel reserves its height, so the canvas below never paints over the bar.
+    egui::Panel::top("docwin-chrome")
+        .exact_size(h)
+        .frame(egui::Frame::NONE)
+        .show(ui, |ui| {
+            let bar = ui.max_rect();
+            ui.painter().rect_filled(bar, 0.0, chrome);
+            let captions = titlebar::caption_width(app, ui.ctx());
+            let galley = crate::tab_strip::elided(ui, title, crate::theme::medium(13.0), ink, (bar.width() - captions - 24.0).max(8.0));
+            ui.painter().galley(pos2(bar.left() + 12.0, bar.center().y - galley.size().y / 2.0), galley, ink);
+            // Only the free middle of the bar drags; a press on a caption button belongs to its
+            // widget. Double-click toggles the OS window's maximized state.
+            let drag_rect = Rect::from_min_max(pos2(bar.left(), bar.top()), pos2(bar.right() - captions, bar.bottom()));
+            let drag = ui.interact(drag_rect, id.with("os-drag"), Sense::click_and_drag());
+            if drag.drag_started() {
+                ui.ctx().send_viewport_cmd(egui::ViewportCommand::StartDrag);
+            }
+            if drag.double_clicked() {
+                ui.ctx().send_viewport_cmd(egui::ViewportCommand::Maximized(!maximized));
+            }
+            clicked = titlebar::document_captions(app, ui, bar, id.with("os-caption"), maximized, ink);
+        });
+    clicked
 }
 
 /// macOS traffic lights (close, minimize, zoom) on a document window's left, in the system's own
