@@ -861,6 +861,14 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
             if focused && !w.focused && app.session.active_index() != Some(w.document) {
                 app.session.set_active(w.document);
             }
+            if focused && !w.focused {
+                // A document window is a viewport of the application, not a standalone viewer:
+                // opening or returning to it brings the main PhotoSoft window (tools, panels,
+                // status bar) up with it, then the document window on top. Windows keeps both in
+                // the same taskbar group because they share the app id.
+                ctx.send_viewport_cmd_to(egui::ViewportId::ROOT, egui::ViewportCommand::Focus);
+                ctx.send_viewport_cmd_to(vid, egui::ViewportCommand::Focus);
+            }
             if let Some(outer) = ui.ctx().input(|i| i.viewport().outer_rect)
                 && let Some(win) = app.ui.windows.iter_mut().find(|x| x.id == w.id)
             {
