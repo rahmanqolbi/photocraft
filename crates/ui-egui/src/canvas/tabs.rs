@@ -849,7 +849,6 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
     // is pinned to the workspace instead of roaming the desktop: like a Photoshop document window
     // it belongs to the application, not to the OS desktop.
     let main_rect = ctx.input(|i| i.viewport().outer_rect).unwrap_or_else(|| egui::Rect::from_min_size(egui::pos2(0.0, 0.0), egui::vec2(1280.0, 800.0)));
-    let canvas = app.last_canvas_rect;
     let mut close_docs = Vec::new();
     for (slot, w) in wins.into_iter().enumerate() {
         if app.session.documents().get(w.document).is_none() {
@@ -867,20 +866,14 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
             (main_rect.width() * 0.55 - cascade).clamp(360.0, 900.0),
             (main_rect.height() * 0.60 - cascade).clamp(280.0, 700.0),
         );
-        // Send the placement to the viewport from the main frame: a command issued from inside
-        // the viewport callback can be lost when the window is being recreated.
-        if w.position != Some(target_pos) {
-            ctx.send_viewport_cmd_to(vid, egui::ViewportCommand::OuterPosition(egui::pos2(target_pos[0], target_pos[1])));
-        }
-        ctx.send_viewport_cmd_to(vid, egui::ViewportCommand::InnerSize(target_size));
         let mut builder = crate::os_window::builder()
             .with_title(title.clone())
             .with_inner_size(target_size)
             .with_position(target_pos);
         if custom {
-            // No OS frame: the window paints the same chrome and caption buttons as the app. It is
-            // not resizable from its edges, so it stays inside the application's workspace.
-            builder = builder.with_decorations(false).with_resizable(false).with_maximize_button(true);
+            // No OS frame: the window paints the same chrome and caption buttons as the app.
+            // Dragging and edge resizing stay native; the clamp below keeps it in the app frame.
+            builder = builder.with_decorations(false).with_resizable(true).with_maximize_button(true);
         }
         let mut view = w.view.clone();
         let mut close = false;
@@ -902,12 +895,25 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
                     ctx.send_viewport_cmd_to(egui::ViewportId::ROOT, egui::ViewportCommand::Minimized(false));
                 }
             }
-            if let Some(outer) = ui.ctx().input(|i| i.viewport().outer_rect)
-                && let Some(win) = app.ui.windows.iter_mut().find(|x| x.id == w.id)
-            {
-                let position = [outer.left(), outer.top()];
-                if win.position != Some(position) {
-                    win.position = Some(position);
+            // Photoshop lets document windows move and resize freely, but inside the application
+            // frame. Clamp only when the window crosses that frame, so normal drags still work.
+            if let Some(outer) = ui.ctx().input(|i| i.viewport().outer_rect) {
+                if let Some(win) = app.ui.windows.iter_mut().find(|x| x.id == w.id) {
+                    let position = [outer.left(), outer.top()];
+                    if win.position != Some(position) {
+                        win.position = Some(position);
+                    }
+                }
+                if !ui.ctx().input(|i| i.viewport().maximized.unwrap_or(false)) {
+                    let x = outer.left().clamp(main_rect.left() + 8.0, (main_rect.right() - outer.width() - 8.0).max(main_rect.left() + 8.0));
+                    let y = outer.top().clamp(main_rect.top() + 8.0, (main_rect.bottom() - outer.height() - 8.0).max(main_rect.top() + 8.0));
+                    if (x - outer.left()).abs() > 1.0 || (y - outer.top()).abs() > 1.0 {
+                        ui.ctx().send_viewport_cmd(egui::ViewportCommand::OuterPosition(egui::pos2(x, y)));
+                    }
+                    let max_size = egui::vec2((main_rect.width() - 16.0).max(320.0), (main_rect.height() - 16.0).max(240.0));
+                    if outer.width() > max_size.x || outer.height() > max_size.y {
+                        ui.ctx().send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(outer.width().min(max_size.x), outer.height().min(max_size.y))));
+                    }
                 }
             }
             if custom {
