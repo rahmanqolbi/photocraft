@@ -818,39 +818,15 @@ pub(super) fn open_on_double_click(app: &mut PhotocraftApp, ui: &egui::Ui, area:
 /// thumbnails), and the window's title is the document's Photoshop title, so window pickers
 /// show "name @ zoom% (RGB/8)" instead of a raw identifier. Closing it closes the document
 /// (the guarded `file.close` raises the save dialog if dirty); it never docks back.
-/// Open documents in their own operating system windows (Preferences › Workspace › Floating
-/// windows: `Os`). Each window shares the application's app id, so Windows groups them under one
-/// taskbar button with a hover preview per document, as a browser does for its tabs. They are
-/// viewports of this same process: closing one closes the document, not the app; tools, panels and
-/// the command stream stay shared. With the app's custom title bar, each document window draws the
-/// same chrome and caption buttons as the main window instead of an OS frame.
 pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
     if app.session.prefs().workspace.floating_style == photocraft_engine::prefs::FloatingStyle::Workspace {
-        // Preferences > Workspace > Floating windows: these windows live inside the workspace by
+        // Preferences › Workspace › Floating windows: these windows live inside the workspace by
         // default (`canvas::floating::show`), so no operating system viewport is opened.
         return;
     }
-    let custom = app.custom_titlebar;
-    let wins: Vec<_> = app.ui.windows.iter().filter(|w| w.open).cloned().collect();
-    // A document window belongs to the application: minimizing the application minimizes its
-    // documents, and restoring it brings them back. They stay separate taskbar entries (same app
-    // id) rather than owned tool windows, so the taskbar list still shows each image.
-    let main_min = ctx.input(|i| i.viewport().minimized.unwrap_or(false));
-    let min_sync = egui::Id::unique(("docwin", "main-minimized"));
-    let was_min = ctx.data(|d| d.get_temp::<bool>(min_sync)).unwrap_or(false);
-    if main_min != was_min {
-        for w in &wins {
-            ctx.send_viewport_cmd_to(egui::ViewportId::from_hash_of(("docwin", w.id)), egui::ViewportCommand::Minimized(main_min));
-        }
-        ctx.data_mut(|d| d.insert_temp(min_sync, main_min));
-    }
-    // Keep each document window inside the application's canvas area. It is a real OS window (so
-    // it has its own taskbar thumbnail and Alt+Tab entry, grouped under the app id), but its frame
-    // is pinned to the workspace instead of roaming the desktop: like a Photoshop document window
-    // it belongs to the application, not to the OS desktop.
-    let main_rect = ctx.input(|i| i.viewport().outer_rect).unwrap_or_else(|| egui::Rect::from_min_size(egui::pos2(0.0, 0.0), egui::vec2(1280.0, 800.0)));
+    let wins = app.ui.windows.clone();
     let mut close_docs = Vec::new();
-    for (slot, w) in wins.into_iter().enumerate() {
+    for w in wins.into_iter().filter(|w| w.open) {
         if app.session.documents().get(w.document).is_none() {
             // Its document is gone (closed elsewhere): close the OS window for good.
             ctx.send_viewport_cmd_to(egui::ViewportId::from_hash_of(("docwin", w.id)), egui::ViewportCommand::Close);
@@ -858,27 +834,14 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
         }
         let title = tab_title_at(app, w.document, w.view.zoom * 100.0);
         let vid = egui::ViewportId::from_hash_of(("docwin", w.id));
-        let cascade = slot as f32 * 26.0;
-        // Stay clear of the app's toolbar, left tool strip and right panels: those are at
-        // roughly 52 pt and 360 pt from the window's edges.
-        let target_pos = [main_rect.left() + 120.0 + cascade, main_rect.top() + 110.0 + cascade];
-        let target_size = egui::vec2(
-            (main_rect.width() * 0.55 - cascade).clamp(360.0, 900.0),
-            (main_rect.height() * 0.60 - cascade).clamp(280.0, 700.0),
-        );
-        let mut builder = crate::os_window::builder()
-            .with_title(title.clone())
-            .with_inner_size(target_size)
-            .with_position(target_pos);
-        if custom {
-            // No OS frame: the window paints the same chrome and caption buttons as the app.
-            // Dragging and edge resizing stay native; the clamp below keeps it in the app frame.
-            builder = builder.with_decorations(false).with_resizable(true).with_maximize_button(true);
+        let mut builder = crate::os_window::builder().with_title(title).with_inner_size([800.0, 600.0]);
+        if let Some([x, y]) = w.position {
+            builder = builder.with_position([x, y]);
         }
         let mut view = w.view.clone();
         let mut close = false;
         let mut focused = false;
-        ctx.show_viewport_immediate(vid, builder, |ui, _class| {
+        ctx.show_viewport_immediate(vid, builder, |ui, class| {
             if ui.ctx().input(|i| i.viewport().close_requested()) {
                 close = true;
             }
@@ -886,49 +849,11 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
             if focused && !w.focused && app.session.active_index() != Some(w.document) {
                 app.session.set_active(w.document);
             }
-            if focused && !w.focused {
-                // A document window is a viewport of the application, not a standalone viewer:
-                // opening or returning to it brings the main PhotoSoft window (tools, panels,
-                // status bar) up with it, then the document window on top. Windows keeps both in
-                // the same taskbar group because they share the app id.
-                if main_min && !ui.ctx().input(|i| i.viewport().minimized.unwrap_or(false)) {
-                    ctx.send_viewport_cmd_to(egui::ViewportId::ROOT, egui::ViewportCommand::Minimized(false));
-                }
-            }
-            // Photoshop lets document windows move and resize freely, but inside the application
-            // frame. Clamp only when the window crosses that frame, so normal drags still work.
-            if let Some(outer) = ui.ctx().input(|i| i.viewport().outer_rect) {
-                if let Some(win) = app.ui.windows.iter_mut().find(|x| x.id == w.id) {
-                    let position = [outer.left(), outer.top()];
-                    if win.position != Some(position) {
-                        win.position = Some(position);
-                    }
-                }
-                if !ui.ctx().input(|i| i.viewport().maximized.unwrap_or(false)) {
-                    let x = outer.left().clamp(main_rect.left() + 8.0, (main_rect.right() - outer.width() - 8.0).max(main_rect.left() + 8.0));
-                    let y = outer.top().clamp(main_rect.top() + 8.0, (main_rect.bottom() - outer.height() - 8.0).max(main_rect.top() + 8.0));
-                    if (x - outer.left()).abs() > 1.0 || (y - outer.top()).abs() > 1.0 {
-                        ui.ctx().send_viewport_cmd(egui::ViewportCommand::OuterPosition(egui::pos2(x, y)));
-                    }
-                    let max_size = egui::vec2((main_rect.width() - 16.0).max(320.0), (main_rect.height() - 16.0).max(240.0));
-                    if outer.width() > max_size.x || outer.height() > max_size.y {
-                        ui.ctx().send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(outer.width().min(max_size.x), outer.height().min(max_size.y))));
-                    }
-                }
-            }
-            if custom {
-                let max = ui.ctx().input(|i| i.viewport().maximized.unwrap_or(false));
-                let clicked = super::floating::os_title_bar(app, ui, &title, ui.scope_id().with(("docwin", w.id)), max);
-                match clicked {
-                    Some(crate::panels::titlebar::Caption::Minimize) => ui.ctx().send_viewport_cmd(egui::ViewportCommand::Minimized(true)),
-                    Some(crate::panels::titlebar::Caption::Maximize) => ui.ctx().send_viewport_cmd(egui::ViewportCommand::Maximized(!max)),
-                    Some(crate::panels::titlebar::Caption::Close) => close = true,
-                    None => {}
-                }
-            }
             egui::CentralPanel::default().frame(egui::Frame::NONE.fill(crate::theme::Tokens::get(ui.ctx()).canvas)).show(ui, |ui| {
                 let rect = ui.available_rect_before_wrap();
                 view = canvas_view(app, ui, w.document, rect, view.clone(), focused);
+                // Preferences › Zoom Resizes Windows: a zoom wraps the window around the image.
+                crate::zoom_window_fit::follow(app, ui.ctx(), class, vid, &w, &mut view, rect);
             });
         });
         if let Some(win) = app.ui.windows.iter_mut().find(|x| x.id == w.id) {
@@ -939,7 +864,7 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
             }
         }
     }
-// Photoshop closes the *document* (save prompt on dirty docs); it does not dock back.
+    // Photoshop closes the *document* (save prompt on dirty docs); it does not dock back.
     for doc in close_docs {
         if let Err(e) = crate::menus::invoke(app, ctx, "file.close", json!({"document": doc})) {
             app.ui.status = e;

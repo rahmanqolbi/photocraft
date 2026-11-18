@@ -102,7 +102,7 @@ pub(super) fn draw_placeholder(ui: &egui::Ui, t: &Tokens, rect: Rect, title: &st
 /// its own `chrome` token in custom-title-bar mode, or the system title bar's light/dark colours
 /// when the OS draws it (always the case on macOS). A document window then reads as a smaller copy
 /// of the application window, on both platforms and in both appearances.
-pub(super) fn chrome_colours(app: &PhotocraftApp, ctx: &egui::Context, t: &Tokens) -> (Color32, Color32) {
+fn chrome_colours(app: &PhotocraftApp, ctx: &egui::Context, t: &Tokens) -> (Color32, Color32) {
     if !cfg!(target_os = "macos") && !crate::panels::system_title_bar(app) {
         return (t.chrome, t.text);
     }
@@ -114,43 +114,8 @@ pub(super) fn chrome_colours(app: &PhotocraftApp, ctx: &egui::Context, t: &Token
 
 /// The window corner radius, in points. Native document windows use the same rounded corners as
 /// the application window rather than the theme's small widget radius.
-pub(super) fn corner_radius() -> u8 {
+fn corner_radius() -> u8 {
     if cfg!(target_os = "macos") { 10 } else { 8 }
-}
-
-/// The custom title bar drawn inside an *operating system* document window when the
-/// application window draws its own title bar too. Same chrome colour and caption buttons as the
-/// app (`chrome_colours`, [`titlebar::document_captions`]), so the extra window reads as part of
-/// the same application. The bar's free space starts an OS drag; the caption buttons act on this
-/// viewport (the caller applies the click). Returns the caption that was clicked.
-pub(super) fn os_title_bar(app: &mut PhotocraftApp, ui: &mut egui::Ui, title: &str, id: egui::Id, maximized: bool) -> Option<Caption> {
-    let t = Tokens::get(ui.ctx());
-    let (chrome, ink) = chrome_colours(app, ui.ctx(), &t);
-    let h = crate::titlebar::bar_height(app, ui.ctx(), 32.0);
-    let mut clicked = None;
-    // A top panel reserves its height, so the canvas below never paints over the bar.
-    egui::Panel::top("docwin-chrome")
-        .exact_size(h)
-        .frame(egui::Frame::NONE)
-        .show(ui, |ui| {
-            let bar = ui.max_rect();
-            ui.painter().rect_filled(bar, 0.0, chrome);
-            let captions = titlebar::caption_width(app, ui.ctx());
-            let galley = crate::tab_strip::elided(ui, title, crate::theme::medium(13.0), ink, (bar.width() - captions - 24.0).max(8.0));
-            ui.painter().galley(pos2(bar.left() + 12.0, bar.center().y - galley.size().y / 2.0), galley, ink);
-            // Only the free middle of the bar drags; a press on a caption button belongs to its
-            // widget. Double-click toggles the OS window's maximized state.
-            let drag_rect = Rect::from_min_max(pos2(bar.left(), bar.top()), pos2(bar.right() - captions, bar.bottom()));
-            let drag = ui.interact(drag_rect, id.with("os-drag"), Sense::click_and_drag());
-            if drag.drag_started() {
-                ui.ctx().send_viewport_cmd(egui::ViewportCommand::StartDrag);
-            }
-            if drag.double_clicked() {
-                ui.ctx().send_viewport_cmd(egui::ViewportCommand::Maximized(!maximized));
-            }
-            clicked = titlebar::document_captions(app, ui, bar, id.with("os-caption"), maximized, ink);
-        });
-    clicked
 }
 
 /// macOS traffic lights (close, minimize, zoom) on a document window's left, in the system's own
@@ -285,6 +250,20 @@ pub(super) fn show(app: &mut PhotocraftApp, ui: &mut egui::Ui, area: Rect) -> bo
     }
     let mut close_docs = Vec::new();
     for f in frames {
+        if f.dock {
+            // Dragged back onto the tab strip: keep the document and its view, drop only the
+            // floating window. It returns to its tab in the application frame.
+            if let Some(w) = app.ui.windows.iter().find(|w| w.id == f.wid) {
+                if let Some(v) = app.ui.views.get_mut(w.document) {
+                    *v = w.view.clone();
+                }
+                app.session.set_active(w.document);
+            }
+            if let Some(w) = app.ui.windows.iter_mut().find(|w| w.id == f.wid) {
+                w.open = false;
+            }
+            continue;
+        }
         if let Some(w) = app.ui.windows.iter_mut().find(|w| w.id == f.wid) {
             w.rect = Some([f.rect.min.x, f.rect.min.y, f.rect.width(), f.rect.height()]);
             w.maximized = f.maximized;
@@ -322,6 +301,8 @@ struct WinFrame {
     minimized: bool,
     /// The × was pressed: close this document (guarded `file.close` prompts to save first).
     close: bool,
+    /// The title bar was dropped on the tab strip: dock the document back into a tab.
+    dock: bool,
 }
 
 /// Draw one floating window: shadow, frame, title bar with its buttons, resize handles and the
@@ -384,6 +365,19 @@ fn paint_window(app: &mut PhotocraftApp, ui: &mut egui::Ui, area: Rect, wid: u64
     }
     if drag.dragged() && !maximized {
         rect = clamp_to(area, Rect::from_min_size(rect.min + drag.drag_delta(), rect.size()));
+    }
+    // Photoshop docks a floating document again when its title bar is dropped on the tab strip.
+    let mut dock = false;
+    if (drag.dragged() || drag.drag_stopped())
+        && let Some(pos) = ui.input(|i| i.pointer.latest_pos())
+        && let Some(strip) = app.tab_strip.as_ref()
+        && strip.rect.contains(pos)
+    {
+        if drag.drag_stopped() {
+            dock = true;
+        } else {
+            ui.painter().rect_stroke(strip.rect, 2.0, Stroke::new(2.0, t.accent), egui::StrokeKind::Inside);
+        }
     }
     // The app's own caption buttons, in the desktop's style: same glyphs, same hover colours.
     // An inner document window cannot send OS viewport commands, so their clicks are applied to
@@ -477,7 +471,7 @@ fn paint_window(app: &mut PhotocraftApp, ui: &mut egui::Ui, area: Rect, wid: u64
             }
         }
     }
-    Some(WinFrame { wid, rect, maximized, minimized, close })
+    Some(WinFrame { wid, rect, maximized, minimized, close, dock })
 }
 
 #[cfg(test)]
@@ -625,6 +619,35 @@ mod tests {
             h.run_steps(1);
         }
         h.run_steps(1);
+    }
+
+    #[test]
+    fn dragging_a_floating_window_onto_the_tab_strip_docks_it_back() {
+        let mut app = PhotocraftApp::new(photocraft_engine::Session::new(), crate::Services::default());
+        app.run("file.new", serde_json::json!({"width": 8, "height": 8})).unwrap();
+        app.run("file.new", serde_json::json!({"width": 8, "height": 8})).unwrap();
+        app.sync_views();
+        let ctx = egui::Context::default();
+        crate::menus::invoke(&mut app, &ctx, "window.arrange.floatInWindow", serde_json::json!({"document": 1})).unwrap();
+        let mut h = harness(app);
+        // The harness only draws floating windows, not the main tab strip: place one where the
+        // document tabs would be so the drop target is unambiguous.
+        let strip = Rect::from_min_size(pos2(10.0, 30.0), egui::vec2(500.0, 26.0));
+        h.state_mut().tab_strip = Some(super::super::tabs::TabStrip { rect: strip, tabs: vec![] });
+        let r = window_rect(&h);
+        let from = pos2(r[0] + 60.0, r[1] + TITLE_H / 2.0);
+        let to = strip.center();
+        h.hover_at(from);
+        h.run_steps(1);
+        h.event(egui::Event::PointerButton { pos: from, button: egui::PointerButton::Primary, pressed: true, modifiers: Default::default() });
+        h.event(egui::Event::PointerMoved(pos2(from.x + 10.0, from.y + 10.0)));
+        h.run_steps(1);
+        h.event(egui::Event::PointerMoved(to));
+        h.run_steps(1);
+        h.event(egui::Event::PointerButton { pos: to, button: egui::PointerButton::Primary, pressed: false, modifiers: Default::default() });
+        h.run_steps(2);
+        assert!(h.state().ui.windows.iter().all(|w| !w.open), "the floating window is gone");
+        assert!(super::super::tabs::docked_document_indices(h.state()).contains(&1), "the document is docked again");
     }
 
     #[test]
