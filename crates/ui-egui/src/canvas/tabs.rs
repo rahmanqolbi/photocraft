@@ -860,11 +860,19 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
         let title = tab_title_at(app, w.document, w.view.zoom * 100.0);
         let vid = egui::ViewportId::from_hash_of(("docwin", w.id));
         let cascade = slot as f32 * 26.0;
-        let target_pos = [main_rect.left() + canvas.left() + 18.0 + cascade, main_rect.top() + canvas.top() + 18.0 + cascade];
+        // Stay clear of the app's toolbar, left tool strip and right panels: those are at
+        // roughly 52 pt and 360 pt from the window's edges.
+        let target_pos = [main_rect.left() + 120.0 + cascade, main_rect.top() + 110.0 + cascade];
         let target_size = egui::vec2(
-            (canvas.width() * 0.72 - cascade).clamp(320.0, canvas.width().max(1.0)),
-            (canvas.height() * 0.72 - cascade).clamp(240.0, canvas.height().max(1.0)),
+            (main_rect.width() * 0.55 - cascade).clamp(360.0, 900.0),
+            (main_rect.height() * 0.60 - cascade).clamp(280.0, 700.0),
         );
+        // Send the placement to the viewport from the main frame: a command issued from inside
+        // the viewport callback can be lost when the window is being recreated.
+        if w.position != Some(target_pos) {
+            ctx.send_viewport_cmd_to(vid, egui::ViewportCommand::OuterPosition(egui::pos2(target_pos[0], target_pos[1])));
+        }
+        ctx.send_viewport_cmd_to(vid, egui::ViewportCommand::InnerSize(target_size));
         let mut builder = crate::os_window::builder()
             .with_title(title.clone())
             .with_inner_size(target_size)
@@ -910,13 +918,6 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
                     Some(crate::panels::titlebar::Caption::Maximize) => ui.ctx().send_viewport_cmd(egui::ViewportCommand::Maximized(!max)),
                     Some(crate::panels::titlebar::Caption::Close) => close = true,
                     None => {}
-                }
-            }
-            if let Some(outer) = ui.ctx().input(|i| i.viewport().outer_rect) {
-                let pos = [outer.left(), outer.top()];
-                let moved = (pos[0] - target_pos[0]).abs() > 1.0 || (pos[1] - target_pos[1]).abs() > 1.0;
-                if moved && !ui.ctx().input(|i| i.viewport().maximized.unwrap_or(false)) {
-                    ui.ctx().send_viewport_cmd(egui::ViewportCommand::OuterPosition(egui::pos2(target_pos[0], target_pos[1])));
                 }
             }
             egui::CentralPanel::default().frame(egui::Frame::NONE.fill(crate::theme::Tokens::get(ui.ctx()).canvas)).show(ui, |ui| {
