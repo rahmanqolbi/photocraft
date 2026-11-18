@@ -844,8 +844,12 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
         }
         ctx.data_mut(|d| d.insert_temp(min_sync, main_min));
     }
+    // Keep each document window inside the application's canvas area. It is a real OS window (so
+    // it has its own taskbar thumbnail and Alt+Tab entry, grouped under the app id), but its frame
+    // is pinned to the workspace instead of roaming the desktop: like a Photoshop document window
+    // it belongs to the application, not to the OS desktop.
     let main_rect = ctx.input(|i| i.viewport().outer_rect).unwrap_or_else(|| egui::Rect::from_min_size(egui::pos2(0.0, 0.0), egui::vec2(1280.0, 800.0)));
-    let doc_size = egui::vec2((main_rect.width() * 0.62).clamp(480.0, 900.0), (main_rect.height() * 0.62).clamp(360.0, 700.0));
+    let canvas = app.last_canvas_rect;
     let mut close_docs = Vec::new();
     for (slot, w) in wins.into_iter().enumerate() {
         if app.session.documents().get(w.document).is_none() {
@@ -855,20 +859,25 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
         }
         let title = tab_title_at(app, w.document, w.view.zoom * 100.0);
         let vid = egui::ViewportId::from_hash_of(("docwin", w.id));
-        // Offset and size the window so the application frame behind it stays visible; a
-        // document window is not meant to replace PhotoSoft on the desktop.
-        let cascade = slot as f32 * 36.0;
-        let pos = w.position.unwrap_or([main_rect.left() + 120.0 + cascade, main_rect.top() + 100.0 + cascade]);
-        let mut builder = crate::os_window::builder().with_title(title.clone()).with_inner_size(doc_size).with_position(pos);
+        let cascade = slot as f32 * 26.0;
+        let target_pos = [main_rect.left() + canvas.left() + 18.0 + cascade, main_rect.top() + canvas.top() + 18.0 + cascade];
+        let target_size = egui::vec2(
+            (canvas.width() * 0.72 - cascade).clamp(320.0, canvas.width().max(1.0)),
+            (canvas.height() * 0.72 - cascade).clamp(240.0, canvas.height().max(1.0)),
+        );
+        let mut builder = crate::os_window::builder()
+            .with_title(title.clone())
+            .with_inner_size(target_size)
+            .with_position(target_pos);
         if custom {
-            // No OS frame: the window paints the same chrome and caption buttons as the app. Winit
-            // keeps a resizable thick frame, so the edges still resize natively.
-            builder = builder.with_decorations(false).with_resizable(true).with_maximize_button(true);
+            // No OS frame: the window paints the same chrome and caption buttons as the app. It is
+            // not resizable from its edges, so it stays inside the application's workspace.
+            builder = builder.with_decorations(false).with_resizable(false).with_maximize_button(true);
         }
         let mut view = w.view.clone();
         let mut close = false;
         let mut focused = false;
-        ctx.show_viewport_immediate(vid, builder, |ui, class| {
+        ctx.show_viewport_immediate(vid, builder, |ui, _class| {
             if ui.ctx().input(|i| i.viewport().close_requested()) {
                 close = true;
             }
@@ -903,11 +912,16 @@ pub fn extra_windows(app: &mut PhotocraftApp, ctx: &egui::Context) {
                     None => {}
                 }
             }
+            if let Some(outer) = ui.ctx().input(|i| i.viewport().outer_rect) {
+                let pos = [outer.left(), outer.top()];
+                let moved = (pos[0] - target_pos[0]).abs() > 1.0 || (pos[1] - target_pos[1]).abs() > 1.0;
+                if moved && !ui.ctx().input(|i| i.viewport().maximized.unwrap_or(false)) {
+                    ui.ctx().send_viewport_cmd(egui::ViewportCommand::OuterPosition(egui::pos2(target_pos[0], target_pos[1])));
+                }
+            }
             egui::CentralPanel::default().frame(egui::Frame::NONE.fill(crate::theme::Tokens::get(ui.ctx()).canvas)).show(ui, |ui| {
                 let rect = ui.available_rect_before_wrap();
                 view = canvas_view(app, ui, w.document, rect, view.clone(), focused);
-                // Preferences > Zoom Resizes Windows: a zoom wraps the window around the image.
-                crate::zoom_window_fit::follow(app, ui.ctx(), class, vid, &w, &mut view, rect);
             });
         });
         if let Some(win) = app.ui.windows.iter_mut().find(|x| x.id == w.id) {
